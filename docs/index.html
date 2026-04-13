@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
+  <link rel="icon" href="./favicon.ico" />
+  <title>Bili Data Statistic</title>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/naive-ui@2/dist/index.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ZBpine/bili-data-manager@main/dist/bili-data-manager.min.js"></script>
+  <script>
+(function(vue,naiveUi){"use strict";function _interopNamespaceDefault(e){const t=Object.create(null,{[Symbol.toStringTag]:{value:"Module"}});if(e){for(const n in e)if(n!=="default"){const r=Object.getOwnPropertyDescriptor(e,n);Object.defineProperty(t,n,r.get?r:{enumerable:!0,get:()=>e[n]})}}return t.default=e,Object.freeze(t)}const naiveUi__namespace=_interopNamespaceDefault(naiveUi);function ampCount(e){let t=0;for(let n=0;n<e.length;++n)e[n]==="&"&&++t;return t}const separatorRegex=/\s*,(?![^(]*\))\s*/g,extraSpaceRegex=/\s+/g;function resolveSelectorWithAmp(e,t){const n=[];return t.split(separatorRegex).forEach(r=>{let o=ampCount(r);if(o){if(o===1){e.forEach(s=>{n.push(r.replace("&",s))});return}}else{e.forEach(s=>{n.push((s&&s+" ")+r)});return}let a=[r];for(;o--;){const s=[];a.forEach(i=>{e.forEach(v=>{s.push(i.replace("&",v))})}),a=s}a.forEach(s=>n.push(s))}),n}function resolveSelector(e,t){const n=[];return t.split(separatorRegex).forEach(r=>{e.forEach(o=>{n.push((o&&o+" ")+r)})}),n}function parseSelectorPath(e){let t=[""];return e.forEach(n=>{n=n&&n.trim(),n&&(n.includes("&")?t=resolveSelectorWithAmp(t,n):t=resolveSelector(t,n))}),t.join(", ").replace(extraSpaceRegex," ")}function removeElement(e){if(!e)return;const t=e.parentElement;t&&t.removeChild(e)}function queryElement(e,t){return(t??document.head).querySelector(`style[cssr-id="${e}"]`)}function createElement(e){const t=document.createElement("style");return t.setAttribute("cssr-id",e),t}function isMediaOrSupports(e){return e?/^\s*@(s|m)/.test(e):!1}const kebabRegex=/[A-Z]/g;function kebabCase(e){return e.replace(kebabRegex,t=>"-"+t.toLowerCase())}function unwrapProperty(e,t="  "){return typeof e=="object"&&e!==null?` {
+`+Object.entries(e).map(n=>t+`  ${kebabCase(n[0])}: ${n[1]};`).join(`
+`)+`
+`+t+"}":`: ${e};`}function unwrapProperties(e,t,n){return typeof e=="function"?e({context:t.context,props:n}):e}function createStyle(e,t,n,r){if(!t)return"";const o=unwrapProperties(t,n,r);if(!o)return"";if(typeof o=="string")return`${e} {
+${o}
+}`;const a=Object.keys(o);if(a.length===0)return n.config.keepEmptyBlock?e+` {
+}`:"";const s=e?[e+" {"]:[];return a.forEach(i=>{const v=o[i];if(i==="raw"){s.push(`
+`+v+`
+`);return}i=kebabCase(i),v!=null&&s.push(`  ${i}${unwrapProperty(v)}`)}),e&&s.push("}"),s.join(`
+`)}function loopCNodeListWithCallback(e,t,n){e&&e.forEach(r=>{if(Array.isArray(r))loopCNodeListWithCallback(r,t,n);else if(typeof r=="function"){const o=r(t);Array.isArray(o)?loopCNodeListWithCallback(o,t,n):o&&n(o)}else r&&n(r)})}function traverseCNode(e,t,n,r,o){const a=e.$;let s="";if(!a||typeof a=="string")isMediaOrSupports(a)?s=a:t.push(a);else if(typeof a=="function"){const f=a({context:r.context,props:o});isMediaOrSupports(f)?s=f:t.push(f)}else if(a.before&&a.before(r.context),!a.$||typeof a.$=="string")isMediaOrSupports(a.$)?s=a.$:t.push(a.$);else if(a.$){const f=a.$({context:r.context,props:o});isMediaOrSupports(f)?s=f:t.push(f)}const i=parseSelectorPath(t),v=createStyle(i,e.props,r,o);s?n.push(`${s} {`):v.length&&n.push(v),e.children&&loopCNodeListWithCallback(e.children,{context:r.context,props:o},f=>{if(typeof f=="string"){const y=createStyle(i,{raw:f},r,o);n.push(y)}else traverseCNode(f,t,n,r,o)}),t.pop(),s&&n.push("}"),a&&a.after&&a.after(r.context)}function render(e,t,n){const r=[];return traverseCNode(e,[],r,t,n),r.join(`
+
+`)}function murmur2(e){for(var t=0,n,r=0,o=e.length;o>=4;++r,o-=4)n=e.charCodeAt(r)&255|(e.charCodeAt(++r)&255)<<8|(e.charCodeAt(++r)&255)<<16|(e.charCodeAt(++r)&255)<<24,n=(n&65535)*1540483477+((n>>>16)*59797<<16),n^=n>>>24,t=(n&65535)*1540483477+((n>>>16)*59797<<16)^(t&65535)*1540483477+((t>>>16)*59797<<16);switch(o){case 3:t^=(e.charCodeAt(r+2)&255)<<16;case 2:t^=(e.charCodeAt(r+1)&255)<<8;case 1:t^=e.charCodeAt(r)&255,t=(t&65535)*1540483477+((t>>>16)*59797<<16)}return t^=t>>>13,t=(t&65535)*1540483477+((t>>>16)*59797<<16),((t^t>>>15)>>>0).toString(36)}typeof window<"u"&&(window.__cssrContext={});function unmount(e,t,n,r){const{els:o}=t;if(n===void 0)o.forEach(removeElement),t.els=[];else{const a=queryElement(n,r);a&&o.includes(a)&&(removeElement(a),t.els=o.filter(s=>s!==a))}}function addElementToList(e,t){e.push(t)}function mount$1(e,t,n,r,o,a,s,i,v){let f;if(n===void 0&&(f=t.render(r),n=murmur2(f)),v){v.adapter(n,f??t.render(r));return}i===void 0&&(i=document.head);const y=queryElement(n,i);if(y!==null&&!a)return y;const g=y??createElement(n);if(f===void 0&&(f=t.render(r)),g.textContent=f,y!==null)return y;if(s){const _=i.querySelector(`meta[name="${s}"]`);if(_)return i.insertBefore(g,_),addElementToList(t.els,g),g}return o?i.insertBefore(g,i.querySelector("style, link")):i.appendChild(g),addElementToList(t.els,g),g}function wrappedRender(e){return render(this,this.instance,e)}function wrappedMount(e={}){const{id:t,ssr:n,props:r,head:o=!1,force:a=!1,anchorMetaName:s,parent:i}=e;return mount$1(this.instance,this,t,r,o,a,s,i,n)}function wrappedUnmount(e={}){const{id:t,parent:n}=e;unmount(this.instance,this,t,n)}const createCNode=function(e,t,n,r){return{instance:e,$:t,props:n,children:r,els:[],render:wrappedRender,mount:wrappedMount,unmount:wrappedUnmount}},c$4=function(e,t,n,r){return Array.isArray(t)?createCNode(e,{$:null},null,t):Array.isArray(n)?createCNode(e,t,null,n):Array.isArray(r)?createCNode(e,t,n,r):createCNode(e,t,n,null)};function CssRender(e={}){const t={c:((...n)=>c$4(t,...n)),use:(n,...r)=>n.install(t,...r),find:queryElement,context:{},config:e};return t}function plugin$4(e){let t=".",n="__",r="--",o;if(e){let u=e.blockPrefix;u&&(t=u),u=e.elementPrefix,u&&(n=u),u=e.modifierPrefix,u&&(r=u)}const a={install(u){o=u.c;const l=u.context;l.bem={},l.bem.b=null,l.bem.els=null}};function s(u){let l,m;return{before(d){l=d.bem.b,m=d.bem.els,d.bem.els=null},after(d){d.bem.b=l,d.bem.els=m},$({context:d,props:h}){return u=typeof u=="string"?u:u({context:d,props:h}),d.bem.b=u,`${h?.bPrefix||t}${d.bem.b}`}}}function i(u){let l;return{before(m){l=m.bem.els},after(m){m.bem.els=l},$({context:m,props:d}){return u=typeof u=="string"?u:u({context:m,props:d}),m.bem.els=u.split(",").map(h=>h.trim()),m.bem.els.map(h=>`${d?.bPrefix||t}${m.bem.b}${n}${h}`).join(", ")}}}function v(u){return{$({context:l,props:m}){u=typeof u=="string"?u:u({context:l,props:m});const d=u.split(",").map(b=>b.trim());function h(b){return d.map(M=>`&${m?.bPrefix||t}${l.bem.b}${b!==void 0?`${n}${b}`:""}${r}${M}`).join(", ")}const $=l.bem.els;return $!==null?h($[0]):h()}}}function f(u){return{$({context:l,props:m}){u=typeof u=="string"?u:u({context:l,props:m});const d=l.bem.els;return`&:not(${m?.bPrefix||t}${l.bem.b}${d!==null&&d.length>0?`${n}${d[0]}`:""}${r}${u})`}}}return Object.assign(a,{cB:((...u)=>o(s(u[0]),u[1],u[2])),cE:((...u)=>o(i(u[0]),u[1],u[2])),cM:((...u)=>o(v(u[0]),u[1],u[2])),cNotM:((...u)=>o(f(u[0]),u[1],u[2]))}),a}const cssr$2=CssRender(),plugin$3=plugin$4({blockPrefix:"."});cssr$2.use(plugin$3);const{c:c$3,find:find$2}=cssr$2,{cB:cB$2,cE:cE$2,cM:cM$2,cNotM:cNotM$2}=plugin$3,css$1=String.raw,ssrContextKey$1="@css-render/vue3-ssr";function createStyleString$1(e,t){return`<style cssr-id="${e}">
+${t}
+</style>`}function ssrAdapter$1(e,t,n){const{styles:r,ids:o}=n;o.has(e)||r!==null&&(o.add(e),r.push(createStyleString$1(e,t)))}const isBrowser$1=typeof document<"u";function useSsrAdapter$1(){if(isBrowser$1)return;const e=vue.inject(ssrContextKey$1,null);if(e!==null)return{adapter:(t,n)=>ssrAdapter$1(t,n,e),context:e}}const cssrAnchorMetaName$3="bds-style";function useTheme$1(e,t,n,r){const o=useSsrAdapter$1(),a=n||document.head,s=()=>{t.mount({id:e,head:!0,anchorMetaName:cssrAnchorMetaName$3,ssr:o,parent:a})};o?s():vue.onBeforeMount(s)}const style$c=c$3([cB$2("bds-shell",css$1`
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    `,[cM$2("static",css$1`
+          min-height: 100vh;
+        `)])]);function mountStyle$c(e){useTheme$1("bds-app-style",style$c,e)}const ROOT_KEY="bds-storage",toSegments=e=>String(e||"").split(".").filter(Boolean),loadRoot=()=>{try{const e=localStorage.getItem(ROOT_KEY);if(!e)return{};const t=JSON.parse(e);return t&&typeof t=="object"?t:{}}catch{return{}}},saveRoot=e=>{try{localStorage.setItem(ROOT_KEY,JSON.stringify(e))}catch{}};function get(e,t=void 0){const n=toSegments(e);if(!n.length)return t;let r=loadRoot();for(const o of n){if(!r||typeof r!="object"||!(o in r))return t;r=r[o]}return r===void 0?t:r}function set(e,t){const n=toSegments(e);if(!n.length)return;const r=loadRoot();let o=r;for(let a=0;a<n.length-1;a+=1){const s=n[a],i=o[s];(!i||typeof i!="object")&&(o[s]={}),o=o[s]}o[n[n.length-1]]=t,saveRoot(r)}const storage={get,set},colors={aliceblue:"#F0F8FF",antiquewhite:"#FAEBD7",aqua:"#0FF",aquamarine:"#7FFFD4",azure:"#F0FFFF",beige:"#F5F5DC",bisque:"#FFE4C4",black:"#000",blanchedalmond:"#FFEBCD",blue:"#00F",blueviolet:"#8A2BE2",brown:"#A52A2A",burlywood:"#DEB887",cadetblue:"#5F9EA0",chartreuse:"#7FFF00",chocolate:"#D2691E",coral:"#FF7F50",cornflowerblue:"#6495ED",cornsilk:"#FFF8DC",crimson:"#DC143C",cyan:"#0FF",darkblue:"#00008B",darkcyan:"#008B8B",darkgoldenrod:"#B8860B",darkgray:"#A9A9A9",darkgrey:"#A9A9A9",darkgreen:"#006400",darkkhaki:"#BDB76B",darkmagenta:"#8B008B",darkolivegreen:"#556B2F",darkorange:"#FF8C00",darkorchid:"#9932CC",darkred:"#8B0000",darksalmon:"#E9967A",darkseagreen:"#8FBC8F",darkslateblue:"#483D8B",darkslategray:"#2F4F4F",darkslategrey:"#2F4F4F",darkturquoise:"#00CED1",darkviolet:"#9400D3",deeppink:"#FF1493",deepskyblue:"#00BFFF",dimgray:"#696969",dimgrey:"#696969",dodgerblue:"#1E90FF",firebrick:"#B22222",floralwhite:"#FFFAF0",forestgreen:"#228B22",fuchsia:"#F0F",gainsboro:"#DCDCDC",ghostwhite:"#F8F8FF",gold:"#FFD700",goldenrod:"#DAA520",gray:"#808080",grey:"#808080",green:"#008000",greenyellow:"#ADFF2F",honeydew:"#F0FFF0",hotpink:"#FF69B4",indianred:"#CD5C5C",indigo:"#4B0082",ivory:"#FFFFF0",khaki:"#F0E68C",lavender:"#E6E6FA",lavenderblush:"#FFF0F5",lawngreen:"#7CFC00",lemonchiffon:"#FFFACD",lightblue:"#ADD8E6",lightcoral:"#F08080",lightcyan:"#E0FFFF",lightgoldenrodyellow:"#FAFAD2",lightgray:"#D3D3D3",lightgrey:"#D3D3D3",lightgreen:"#90EE90",lightpink:"#FFB6C1",lightsalmon:"#FFA07A",lightseagreen:"#20B2AA",lightskyblue:"#87CEFA",lightslategray:"#778899",lightslategrey:"#778899",lightsteelblue:"#B0C4DE",lightyellow:"#FFFFE0",lime:"#0F0",limegreen:"#32CD32",linen:"#FAF0E6",magenta:"#F0F",maroon:"#800000",mediumaquamarine:"#66CDAA",mediumblue:"#0000CD",mediumorchid:"#BA55D3",mediumpurple:"#9370DB",mediumseagreen:"#3CB371",mediumslateblue:"#7B68EE",mediumspringgreen:"#00FA9A",mediumturquoise:"#48D1CC",mediumvioletred:"#C71585",midnightblue:"#191970",mintcream:"#F5FFFA",mistyrose:"#FFE4E1",moccasin:"#FFE4B5",navajowhite:"#FFDEAD",navy:"#000080",oldlace:"#FDF5E6",olive:"#808000",olivedrab:"#6B8E23",orange:"#FFA500",orangered:"#FF4500",orchid:"#DA70D6",palegoldenrod:"#EEE8AA",palegreen:"#98FB98",paleturquoise:"#AFEEEE",palevioletred:"#DB7093",papayawhip:"#FFEFD5",peachpuff:"#FFDAB9",peru:"#CD853F",pink:"#FFC0CB",plum:"#DDA0DD",powderblue:"#B0E0E6",purple:"#800080",rebeccapurple:"#663399",red:"#F00",rosybrown:"#BC8F8F",royalblue:"#4169E1",saddlebrown:"#8B4513",salmon:"#FA8072",sandybrown:"#F4A460",seagreen:"#2E8B57",seashell:"#FFF5EE",sienna:"#A0522D",silver:"#C0C0C0",skyblue:"#87CEEB",slateblue:"#6A5ACD",slategray:"#708090",slategrey:"#708090",snow:"#FFFAFA",springgreen:"#00FF7F",steelblue:"#4682B4",tan:"#D2B48C",teal:"#008080",thistle:"#D8BFD8",tomato:"#FF6347",turquoise:"#40E0D0",violet:"#EE82EE",wheat:"#F5DEB3",white:"#FFF",whitesmoke:"#F5F5F5",yellow:"#FF0",yellowgreen:"#9ACD32",transparent:"#0000"};function hsv2rgb(e,t,n){t/=100,n/=100;let r=(o,a=(o+e/60)%6)=>n-n*t*Math.max(Math.min(a,4-a,1),0);return[r(5)*255,r(3)*255,r(1)*255]}function hsl2rgb(e,t,n){t/=100,n/=100;let r=t*Math.min(n,1-n),o=(a,s=(a+e/30)%12)=>n-r*Math.max(Math.min(s-3,9-s,1),-1);return[o(0)*255,o(8)*255,o(4)*255]}const prefix$1="^\\s*",suffix="\\s*$",percent="\\s*((\\.\\d+)|(\\d+(\\.\\d*)?))%\\s*",float="\\s*((\\.\\d+)|(\\d+(\\.\\d*)?))\\s*",hex="([0-9A-Fa-f])",dhex="([0-9A-Fa-f]{2})",hslRegex=new RegExp(`${prefix$1}hsl\\s*\\(${float},${percent},${percent}\\)${suffix}`),hsvRegex=new RegExp(`${prefix$1}hsv\\s*\\(${float},${percent},${percent}\\)${suffix}`),hslaRegex=new RegExp(`${prefix$1}hsla\\s*\\(${float},${percent},${percent},${float}\\)${suffix}`),hsvaRegex=new RegExp(`${prefix$1}hsva\\s*\\(${float},${percent},${percent},${float}\\)${suffix}`),rgbRegex=new RegExp(`${prefix$1}rgb\\s*\\(${float},${float},${float}\\)${suffix}`),rgbaRegex=new RegExp(`${prefix$1}rgba\\s*\\(${float},${float},${float},${float}\\)${suffix}`),sHexRegex=new RegExp(`${prefix$1}#${hex}${hex}${hex}${suffix}`),hexRegex=new RegExp(`${prefix$1}#${dhex}${dhex}${dhex}${suffix}`),sHexaRegex=new RegExp(`${prefix$1}#${hex}${hex}${hex}${hex}${suffix}`),hexaRegex=new RegExp(`${prefix$1}#${dhex}${dhex}${dhex}${dhex}${suffix}`);function parseHex(e){return parseInt(e,16)}function hsla(e){try{let t;if(t=hslaRegex.exec(e))return[roundDeg(t[1]),roundPercent(t[5]),roundPercent(t[9]),roundAlpha(t[13])];if(t=hslRegex.exec(e))return[roundDeg(t[1]),roundPercent(t[5]),roundPercent(t[9]),1];throw new Error(`[seemly/hsla]: Invalid color value ${e}.`)}catch(t){throw t}}function hsva(e){try{let t;if(t=hsvaRegex.exec(e))return[roundDeg(t[1]),roundPercent(t[5]),roundPercent(t[9]),roundAlpha(t[13])];if(t=hsvRegex.exec(e))return[roundDeg(t[1]),roundPercent(t[5]),roundPercent(t[9]),1];throw new Error(`[seemly/hsva]: Invalid color value ${e}.`)}catch(t){throw t}}function rgba(e){try{let t;if(t=hexRegex.exec(e))return[parseHex(t[1]),parseHex(t[2]),parseHex(t[3]),1];if(t=rgbRegex.exec(e))return[roundChannel(t[1]),roundChannel(t[5]),roundChannel(t[9]),1];if(t=rgbaRegex.exec(e))return[roundChannel(t[1]),roundChannel(t[5]),roundChannel(t[9]),roundAlpha(t[13])];if(t=sHexRegex.exec(e))return[parseHex(t[1]+t[1]),parseHex(t[2]+t[2]),parseHex(t[3]+t[3]),1];if(t=hexaRegex.exec(e))return[parseHex(t[1]),parseHex(t[2]),parseHex(t[3]),roundAlpha(parseHex(t[4])/255)];if(t=sHexaRegex.exec(e))return[parseHex(t[1]+t[1]),parseHex(t[2]+t[2]),parseHex(t[3]+t[3]),roundAlpha(parseHex(t[4]+t[4])/255)];if(e in colors)return rgba(colors[e]);if(hslRegex.test(e)||hslaRegex.test(e)){const[n,r,o,a]=hsla(e);return[...hsl2rgb(n,r,o),a]}else if(hsvRegex.test(e)||hsvaRegex.test(e)){const[n,r,o,a]=hsva(e);return[...hsv2rgb(n,r,o),a]}throw new Error(`[seemly/rgba]: Invalid color value ${e}.`)}catch(t){throw t}}function normalizeAlpha(e){return e>1?1:e<0?0:e}function stringifyRgba(e,t,n,r){return`rgba(${roundChannel(e)}, ${roundChannel(t)}, ${roundChannel(n)}, ${normalizeAlpha(r)})`}function compositeChannel(e,t,n,r,o){return roundChannel((e*t*(1-r)+n*r)/o)}function composite(e,t){Array.isArray(e)||(e=rgba(e)),Array.isArray(t)||(t=rgba(t));const n=e[3],r=t[3],o=roundAlpha(n+r-n*r);return stringifyRgba(compositeChannel(e[0],n,t[0],r,o),compositeChannel(e[1],n,t[1],r,o),compositeChannel(e[2],n,t[2],r,o),o)}function changeColor(e,t){const[n,r,o,a=1]=Array.isArray(e)?e:rgba(e);return typeof t.alpha=="number"?stringifyRgba(n,r,o,t.alpha):stringifyRgba(n,r,o,a)}function roundAlpha(e){const t=Math.round(Number(e)*100)/100;return t>1?1:t<0?0:t}function roundDeg(e){const t=Math.round(Number(e));return t>=360||t<0?0:t}function roundChannel(e){const t=Math.round(Number(e));return t>255?255:t<0?0:t}function roundPercent(e){const t=Math.round(Number(e));return t>100?100:t<0?0:t}function toHexString(e){if(typeof e=="string"){let t;if(t=hexRegex.exec(e))return t[0];if(t=hexaRegex.exec(e))return t[0].slice(0,7);if(t=sHexRegex.exec(e)||sHexaRegex.exec(e))return`#${t[1]}${t[1]}${t[2]}${t[2]}${t[3]}${t[3]}`;throw new Error(`[seemly/toHexString]: Invalid hex value ${e}.`)}return`#${e.slice(0,3).map(t=>roundChannel(t).toString(16).toUpperCase().padStart(2,"0")).join("")}`}const textColor1="#18191C",textColor2="#484B54",textColor3="#787D8C",fontTheme={fontWeight:"400",fontWeightStrong:"700",fontSize:"15px",fontSizeSmall:"14px",fontSizeMedium:"15px",fontSizeLarge:"18px",fontSizeHuge:"20px"},Statistic={labelFontSize:"13px",valueFontSize:"20px"},DEFAULT_THEME={mode:"auto",lightPrimary:"#00a1d6",darkPrimary:"#ff679a"},toOpaqueHex=(e,t=DEFAULT_THEME.lightPrimary)=>{try{const[n,r,o]=rgba(String(e||"").trim());return toHexString([n,r,o])}catch{return t===e?DEFAULT_THEME.lightPrimary:toOpaqueHex(t,DEFAULT_THEME.lightPrimary)}},mix=(e,t,n)=>{const r=toOpaqueHex(e),o=toOpaqueHex(t),a=Math.max(0,Math.min(1,Number(n)||0)),s=changeColor(o,{alpha:a}),i=composite(r,s),[v,f,y]=rgba(i);return toHexString([v,f,y])},reverseHex=e=>{const[t,n,r]=rgba(toOpaqueHex(e));return toHexString([255-t,255-n,255-r])},createPrimaryPalette=e=>{const t=toOpaqueHex(e);return{primaryColor:t,primaryColorHover:mix(t,"#ffffff",.14),primaryColorPressed:mix(t,"#000000",.14),primaryColorSuppl:mix(t,"#ffffff",.06)}},normalizeThemeMode=e=>{const t=String(e||"").trim();return t==="light"||t==="dark"||t==="auto"?t:DEFAULT_THEME.mode},normalizeThemeColor=toOpaqueHex,createLightThemeOverrides=(e=DEFAULT_THEME.lightPrimary)=>({common:{...createPrimaryPalette(e),textColor1,textColor2,textColor3,...fontTheme},Statistic}),createDarkThemeOverrides=(e=DEFAULT_THEME.darkPrimary)=>({common:{...createPrimaryPalette(e),textColor1:reverseHex(textColor1),textColor2:reverseHex(textColor2),textColor3:reverseHex(textColor3),...fontTheme},Statistic}),style$b=c$3([cB$2("bds-entry-launcher",css$1`
+      position: fixed;
+      left: -100px;
+      bottom: 200px;
+      width: 120px;
+      height: 40px;
+      z-index: 700;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      padding: 0 8px 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: var(--n-font-size-medium);
+      box-shadow: 0 0 5px var(--dm-launcher-shadow-color);
+      transition: left 0.3s ease-in-out, background-color 0.2s ease-in-out;
+      overflow: hidden;
+
+      &:hover {
+        left: -10px;
+      }
+
+      .n-button__content {
+        width: 100%;
+        justify-content: space-between;
+      }
+    `,[cE$2("text",css$1`
+          white-space: nowrap;
+          user-select: none;
+        `),cE$2("icon",css$1`
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 2px;
+
+          svg {
+            fill: var(--dm-launcher-icon-color);
+          }
+        `)])]);function mountStyle$b(e){useTheme$1("bds-entry-launcher-style",style$b,e)}const _hoisted_1$o={class:"bds-entry-launcher__text"},_sfc_main$d={__name:"EntryLauncher",props:{label:{type:String,default:"弹幕统计"}},emits:["toggle"],setup(e,{emit:t}){const n=e,r=t,o=vue.inject("styleMountTarget",null);mountStyle$b(o);const a=naiveUi.useThemeVars(),s=vue.computed(()=>{const i=a.value.primaryColor,v=a.value.cardColor,f=changeColor(v,{alpha:.9}),y=changeColor(v,{alpha:1}),g=changeColor(i,{alpha:.9});return{"--dm-launcher-icon-color":i,"--dm-launcher-shadow-color":changeColor(i,{alpha:.3}),"--n-text-color":i,"--n-text-color-hover":i,"--n-text-color-pressed":i,"--n-text-color-focus":i,"--n-border":"1px solid transparent","--n-border-hover":`1px solid ${g}`,"--n-border-pressed":`1px solid ${g}`,"--n-border-focus":`1px solid ${g}`,"--n-color":changeColor(v,{alpha:.3}),"--n-color-hover":f,"--n-color-pressed":y,"--n-color-focus":f}});return(i,v)=>{const f=naiveUi.NButton;return vue.openBlock(),vue.createBlock(f,{class:"bds-entry-launcher",style:vue.normalizeStyle(vue.unref(s)),onClick:v[0]||(v[0]=y=>r("toggle"))},{default:vue.withCtx(()=>[vue.createElementVNode("span",_hoisted_1$o,vue.toDisplayString(n.label),1),v[1]||(v[1]=vue.createElementVNode("span",{class:"bds-entry-launcher__icon","aria-hidden":"true"},[vue.createElementVNode("svg",{viewBox:"0 0 1024 1024",width:"20",height:"20"},[vue.createElementVNode("path",{d:"M691.2 928.2V543.1c0-32.7 26.5-59.3 59.2-59.3h118.5c32.7 0 59.3 26.5 59.3 59.2V928.2h-237z m192.6-385.1c0-8.2-6.6-14.8-14.8-14.8H750.5c-8.2 0-14.8 6.6-14.9 14.7v340.8h148.2V543.1zM395 157.8c-0.1-32.6 26.3-59.2 58.9-59.3h118.8c32.6 0 59.1 26.5 59.1 59.1v770.6H395V157.8z m44.4 725.9h148V157.9c0-8.1-6.5-14.7-14.7-14.8H454.1c-8.1 0.1-14.7 6.7-14.7 14.8v725.8zM98.6 394.9c0-32.7 26.5-59.2 59.2-59.3h118.5c32.7-0.1 59.3 26.4 59.3 59.1v533.5h-237V394.9z m44.5 488.8h148.2V394.9c0-8.2-6.7-14.8-14.8-14.8H158c-8.2 0-14.8 6.6-14.9 14.7v488.9z"})])],-1))]),_:1},8,["style"])}}},style$a=cB$2("bds-panel-shell",[cE$2("overlay",css$1`
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+      `),cE$2("panel",css$1`
+        position: fixed;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+        background: var(--bds-panel-shell-bg);
+      `),cE$2("panel-body",css$1`
+        padding: 20px;
+        box-sizing: border-box;
+        height: 100%;
+        overflow: hidden;
+      `)]);function mountStyle$a(e){useTheme$1("bds-panel-shell-style",style$a,e)}const _hoisted_1$n={class:"bds-panel-shell"},_sfc_main$c={__name:"PanelShell",props:{show:{type:Boolean,default:!1},size:{type:Number,default:80},error:{type:String,default:""},zIndex:{type:Number,default:800}},emits:["update:show"],setup(e,{expose:t,emit:n}){const r=e,o=n,a=vue.inject("styleMountTarget",null);mountStyle$a(a);const s=naiveUi.useThemeVars(),i=vue.ref(null),v=vue.computed(()=>{const g=Math.max(20,Math.min(100,Number(r.size)||80)),_=(100-g)/2;return{left:`${_}vw`,top:`${_}vh`,width:`${g}vw`,height:`${g}vh`,zIndex:r.zIndex+100,"--bds-panel-shell-bg":s.value.baseColor||s.value.cardColor||"#fff"}}),f=vue.computed(()=>({zIndex:r.zIndex})),y=()=>{o("update:show",!1)};return t({panelEl:i}),(g,_)=>{const k=naiveUi.NAlert;return vue.openBlock(),vue.createElementBlock("div",_hoisted_1$n,[vue.withDirectives(vue.createElementVNode("div",{class:"bds-panel-shell__overlay",style:vue.normalizeStyle(vue.unref(f)),onClick:y},null,4),[[vue.vShow,e.show]]),vue.withDirectives(vue.createElementVNode("div",{class:"bds-panel-shell__panel",style:vue.normalizeStyle(vue.unref(v))},[vue.createElementVNode("div",{class:"bds-panel-shell__panel-body",ref_key:"panelEl",ref:i},[e.error?(vue.openBlock(),vue.createBlock(k,{key:0,type:"error",title:e.error,style:{"margin-bottom":"8px"}},null,8,["title"])):vue.createCommentVNode("",!0),vue.renderSlot(g.$slots,"default",{panelEl:vue.unref(i)})],512)],4),[[vue.vShow,e.show]])])}}},style$9=cB$2("bds-upload-screen",css$1`
+    min-height: 100vh;
+    background-color: var(--bds-upload-screen-bg-base);
+    background-image:
+      radial-gradient(
+        120% 90% at 0% 0%,
+        var(--bds-upload-screen-bg-radial) 0%,
+        var(--bds-upload-screen-bg-base-transparent) 30%
+      ),
+      radial-gradient(
+        90% 60% at 100% 108%,
+        var(--bds-upload-screen-bg-radial) 0%,
+        var(--bds-upload-screen-bg-base-transparent) 60%
+      );
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  `,[cE$2("uploader",css$1`
+        width: min(720px, 90vw);
+      `),cE$2("bar",css$1`
+        width: min(720px, 90vw);
+        margin-bottom: 12px;
+      `),cE$2("card",css$1`
+        width: 100%;
+        min-height: 240px;
+        border: 2px dashed var(--bds-upload-border);
+        border-radius: 14px;
+        background: var(--bds-upload-bg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        &:hover {
+          border-color: var(--bds-upload-drag-border);
+          box-shadow: var(--bds-upload-drag-shadow);
+          transform: scale(1.01);
+        }
+      `)]);function mountStyle$9(e){useTheme$1("bds-upload-screen-style",style$9,e)}const _sfc_main$b={__name:"UploadScreen",props:{hasData:{type:Boolean,default:!1},mode:{type:String,default:"readonly"},sourceUrl:{type:String,default:""}},emits:["open-panel","parsed-data","update:sourceUrl"],setup(e,{emit:t}){const n=e,r=t,o=vue.inject("styleMountTarget",null);mountStyle$9(o);const a=naiveUi.useThemeVars(),s=vue.ref(""),i=vue.ref([]),v=vue.computed({get:()=>String(n.sourceUrl||""),set:m=>{r("update:sourceUrl",String(m||""))}}),f=vue.computed(()=>{const m=a.value.primaryColor||"#00a1d6",d=a.value.bodyColor||a.value.baseColor||a.value.cardColor||"#ffffff";return{"--bds-upload-screen-bg-base":d,"--bds-upload-screen-bg-base-transparent":changeColor(d,{alpha:0}),"--bds-upload-screen-bg-radial":changeColor(m,{alpha:.18}),"--bds-upload-screen-bg-accent":changeColor(m,{alpha:.1}),"--bds-upload-bg":changeColor(d,{alpha:.88}),"--bds-upload-border":changeColor(m,{alpha:.45}),"--bds-upload-drag-border":m,"--bds-upload-drag-shadow":`0 8px 24px ${changeColor(m,{alpha:.24})}`}}),y=m=>{const d=JSON.parse(String(m||""));if(!d||typeof d!="object"||Array.isArray(d))throw new Error("上传数据不是有效对象");return d},g=async m=>{if(!m)throw new Error("未读取到上传文件");const d=await m.text(),h=y(d);r("parsed-data",h)},_=async({file:m})=>{try{s.value="",await g(m?.file||m)}catch(d){s.value=String(d?.message||d||"上传数据解析失败")}finally{i.value=[]}},k=m=>{i.value=Array.isArray(m)?m:[]},u=async m=>{try{s.value="";const d=m?.dataTransfer?.files?.[0];await g(d)}catch(d){s.value=String(d?.message||d||"上传数据解析失败")}finally{i.value=[]}},l=m=>{m!=null&&r("update:sourceUrl",String(m||"")),r("open-panel")};return(m,d)=>{const h=naiveUi.NInput,$=naiveUi.NButton,b=naiveUi.NFlex,M=naiveUi.NText,V=naiveUi.NUploadDragger,z=naiveUi.NUpload,Y=naiveUi.NAlert;return vue.openBlock(),vue.createElementBlock("div",{class:"bds-upload-screen",style:vue.normalizeStyle(vue.unref(f))},[vue.createVNode(b,{size:8,wrap:!1,align:"center",justify:"center",class:"bds-upload-screen__bar"},{default:vue.withCtx(()=>[n.mode!=="readonly"?(vue.openBlock(),vue.createBlock(h,{key:0,value:vue.unref(v),"onUpdate:value":d[0]||(d[0]=G=>vue.isRef(v)?v.value=G:null),placeholder:"输入 B 站视频 / 番剧 / 用户页面 URL",style:{flex:"1"},onKeyup:d[1]||(d[1]=vue.withKeys(G=>l(G?.target?.value),["enter"]))},null,8,["value"])):vue.createCommentVNode("",!0),n.hasData||n.sourceUrl?(vue.openBlock(),vue.createBlock($,{key:1,type:"primary",onClick:d[2]||(d[2]=G=>l())},{default:vue.withCtx(()=>[...d[6]||(d[6]=[vue.createTextVNode(" 打开面板 ",-1)])]),_:1})):vue.createCommentVNode("",!0)]),_:1}),vue.createVNode(z,{class:"bds-upload-screen__uploader","show-file-list":!1,"default-upload":!1,max:1,accept:"application/json,.json","file-list":vue.unref(i),"onUpdate:fileList":k,onChange:_},{default:vue.withCtx(()=>[vue.createVNode(V,{class:"bds-upload-screen__card",onDropCapture:vue.withModifiers(u,["stop","prevent"]),onDragoverCapture:d[3]||(d[3]=vue.withModifiers(()=>{},["stop","prevent"])),onDragenterCapture:d[4]||(d[4]=vue.withModifiers(()=>{},["stop","prevent"])),onDragleaveCapture:d[5]||(d[5]=vue.withModifiers(()=>{},["stop","prevent"]))},{default:vue.withCtx(()=>[vue.createVNode(M,{style:{"font-size":"16px"}},{default:vue.withCtx(()=>[...d[7]||(d[7]=[vue.createTextVNode("拖拽上传弹幕数据 JSON",-1)])]),_:1}),vue.createVNode(M,{depth:"3"},{default:vue.withCtx(()=>[...d[8]||(d[8]=[vue.createTextVNode("或点击选择文件",-1)])]),_:1})]),_:1})]),_:1},8,["file-list"]),vue.unref(s)?(vue.openBlock(),vue.createBlock(Y,{key:0,type:"error",title:vue.unref(s),style:{"margin-top":"12px"}},null,8,["title"])):vue.createCommentVNode("",!0)],4)}}},_hoisted_1$m={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"},Camera=vue.defineComponent({name:"Camera",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$m,n[0]||(n[0]=[vue.createElementVNode("g",{fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},[vue.createElementVNode("path",{d:"M5 7h1a2 2 0 0 0 2-2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2"}),vue.createElementVNode("circle",{cx:"12",cy:"13",r:"3"})],-1)]))}}),_hoisted_1$l={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"},ExternalLink=vue.defineComponent({name:"ExternalLink",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$l,n[0]||(n[0]=[vue.createElementVNode("g",{fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},[vue.createElementVNode("path",{d:"M11 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-5"}),vue.createElementVNode("path",{d:"M10 14L20 4"}),vue.createElementVNode("path",{d:"M15 4h5v5"})],-1)]))}}),_hoisted_1$k={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"},FileDownload=vue.defineComponent({name:"FileDownload",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$k,n[0]||(n[0]=[vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path><path d="M12 11v6"></path><path d="M9 14l3 3l3-3"></path></g>',1)]))}}),_hoisted_1$j={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"},InfoCircle=vue.defineComponent({name:"InfoCircle",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$j,n[0]||(n[0]=[vue.createElementVNode("g",{fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},[vue.createElementVNode("circle",{cx:"12",cy:"12",r:"9"}),vue.createElementVNode("path",{d:"M12 8h.01"}),vue.createElementVNode("path",{d:"M11 12h1v4h1"})],-1)]))}}),_hoisted_1$i={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"},Settings=vue.defineComponent({name:"Settings",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$i,n[0]||(n[0]=[vue.createElementVNode("g",{fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},[vue.createElementVNode("path",{d:"M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37c1 .608 2.296.07 2.572-1.065z"}),vue.createElementVNode("circle",{cx:"12",cy:"12",r:"3"})],-1)]))}}),_hoisted_1$h={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"},SquareCheck=vue.defineComponent({name:"SquareCheck",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$h,n[0]||(n[0]=[vue.createElementVNode("g",{fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},[vue.createElementVNode("rect",{x:"4",y:"4",width:"16",height:"16",rx:"2"}),vue.createElementVNode("path",{d:"M9 12l2 2l4-4"})],-1)]))}}),_hoisted_1$g={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"},Trash=vue.defineComponent({name:"Trash",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$g,n[0]||(n[0]=[vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path></g>',1)]))}}),_hoisted_1$f={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"},TrashX=vue.defineComponent({name:"TrashX",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$f,n[0]||(n[0]=[vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path><path d="M10 12l4 4m0-4l-4 4"></path></g>',1)]))}}),cssrAnchorMetaName$2="naive-ui-style";function createInjectionKey(e){return e}const ssrContextKey="@css-render/vue3-ssr";function createStyleString(e,t){return`<style cssr-id="${e}">
+${t}
+</style>`}function ssrAdapter(e,t,n){const{styles:r,ids:o}=n;o.has(e)||r!==null&&(o.add(e),r.push(createStyleString(e,t)))}const isBrowser=typeof document<"u";function useSsrAdapter(){if(isBrowser)return;const e=vue.inject(ssrContextKey,null);if(e!==null)return{adapter:(t,n)=>ssrAdapter(t,n,e),context:e}}const{c:c$2}=CssRender(),cssrAnchorMetaName$1="vueuc-style";function plugin$2(e){let t=".",n="__",r="--",o;if(e){let u=e.blockPrefix;u&&(t=u),u=e.elementPrefix,u&&(n=u),u=e.modifierPrefix,u&&(r=u)}const a={install(u){o=u.c;const l=u.context;l.bem={},l.bem.b=null,l.bem.els=null}};function s(u){let l,m;return{before(d){l=d.bem.b,m=d.bem.els,d.bem.els=null},after(d){d.bem.b=l,d.bem.els=m},$({context:d,props:h}){return u=typeof u=="string"?u:u({context:d,props:h}),d.bem.b=u,`${h?.bPrefix||t}${d.bem.b}`}}}function i(u){let l;return{before(m){l=m.bem.els},after(m){m.bem.els=l},$({context:m,props:d}){return u=typeof u=="string"?u:u({context:m,props:d}),m.bem.els=u.split(",").map(h=>h.trim()),m.bem.els.map(h=>`${d?.bPrefix||t}${m.bem.b}${n}${h}`).join(", ")}}}function v(u){return{$({context:l,props:m}){u=typeof u=="string"?u:u({context:l,props:m});const d=u.split(",").map(b=>b.trim());function h(b){return d.map(M=>`&${m?.bPrefix||t}${l.bem.b}${b!==void 0?`${n}${b}`:""}${r}${M}`).join(", ")}const $=l.bem.els;return $!==null?h($[0]):h()}}}function f(u){return{$({context:l,props:m}){u=typeof u=="string"?u:u({context:l,props:m});const d=l.bem.els;return`&:not(${m?.bPrefix||t}${l.bem.b}${d!==null&&d.length>0?`${n}${d[0]}`:""}${r}${u})`}}}return Object.assign(a,{cB:((...u)=>o(s(u[0]),u[1],u[2])),cE:((...u)=>o(i(u[0]),u[1],u[2])),cM:((...u)=>o(v(u[0]),u[1],u[2])),cNotM:((...u)=>o(f(u[0]),u[1],u[2]))}),a}const namespace="n",prefix=`.${namespace}-`,elementPrefix="__",modifierPrefix="--",cssr$1=CssRender(),plugin$1=plugin$2({blockPrefix:prefix,elementPrefix,modifierPrefix});cssr$1.use(plugin$1);const{c:c$1,find:find$1}=cssr$1,{cB:cB$1,cE:cE$1,cM:cM$1,cNotM:cNotM$1}=plugin$1,configProviderInjectionKey="n-config-provider",defaultClsPrefix="n";function useMergedClsPrefix(){const e=vue.inject(configProviderInjectionKey,null);return e?e.mergedClsPrefixRef:vue.shallowRef(defaultClsPrefix)}const commonVariables={cubicBezierEaseInOut:"cubic-bezier(.4, 0, .2, 1)",cubicBezierEaseOut:"cubic-bezier(0, 0, .2, 1)",cubicBezierEaseIn:"cubic-bezier(.4, 0, 1, 1)"},{cubicBezierEaseIn,cubicBezierEaseOut}=commonVariables;function fadeInScaleUpTransition({transformOrigin:e="inherit",duration:t=".2s",enterScale:n=".9",originalTransform:r="",originalTransition:o=""}={}){return[c$1("&.fade-in-scale-up-transition-leave-active",{transformOrigin:e,transition:`opacity ${t} ${cubicBezierEaseIn}, transform ${t} ${cubicBezierEaseIn} ${o&&`,${o}`}`}),c$1("&.fade-in-scale-up-transition-enter-active",{transformOrigin:e,transition:`opacity ${t} ${cubicBezierEaseOut}, transform ${t} ${cubicBezierEaseOut} ${o&&`,${o}`}`}),c$1("&.fade-in-scale-up-transition-enter-from, &.fade-in-scale-up-transition-leave-to",{opacity:0,transform:`${r} scale(${n})`}),c$1("&.fade-in-scale-up-transition-leave-from, &.fade-in-scale-up-transition-enter-to",{opacity:1,transform:`${r} scale(1)`})]}const{cubicBezierEaseInOut}=commonVariables;function fadeInTransition({name:e="fade-in",enterDuration:t="0.2s",leaveDuration:n="0.2s",enterCubicBezier:r=cubicBezierEaseInOut,leaveCubicBezier:o=cubicBezierEaseInOut}={}){return[c$1(`&.${e}-transition-enter-active`,{transition:`all ${t} ${r}!important`}),c$1(`&.${e}-transition-leave-active`,{transition:`all ${n} ${o}!important`}),c$1(`&.${e}-transition-enter-from, &.${e}-transition-leave-to`,{opacity:0}),c$1(`&.${e}-transition-leave-from, &.${e}-transition-enter-to`,{opacity:1})]}const imageStyle=c$1([c$1("body >",[cB$1("image-container","position: fixed;")]),cB$1("image-preview-container",`
+ position: fixed;
+ left: 0;
+ right: 0;
+ top: 0;
+ bottom: 0;
+ display: flex;
+ `),cB$1("image-preview-overlay",`
+ z-index: -1;
+ position: absolute;
+ left: 0;
+ right: 0;
+ top: 0;
+ bottom: 0;
+ background: rgba(0, 0, 0, .3);
+ `,[fadeInTransition()]),cB$1("image-preview-toolbar",`
+ z-index: 1;
+ position: absolute;
+ left: 50%;
+ transform: translateX(-50%);
+ border-radius: var(--n-toolbar-border-radius);
+ height: 48px;
+ bottom: 40px;
+ padding: 0 12px;
+ background: var(--n-toolbar-color);
+ box-shadow: var(--n-toolbar-box-shadow);
+ color: var(--n-toolbar-icon-color);
+ transition: color .3s var(--n-bezier);
+ display: flex;
+ align-items: center;
+ `,[cB$1("base-icon",`
+ padding: 0 8px;
+ font-size: 28px;
+ cursor: pointer;
+ `),fadeInTransition()]),cB$1("image-preview-wrapper",`
+ position: absolute;
+ left: 0;
+ right: 0;
+ top: 0;
+ bottom: 0;
+ display: flex;
+ pointer-events: none;
+ `,[fadeInScaleUpTransition()]),cB$1("image-preview",`
+ user-select: none;
+ -webkit-user-select: none;
+ pointer-events: all;
+ margin: auto;
+ max-height: calc(100vh - 32px);
+ max-width: calc(100vw - 32px);
+ transition: transform .3s var(--n-bezier);
+ `),cB$1("image",`
+ display: inline-flex;
+ max-height: 100%;
+ max-width: 100%;
+ `,[cNotM$1("preview-disabled",`
+ cursor: pointer;
+ `),c$1("img",`
+ border-radius: inherit;
+ `)])]),iconStyle=cB$1("base-icon",`
+ height: 1em;
+ width: 1em;
+ line-height: 1em;
+ text-align: center;
+ display: inline-block;
+ position: relative;
+ fill: currentColor;
+`,[c$1("svg",`
+ height: 1em;
+ width: 1em;
+ `)]),cssr=CssRender(),plugin=plugin$2({blockPrefix:"."});cssr.use(plugin);const{c,find}=cssr,{cB,cE,cM,cNotM}=plugin,css=String.raw,cssrAnchorMetaName="nb-ui-style";function useTheme(e,t,n,r,o="n-config"){const a=useSsrAdapter(),s=vue.inject(configProviderInjectionKey,null);n=n||cssrAnchorMetaName;let i;o==="n-config"?i=s?.styleMountTarget:o instanceof HTMLElement&&(i=o);const v=()=>{const f=r?.value;t.mount({id:f===void 0?e:f+e,head:!0,props:{bPrefix:f?`.${f}-`:void 0},anchorMetaName:n,ssr:a,parent:i})};a?v():vue.onBeforeMount(v)}const _sfc_main$7$1=Object.assign({inheritAttrs:!1},{__name:"Image",props:{size:[String,Number]},setup(e){const t=useMergedClsPrefix();useTheme("-image",imageStyle,cssrAnchorMetaName$2,t,null),useTheme("-base-icon",iconStyle,cssrAnchorMetaName$2,t,null);const n=e,r=vue.useAttrs(),o=vue.computed(()=>n.size!=null?n.size:r.width),a=vue.computed(()=>n.size!=null?n.size:r.height),s=vue.computed(()=>r.objectFit??r["object-fit"]??"cover");return(i,v)=>{const f=naiveUi.NImage;return vue.openBlock(),vue.createBlock(f,vue.mergeProps(vue.unref(r),{width:vue.unref(o),height:vue.unref(a),"object-fit":vue.unref(s)}),vue.createSlots({_:2},[i.$slots.placeholder?{name:"placeholder",fn:vue.withCtx(()=>[vue.renderSlot(i.$slots,"placeholder")]),key:"0"}:i.$slots.default?{name:"placeholder",fn:vue.withCtx(()=>[vue.renderSlot(i.$slots,"default")]),key:"1"}:void 0,i.$slots.error?{name:"error",fn:vue.withCtx(()=>[vue.renderSlot(i.$slots,"error")]),key:"2"}:i.$slots.default?{name:"error",fn:vue.withCtx(()=>[vue.renderSlot(i.$slots,"default")]),key:"3"}:void 0]),1040,["width","height","object-fit"])}}}),style$6$1=c([cB("nb-archive-info-card",css`
+      color: var(--n-text-color-1);
+      border: 1px solid var(--n-border-color);
+      border-radius: var(--n-border-radius);
+    `,[cE("title-line",css`
+          display: block;
+          min-width: 0;
+          font-size: var(--n-font-size-large);
+          font-weight: var(--n-font-weight-strong);
+        `),cE("title",css`
+          min-width: 0;
+        `),cE("subtitle",css`
+          margin-left: 12px;
+          color: var(--n-text-color-3);
+        `),cE("id-link",css`
+          margin-left: 12px;
+          display: inline-flex;
+          vertical-align: baseline;
+        `),cE("main",css`
+          align-items: flex-start;
+
+          @media (max-width: 768px) {
+            flex-wrap: wrap;
+          }
+        `),cE("left",css`
+          flex: 0 0 auto;
+        `),cE("cover",css`
+          border-radius: 6px;
+          overflow: hidden;
+          flex-shrink: 0;
+        `),cE("owner-row",css`
+          min-width: 0;
+        `),cE("owner-face",css`
+          border-radius: 50%;
+          overflow: hidden;
+          flex: 0 0 auto;
+        `),cE("owner-link",css`
+          color: var(--n-text-color-2);
+
+          &:hover {
+            color: var(--n-primary-color-hover);
+          }
+        `),cE("desc",css`
+          font-size: var(--n-font-size-mini);
+          color: var(--n-text-color-2);
+          white-space: pre-wrap;
+          align-self: flex-start;
+        `),cE("time-row",css`
+          color: var(--n-text-color-3);
+          font-size: var(--n-font-size-mini);
+        `),cE("divider",css`
+          margin: 2px 0;
+        `)])]);function mountStyle$6$1(){useTheme("nb-archive-info-card",style$6$1)}const _hoisted_1$d={class:"nb-archive-info-card__title"},_hoisted_2$5={key:0,class:"nb-archive-info-card__subtitle"},_sfc_main$6$1=Object.assign({name:"ArchiveInfoCard"},{__name:"ArchiveInfoCard",props:{archiveInfo:{type:Object,default:()=>({})}},setup(e){const t=e,n=[{key:"like",label:"点赞"},{key:"coin",label:"投币"},{key:"favorite",label:"收藏"},{key:"share",label:"分享"},{key:"view",label:"播放"},{key:"danmaku",label:"弹幕"},{key:"reply",label:"评论"}],r=vue.computed(()=>t.archiveInfo?.owner?.name||"未知UP主"),o=vue.computed(()=>t.archiveInfo?.owner?.mid||""),a=vue.computed(()=>o.value?`https://space.bilibili.com/${o.value}`:""),s=vue.computed(()=>t.archiveInfo?.url||""),i=g=>g?new Date(g*1e3).toLocaleString():"-",v=g=>{if(g==null||g==="")return"-";const _=Number(g);return Number.isFinite(_)?new Intl.NumberFormat("en-US").format(_):String(g)},f=naiveUi.useThemeVars(),y=vue.computed(()=>({"--n-primary-color-hover":f.value.primaryColorHover,"--n-border-color":f.value.borderColor,"--n-border-radius":f.value.borderRadius,"--n-divider-color":f.value.dividerColor,"--n-text-color-1":f.value.textColor1,"--n-text-color-2":f.value.textColor2,"--n-text-color-3":f.value.textColor3,"--n-font-size":f.value.fontSize,"--n-font-size-mini":f.value.fontSizeMini,"--n-font-size-large":f.value.fontSizeLarge,"--n-font-weight-strong":f.value.fontWeightStrong}));return mountStyle$6$1(),(g,_)=>{const k=naiveUi.NButton,u=naiveUi.NText,l=naiveUi.NFlex,m=naiveUi.NEllipsis,d=naiveUi.NDivider,h=naiveUi.NStatistic,$=naiveUi.NGridItem,b=naiveUi.NGrid,M=naiveUi.NCard;return vue.openBlock(),vue.createBlock(M,{bordered:!0,class:"nb-archive-info-card",style:vue.normalizeStyle(vue.unref(y))},{default:vue.withCtx(()=>[vue.createVNode(l,{vertical:"",size:10},{default:vue.withCtx(()=>[vue.createVNode(u,{depth:1,class:"nb-archive-info-card__title-line"},{default:vue.withCtx(()=>[vue.createElementVNode("span",_hoisted_1$d,vue.toDisplayString(t.archiveInfo?.title||"加载中..."),1),t.archiveInfo?.subtitle?(vue.openBlock(),vue.createElementBlock("span",_hoisted_2$5,vue.toDisplayString(t.archiveInfo.subtitle),1)):vue.createCommentVNode("",!0),t.archiveInfo?.id&&vue.unref(s)?(vue.openBlock(),vue.createBlock(k,{key:1,text:"",tag:"a",href:vue.unref(s),target:"_blank",type:"primary",class:"nb-archive-info-card__id-link"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(t.archiveInfo.id),1)]),_:1},8,["href"])):vue.createCommentVNode("",!0)]),_:1}),vue.createVNode(l,{size:16,wrap:!1,class:"nb-archive-info-card__main"},{default:vue.withCtx(()=>[vue.createVNode(l,{vertical:"",size:8,class:"nb-archive-info-card__left"},{default:vue.withCtx(()=>[t.archiveInfo?.cover?(vue.openBlock(),vue.createBlock(vue.unref(_sfc_main$7$1),{key:0,src:t.archiveInfo.cover,width:"160",height:"90",class:"nb-archive-info-card__cover",lazy:""},null,8,["src"])):vue.createCommentVNode("",!0),vue.createVNode(l,{align:"center",size:10,wrap:!1,class:"nb-archive-info-card__owner-row"},{default:vue.withCtx(()=>[t.archiveInfo?.owner?.face?(vue.openBlock(),vue.createBlock(vue.unref(_sfc_main$7$1),{key:0,src:t.archiveInfo.owner.face,size:"32",class:"nb-archive-info-card__owner-face",lazy:""},null,8,["src"])):vue.createCommentVNode("",!0),vue.unref(a)?(vue.openBlock(),vue.createBlock(k,{key:1,text:"",tag:"a",href:vue.unref(a),target:"_blank",class:"nb-archive-info-card__owner-link"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(r)),1)]),_:1},8,["href"])):(vue.openBlock(),vue.createBlock(u,{key:2,depth:2},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(r)),1)]),_:1}))]),_:1})]),_:1}),t.archiveInfo?.desc?(vue.openBlock(),vue.createBlock(m,{key:0,"expand-trigger":"click","line-clamp":7,tooltip:!1,class:"nb-archive-info-card__desc"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(t.archiveInfo.desc),1)]),_:1})):vue.createCommentVNode("",!0)]),_:1}),vue.createVNode(l,{size:20,wrap:!0,class:"nb-archive-info-card__time-row"},{default:vue.withCtx(()=>[vue.createElementVNode("span",null,"视频发布："+vue.toDisplayString(i(t.archiveInfo?.pubtime)),1),vue.createElementVNode("span",null,"抓取时间："+vue.toDisplayString(i(t.archiveInfo?.fetchtime)),1)]),_:1}),vue.createVNode(d,{class:"nb-archive-info-card__divider"}),vue.createVNode(b,{cols:4,"x-gap":20,"y-gap":12,responsive:"screen"},{default:vue.withCtx(()=>[(vue.openBlock(),vue.createElementBlock(vue.Fragment,null,vue.renderList(n,V=>vue.createVNode($,{key:V.key},{default:vue.withCtx(()=>[vue.createVNode(h,{label:V.label,value:v(t.archiveInfo?.stat?.[V.key])},null,8,["label","value"])]),_:2},1024)),64))]),_:1})]),_:1})]),_:1},8,["style"])}}}),_hoisted_1$c={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"};vue.defineComponent({name:"ChevronDown",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$c,n[0]||(n[0]=[vue.createElementVNode("path",{d:"M6 9l6 6l6-6",fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},null,-1)]))}});const _hoisted_1$b={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"};vue.defineComponent({name:"ChevronUp",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$b,n[0]||(n[0]=[vue.createElementVNode("path",{d:"M6 15l6-6l6 6",fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},null,-1)]))}});const _hoisted_1$a={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"};vue.defineComponent({name:"Link",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$a,n[0]||(n[0]=[vue.createElementVNode("g",{fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},[vue.createElementVNode("path",{d:"M10 14a3.5 3.5 0 0 0 5 0l4-4a3.5 3.5 0 0 0-5-5l-.5.5"}),vue.createElementVNode("path",{d:"M14 10a3.5 3.5 0 0 0-5 0l-4 4a3.5 3.5 0 0 0 5 5l.5-.5"})],-1)]))}});const _hoisted_1$9={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"},MessageCircle=vue.defineComponent({name:"MessageCircle",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$9,n[0]||(n[0]=[vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l1.3-3.9A9 8 0 1 1 7.7 19L3 20"></path><path d="M12 12v.01"></path><path d="M8 12v.01"></path><path d="M16 12v.01"></path></g>',1)]))}}),_hoisted_1$8={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"};vue.defineComponent({name:"Photo",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$8,n[0]||(n[0]=[vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 8h.01"></path><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M4 15l4-4a3 5 0 0 1 3 0l5 5"></path><path d="M14 14l1-1a3 5 0 0 1 3 0l2 2"></path></g>',1)]))}});const _hoisted_1$7={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"};vue.defineComponent({name:"ThumbUp",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$7,n[0]||(n[0]=[vue.createElementVNode("path",{d:"M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3",fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},null,-1)]))}});const _hoisted_1$6$1={xmlns:"http://www.w3.org/2000/svg","xmlns:xlink":"http://www.w3.org/1999/xlink",viewBox:"0 0 24 24"};vue.defineComponent({name:"User",render:function(t,n){return vue.openBlock(),vue.createElementBlock("svg",_hoisted_1$6$1,n[0]||(n[0]=[vue.createElementVNode("g",{fill:"none",stroke:"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"},[vue.createElementVNode("circle",{cx:"12",cy:"7",r:"4"}),vue.createElementVNode("path",{d:"M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"})],-1)]))}});function formatProgress$1(e){const t=Math.floor(e/1e3),n=Math.floor(t/3600),r=String(Math.floor(t%3600/60)).padStart(2,"0"),o=String(t%60).padStart(2,"0");return n>0?`${n}:${r}:${o}`:`${r}:${o}`}function formatTimestamp(e){if(!e)return"-";const t=new Date(e*1e3),[n,r,o,a,s,i]=[t.getFullYear(),String(t.getMonth()+1).padStart(2,"0"),String(t.getDate()).padStart(2,"0"),String(t.getHours()).padStart(2,"0"),String(t.getMinutes()).padStart(2,"0"),String(t.getSeconds()).padStart(2,"0")];return`${n}-${r}-${o} ${a}:${s}:${i}`}function toPx(e){return typeof e=="number"?`${e}px`:e}function formatStatValue(e){if(e==null||e==="")return"-";const t=Number(e);return Number.isFinite(t)?new Intl.NumberFormat("en-US").format(t):String(e)}const style$5$1=c([cB("nb-command-dm-timeline",css`
+      padding-top: 10px;
+      color: var(--n-text-color-1);
+    `,[cE("time",css`
+          display: inline-block;
+          color: var(--n-text-color-3);
+          font-size: var(--n-font-size-mini);
+          font-weight: var(--n-font-weight, normal);
+          line-height: 1.4;
+        `),cE("item-card",css`
+          border: 1px solid var(--n-border-color);
+          border-radius: var(--n-border-radius);
+        `),cE("line",css`
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          color: var(--n-text-color-2);
+        `),cE("title",css`
+          font-weight: var(--n-font-weight-strong);
+          color: var(--n-text-color-1);
+        `),cE("meta",css`
+          margin-top: 6px;
+          margin-left: 8px;
+          color: var(--n-text-color-3);
+          font-size: var(--n-font-size-mini);
+        `),cE("table-wrap",css`
+          margin-top: 8px;
+        `),cE("icon-wrap",css`
+          width: 20px;
+          height: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        `),cE("icon-image",css`
+          width: 20px;
+          height: 20px;
+          object-fit: cover;
+          display: block;
+        `),cE("link",css`
+          margin-top: 8px;
+          margin-left: 8px;
+          display: inline-flex;
+          max-width: 100%;
+
+          &, & .n-button__content {
+            white-space: normal;
+            word-break: break-all;
+            text-align: left;
+          }
+        `)])]);function mountStyle$5$1(){useTheme("nb-command-dm-timeline",style$5$1)}const _hoisted_1$5$1={class:"nb-command-dm-timeline__icon-wrap"},_hoisted_2$4=["src"],_hoisted_3$3={class:"nb-command-dm-timeline__time"},_hoisted_4$3={class:"nb-command-dm-timeline__line"},_hoisted_5$2={class:"nb-command-dm-timeline__title"},_hoisted_6$2={key:0,class:"nb-command-dm-timeline__table-wrap"},_hoisted_7$2={class:"nb-command-dm-timeline__line"},_hoisted_8$2={class:"nb-command-dm-timeline__title"},_hoisted_9={key:2,class:"nb-command-dm-timeline__line"},_hoisted_10={class:"nb-command-dm-timeline__title"},_hoisted_11={class:"nb-command-dm-timeline__line"},_hoisted_12={class:"nb-command-dm-timeline__title"},_hoisted_13={key:0,class:"nb-command-dm-timeline__meta"},_hoisted_14={key:1,class:"nb-command-dm-timeline__table-wrap"},_hoisted_15={key:4,class:"nb-command-dm-timeline__line"},_hoisted_16={class:"nb-command-dm-timeline__title"},_hoisted_17={key:5,class:"nb-command-dm-timeline__line"},_hoisted_18={class:"nb-command-dm-timeline__title"},_hoisted_19={key:6,class:"nb-command-dm-timeline__line"},_hoisted_20={class:"nb-command-dm-timeline__title"},_sfc_main$5$1=Object.assign({name:"CommandDmTimeline"},{__name:"CommandDmTimeline",props:{commandDms:{type:Array,default:()=>[]}},setup(e){const t=e,n=[{title:"序号",key:"idx",width:80,sorter:"default"},{title:"选项",key:"desc"},{title:"票数",key:"cnt",width:80,sorter:"default"}],r=[{title:"评分项",key:"content"},{title:"平均",key:"avg_score",width:80,sorter:"default"},{title:"参与",key:"count",width:80,sorter:"default"}],o=y=>{try{return y?typeof y=="string"?JSON.parse(y):y:{}}catch{return{}}},a=y=>({primary:"info",danger:"error"})[y]||y||"default",s=y=>{const g=formatProgress$1(y?.progress??0),_=y?.ctime,k=typeof _=="number"?formatTimestamp(_):String(_||"-");return`时间：${g} | 发送时间：${k}`},i=vue.computed(()=>t.commandDms.map((y,g)=>{const _=o(y?.extra),k=_?.icon?String(_.icon).replace(/^http:/,"https:"):"";return{key:String(y?.idStr||y?.id||`${y?.ctime||0}-${y?.progress||0}-${g}`),extra:_,icon:k,type:a(k?"":"primary"),timestamp:s(y||{}),command:y?.command||"",content:y?.content||""}})),v=naiveUi.useThemeVars(),f=vue.computed(()=>({"--n-primary-color":v.value.primaryColor,"--n-border-color":v.value.borderColor,"--n-border-radius":v.value.borderRadius,"--n-text-color-1":v.value.textColor1,"--n-text-color-2":v.value.textColor2,"--n-text-color-3":v.value.textColor3,"--n-font-size-mini":v.value.fontSizeMini,"--n-font-weight":v.value.fontWeight,"--n-font-weight-strong":v.value.fontWeightStrong}));return mountStyle$5$1(),(y,g)=>{const _=naiveUi.NIcon,k=naiveUi.NText,u=naiveUi.NDataTable,l=naiveUi.NButton,m=naiveUi.NCard,d=naiveUi.NTimelineItem,h=naiveUi.NTimeline,$=naiveUi.NEmpty;return vue.openBlock(),vue.createElementBlock("div",{class:"nb-command-dm-timeline",style:vue.normalizeStyle(vue.unref(f))},[vue.createVNode(h,{"icon-size":20},{default:vue.withCtx(()=>[(vue.openBlock(!0),vue.createElementBlock(vue.Fragment,null,vue.renderList(vue.unref(i),b=>(vue.openBlock(),vue.createBlock(d,{key:b.key,type:b.type},{icon:vue.withCtx(()=>[vue.createElementVNode("div",_hoisted_1$5$1,[b.icon?(vue.openBlock(),vue.createElementBlock("img",{key:0,src:b.icon,alt:"command-icon",class:"nb-command-dm-timeline__icon-image"},null,8,_hoisted_2$4)):(vue.openBlock(),vue.createBlock(_,{key:1,size:14},{default:vue.withCtx(()=>[vue.createVNode(vue.unref(MessageCircle))]),_:1}))])]),header:vue.withCtx(()=>[vue.createElementVNode("span",_hoisted_3$3,vue.toDisplayString(b.timestamp),1)]),default:vue.withCtx(()=>[vue.createVNode(m,{hoverable:"",class:"nb-command-dm-timeline__item-card"},{default:vue.withCtx(()=>[b.command==="#VOTE#"?(vue.openBlock(),vue.createElementBlock(vue.Fragment,{key:0},[vue.createElementVNode("div",_hoisted_4$3,[vue.createVNode(k,{type:"success"},{default:vue.withCtx(()=>[...g[0]||(g[0]=[vue.createTextVNode("【投票】",-1)])]),_:1}),vue.createElementVNode("b",_hoisted_5$2,vue.toDisplayString(b.extra?.question??b.content),1)]),Array.isArray(b.extra?.options)&&b.extra.options.length?(vue.openBlock(),vue.createElementBlock("div",_hoisted_6$2,[vue.createVNode(u,{size:"small",bordered:!0,"single-line":!1,columns:n,data:b.extra.options},null,8,["data"])])):vue.createCommentVNode("",!0)],64)):b.command==="#LINK#"?(vue.openBlock(),vue.createElementBlock(vue.Fragment,{key:1},[vue.createElementVNode("div",_hoisted_7$2,[vue.createVNode(k,{type:"info"},{default:vue.withCtx(()=>[...g[1]||(g[1]=[vue.createTextVNode("【关联】",-1)])]),_:1}),vue.createElementVNode("b",_hoisted_8$2,vue.toDisplayString(b.content),1)]),b.extra?.bvid?(vue.openBlock(),vue.createBlock(l,{key:0,text:"",tag:"a",target:"_blank",rel:"noopener noreferrer",href:`https://www.bilibili.com/video/${b.extra.bvid}`,class:"nb-command-dm-timeline__link"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(b.extra?.title||b.extra?.bvid),1)]),_:2},1032,["href"])):vue.createCommentVNode("",!0)],64)):b.command==="#GRADE#"?(vue.openBlock(),vue.createElementBlock("div",_hoisted_9,[vue.createVNode(k,{type:"warning"},{default:vue.withCtx(()=>[...g[2]||(g[2]=[vue.createTextVNode("【评分】",-1)])]),_:1}),vue.createElementVNode("b",_hoisted_10,vue.toDisplayString(b.extra?.msg??b.content),1),vue.createVNode(k,null,{default:vue.withCtx(()=>[vue.createTextVNode("平均: "+vue.toDisplayString(b.extra?.avg_score??"-"),1)]),_:2},1024),vue.createVNode(k,null,{default:vue.withCtx(()=>[vue.createTextVNode("参与: "+vue.toDisplayString(b.extra?.count??"-"),1)]),_:2},1024)])):b.command==="#GRADESUMMARY#"?(vue.openBlock(),vue.createElementBlock(vue.Fragment,{key:3},[vue.createElementVNode("div",_hoisted_11,[vue.createVNode(k,{type:"warning"},{default:vue.withCtx(()=>[...g[3]||(g[3]=[vue.createTextVNode("【评分总结】",-1)])]),_:1}),vue.createElementVNode("b",_hoisted_12,vue.toDisplayString(b.extra?.msg??b.content),1)]),b.extra?.avg_score!==void 0?(vue.openBlock(),vue.createElementBlock("div",_hoisted_13," 平均："+vue.toDisplayString(b.extra.avg_score),1)):vue.createCommentVNode("",!0),Array.isArray(b.extra?.grades)&&b.extra.grades.length?(vue.openBlock(),vue.createElementBlock("div",_hoisted_14,[vue.createVNode(u,{size:"small",bordered:!0,"single-line":!1,columns:r,data:b.extra.grades},null,8,["data"])])):vue.createCommentVNode("",!0)],64)):b.command==="#ATTENTION#"?(vue.openBlock(),vue.createElementBlock("div",_hoisted_15,[vue.createVNode(k,{type:"error"},{default:vue.withCtx(()=>[...g[4]||(g[4]=[vue.createTextVNode("【关注】",-1)])]),_:1}),vue.createElementVNode("b",_hoisted_16,vue.toDisplayString(b.content),1)])):b.command==="#RESERVE#"?(vue.openBlock(),vue.createElementBlock("div",_hoisted_17,[vue.createVNode(k,{type:"error"},{default:vue.withCtx(()=>[...g[5]||(g[5]=[vue.createTextVNode("【预约】",-1)])]),_:1}),vue.createElementVNode("b",_hoisted_18,vue.toDisplayString(b.extra?.msg??b.content),1)])):(vue.openBlock(),vue.createElementBlock("div",_hoisted_19,[vue.createVNode(k,{type:"info"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(b.command||"未知互动弹幕"),1)]),_:2},1024),vue.createElementVNode("b",_hoisted_20,vue.toDisplayString(b.content),1)]))]),_:2},1024)]),_:2},1032,["type"]))),128))]),_:1}),vue.unref(i).length?vue.createCommentVNode("",!0):(vue.openBlock(),vue.createBlock($,{key:0,description:"暂无互动弹幕"}))],4)}}});c([cB("nb-note",css`
+      display: flex;
+      flex-direction: column;
+      color: var(--n-text-color-1);
+      font-size: 17px;
+      min-width: 1px;
+    `,[cB("meta",css`
+          padding: 0 var(--n-padding) var(--n-padding);
+          border-bottom: 1px solid var(--n-border-color);
+        `),cB("title",css`
+          font-size: 28px;
+          font-weight: 800;
+          line-height: 1.45;
+          white-space: pre-wrap;
+          word-break: break-word;
+        `),cB("cover",css`
+          width: 100%;
+          max-width: 100%;
+          border-radius: var(--n-border-radius);
+          overflow: hidden;
+        `),cB("author-row",css`
+          min-width: 0;
+          align-items: center;
+        `),cB("author-avatar",css`
+          border-radius: 50%;
+          overflow: hidden;
+          flex: 0 0 auto;
+        `),cB("author-main",css`
+          min-width: 0;
+          flex: 1;
+          text-align: left;
+          align-items: flex-start;
+        `),cB("author-name",css`
+          font-size: 16px;
+          font-weight: 600;
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        `),cB("author-name-link",css`
+          text-decoration: none;
+          color: var(--n-text-color-1);
+
+          &:hover {
+            color: var(--n-primary-color-hover);
+          }
+        `),cB("author-time",css`
+          font-size: 13px;
+        `),cB("main",css`
+          padding: var(--n-padding);
+          display: flex;
+          flex-direction: column;
+          gap: calc(var(--n-gap) * 0.75);
+        `),cB("block",css`
+          padding: calc(var(--n-padding) * 0.4) calc(var(--n-padding) * 0.5);
+          border-radius: calc(var(--n-border-radius) * 0.75);
+          transition: background 0.3s var(--n-cubic-bezier-ease-out);
+        `,[cM("paragraph",css`
+              line-height: 1.8;
+              white-space: pre-wrap;
+              word-break: break-word;
+            `),cM("header",css`
+              font-weight: 700;
+              line-height: 1.5;
+              margin-top: calc(var(--n-gap) * 0.5);
+            `),cM("list-item",css`
+              display: flex;
+              align-items: flex-start;
+              gap: calc(var(--n-gap) * 0.5);
+              line-height: 1.8;
+            `),cM("image",css`
+              display: flex;
+              justify-content: center;
+              width: 100%;
+            `),cM("tag",css`
+              display: flex;
+              align-items: center;
+              gap: calc(var(--n-gap) * 0.5);
+            `)]),cE("header-1",css`
+          font-size: 24px;
+        `),cE("header-2",css`
+          font-size: 22px;
+        `),cE("header-3",css`
+          font-size: 20px;
+        `),cE("header-4",css`
+          font-size: 18px;
+        `),cB("list-prefix",css`
+          color: var(--n-text-color-3);
+          min-width: 1.75em;
+          text-align: right;
+          user-select: none;
+        `),cB("segment",css`
+          white-space: pre-wrap;
+          word-break: break-word;
+        `),cB("content-image",css`
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
+        `),cB("image-error",css`
+          color: #b0b9c0;
+          background: #e5e8ef;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `),cB("tag-link",css`
+          cursor: pointer;
+        `,[c("&:hover",css`
+              color: var(--n-primary-color-hover);
+            `)]),cB("empty",css`
+          color: var(--n-text-color-3);
+          text-align: center;
+          padding: calc(var(--n-padding) * 2) var(--n-padding);
+        `)])]),c([cB("nb-comment-tree",css`
+      display: flex;
+      flex-direction: column;
+      color: var(--n-text-color-1);
+      border: 1px solid var(--n-border-color);
+      border-radius: var(--n-border-radius);
+    `,[cB("toolbar",css`
+          padding: var(--n-padding);
+          border-bottom: 1px solid var(--n-border-color);
+        `,[cB("search-input",css`
+              flex: 1;
+            `),cB("search-stat",css`
+              font-size: var(--n-font-size-mini);
+              color: var(--n-text-color-3);
+            `)]),cB("tree-body",css`
+          flex: 1;
+          min-height: 0;
+          position: relative;
+        `),cE("item",css`
+          min-height: 80px;
+          padding: var(--n-padding);
+          transition: background 0.3s var(--n-cubic-bezier-ease-out);
+        `,[cM("highlight",css`
+              background-color: var(--n-primary-color-highlight) !important;
+            `),cB("rail",css`
+              width: var(--n-indent-size);
+              position: relative;
+              cursor: pointer;
+              flex: 0 0 var(--n-indent-size);
+            `,[c("&::after",css`
+                  content: "";
+                  position: absolute;
+                  right: calc(var(--n-gap) / -2);
+                  top: calc(var(--n-padding) * -2);
+                  bottom: 0px;
+                  width: 1px;
+                  background: var(--n-divider-color);
+                `),cM("active",[c("&::after",css`
+                    background: var(--n-primary-color-hover);
+                    width: 2px;
+                  `)])]),cB("image-error",css`
+              color: #b0b9c0;
+              background: #e5e8ef;
+              width: 100%;
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            `),cB("avatar",css`
+              width: var(--n-indent-size);
+              height: var(--n-indent-size);
+              border-radius: 50%;
+            `),cB("main",css`
+              flex: 1;
+            `),cB("header",css``),cB("content",css`
+              white-space: pre-wrap;
+              word-wrap: break-word;
+            `),cB("pics",css``,[cE("item",css`
+                border-radius: var(--n-border-radius);
+                border: 1px solid var(--n-border-color);
+              `)]),cB("footer",css`
+              font-size: var(--n-font-size-mini);
+            `,[cE("item",css`
+                  display: inline-flex;
+                  align-items: center;
+                  line-height: 1;
+                  gap: 2px;
+                `,[c("&.clickable",css`
+                      cursor: pointer;
+                    `,[c("&:hover",css`
+                          color: var(--n-primary-color-hover);
+                        `)])])])]),cB("note-drawer-body",css`
+          min-height: 1px;
+        `),cB("note-drawer-empty",css`
+          margin-top: calc(var(--n-padding) * 2);
+        `)])]);const style$2$1=c([cB("nb-virtual-list",css`
+      position: relative;
+      min-height: 0;
+      height: 100%;
+    `,[cE("list",css`
+          height: 100%;
+          min-height: 0;
+        `),cE("bottom-mask",css`
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: var(--n-mask-height);
+          pointer-events: none;
+          background: linear-gradient(to bottom, var(--n-card-color-transparent), var(--n-card-color));
+          z-index: 1;
+        `)])]);function mountStyle$2$1(){useTheme("nb-virtual-list",style$2$1)}const _hoisted_1$3$1={class:"nb-virtual-list__bottom-mask"},_sfc_main$3$1=Object.assign({inheritAttrs:!1},{__name:"VirtualList",props:{items:{type:Array,default:()=>[]},showBottomMask:{type:Boolean,default:!0},bottomMaskHeight:{type:Number,default:32}},emits:["scroll","resize","wheel"],setup(e,{expose:t,emit:n}){const r=e,o=n,a=vue.useAttrs(),s=vue.ref(null),i=vue.ref(!1),v=vue.computed(()=>{const{class:h,style:$,...b}=a;return b}),f=h=>{if(!h){i.value=!1;return}const $=h.scrollHeight-h.clientHeight>1,b=h.scrollTop+h.clientHeight>=h.scrollHeight-1;i.value=$&&!b},y=()=>s.value?.scrollbarInstRef?.containerRef||s.value?.getScrollContainer?.(),g=()=>{f(y())},_=h=>{f(h?.target),o("scroll",h)},k=h=>{vue.nextTick(g),o("resize",h)},u=h=>{o("wheel",h)};t({scrollTo:(h,$)=>{s.value?.scrollTo?.(h,$)},getScrollContainer:y,getScrollContent:()=>s.value?.getScrollContent?.(),getScrollbarInstRef:()=>s.value?.scrollbarInstRef}),vue.watch(()=>r.items.length,()=>{vue.nextTick(g)},{immediate:!0});const m=naiveUi.useThemeVars(),d=vue.computed(()=>({"--n-card-color":m.value.cardColor,"--n-card-color-transparent":changeColor(m.value.cardColor,{alpha:0}),"--n-mask-height":toPx(r.bottomMaskHeight)}));return mountStyle$2$1(),(h,$)=>{const b=naiveUi.NVirtualList;return vue.openBlock(),vue.createElementBlock("div",{class:vue.normalizeClass(["nb-virtual-list",vue.unref(a).class]),style:vue.normalizeStyle([vue.unref(a).style,vue.unref(d)])},[vue.createVNode(b,vue.mergeProps({ref_key:"listRef",ref:s,class:"nb-virtual-list__list",items:r.items},vue.unref(v),{onScroll:_,onResize:k,onWheel:u}),{default:vue.withCtx(M=>[vue.renderSlot(h.$slots,"default",vue.normalizeProps(vue.guardReactiveProps(M)))]),_:3},16,["items"]),vue.withDirectives(vue.createElementVNode("div",_hoisted_1$3$1,null,512),[[vue.vShow,r.showBottomMask&&vue.unref(i)]])],6)}}}),style$1$1=c([cB("nb-danmaku-table",css`
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      color: var(--n-text-color-1);
+      font-size: var(--n-font-size);
+      border: 1px solid var(--n-border-color);
+      border-radius: var(--n-border-radius);
+      overflow: hidden;
+    `,[cE("header",css`
+          display: flex;
+          font-weight: var(--n-font-weight-strong);
+          color: var(--n-text-color-3);
+          background-color: var(--n-table-header-color);
+          border-bottom: 1px solid var(--n-border-color);
+          flex: 0 0 auto;
+        `),cE("header-cell",css`
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          user-select: none;
+          cursor: pointer;
+
+          &:hover .nb-danmaku-table__sort-indicator {
+            opacity: 0.55;
+          }
+        `),cE("sort-indicator",css`
+          width: 0;
+          height: 0;
+          border-left: 4px solid transparent;
+          border-right: 4px solid transparent;
+          border-top: 6px solid var(--n-text-color-3);
+          opacity: 0;
+          transition: transform 0.2s var(--n-cubic-bezier-ease-out), opacity 0.2s var(--n-cubic-bezier-ease-out),
+            border-top-color 0.2s var(--n-cubic-bezier-ease-out);
+        `,[cM("active",css`
+              opacity: 1 !important;
+              border-top-color: var(--n-text-color-1);
+            `),cM("desc",css`
+              transform: rotate(180deg);
+            `)]),cE("cell",css`
+          padding: 8px;
+          box-sizing: border-box;
+          border-right: 1px solid var(--n-border-color);
+          min-width: 0;
+        `),cE("body",css`
+          flex: 1;
+          min-height: 0;
+        `),cE("row",css`
+          display: flex;
+          border-bottom: 1px solid var(--n-border-color);
+          transition: background-color 0.2s var(--n-cubic-bezier-ease-out);
+          cursor: pointer;
+
+          &:hover {
+            background-color: var(--n-hover-color);
+          }
+        `,[cM("highlight",css`
+              background-color: var(--n-primary-color-highlight) !important;
+            `)]),cE("content-cell",css`
+          white-space: normal;
+          word-break: break-word;
+          overflow-wrap: anywhere;
+        `),cE("empty",css`
+          min-height: 140px;
+        `),cE("empty-wrap",css`
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `)])]);function mountStyle$1$1(){useTheme("nb-danmaku-table",style$1$1)}const _hoisted_1$1$1={class:"nb-danmaku-table__header"},_hoisted_2$1$1=["onClick"],_hoisted_3$4=["onClick"],_hoisted_4$4={class:"nb-danmaku-table__cell",style:{width:"70px"}},_hoisted_5={class:"nb-danmaku-table__cell nb-danmaku-table__content-cell",style:{flex:1}},_hoisted_6={key:1,class:"nb-danmaku-table__cell nb-danmaku-table__content-cell",style:{flex:1}},_hoisted_7={class:"nb-danmaku-table__cell",style:{width:"170px",borderRight:"none"}},_hoisted_8={key:1,class:"nb-danmaku-table__empty-wrap"},_sfc_main$1$1={__name:"DanmakuTable",props:{items:{type:Array,default:()=>[]},itemHeight:{type:Number,default:40},menuItems:{type:Array,default:()=>[]},to:{type:[String,Object],default:void 0}},emits:["row-click","sort-change"],setup(e,{expose:t,emit:n}){const r=e,o=n,a=vue.ref(null),s=vue.ref(null),i=vue.ref(new Set),v=vue.ref("progress"),f=vue.ref("asc"),y=[{key:"progress",label:"时间",style:{width:"70px"}},{key:"content",label:"弹幕内容",style:{flex:1}},{key:"ctime",label:"发送时间",style:{width:"170px",borderRight:"none"}}],g=vue.computed(()=>r.items.map((C,T)=>({__raw:C,...C,__index:T,__key:String(C?.idStr||C?.id||`${C?.ctime||0}-${C?.progress||0}-${T}`)}))),_=(C,T)=>String(C||"").localeCompare(String(T||""),"zh-Hans-CN"),k=vue.computed(()=>{const C=f.value==="asc"?1:-1;return[...g.value].sort((T,D)=>{let j=0;if(v.value==="content")j=_(T.content,D.content);else{const E=Number(T?.[v.value])||0,L=Number(D?.[v.value])||0;j=E-L}return j===0?T.__index-D.__index:j*C})}),u=vue.computed(()=>({key:v.value,order:f.value})),l=C=>v.value===C,m=C=>{if(v.value===C){f.value=f.value==="asc"?"desc":"asc";return}v.value=C,f.value="asc"},d=()=>({key:v.value,order:f.value});vue.watch(u,C=>{o("sort-change",{...C})},{immediate:!0});const h=vue.computed(()=>r.menuItems.length>0);let $=null;const b=(C,T=1500)=>{if($&&(clearTimeout($),$=null),!C&&C!==0){s.value=null;return}s.value=String(C),$=setTimeout(()=>{s.value=null,$=null},T)},M=(C,T)=>`${C}::${T}`,V=(C,T,D)=>C?.disabled?!0:i.value.has(M(T,D)),z=(C,T)=>typeof C?.getName=="function"?C.getName(T):C?.name||"操作",Y=(C,T)=>r.menuItems.map((D,j)=>({key:String(j),label:z(D,C),disabled:V(D,T,j)})),G=async(C,T,D,j)=>{if(!C||typeof C.onSelect!="function")return;const E=M(D,j);if(!i.value.has(E)){i.value.add(E);try{await C.onSelect(T)}finally{i.value.delete(E)}}},q=(C,T,D)=>{const j=Number(C);if(Number.isNaN(j))return;const E=r.menuItems[j];G(E,T,D,j)};t({scrollToRow:C=>{vue.nextTick(()=>{const T=Math.max(0,Number(C)||0),D=k.value.findIndex(j=>j.__index===T);D<0||(a.value?.scrollTo?.({index:Math.max(0,D-3),debounce:!0}),b(k.value[D]?.__key))})},scrollToId:C=>{vue.nextTick(()=>{if(C==null||C==="")return;const T=String(C);a.value?.scrollTo?.({key:T,debounce:!0}),b(T)})},getSortState:d}),vue.onBeforeUnmount(()=>{$&&(clearTimeout($),$=null)});const O=naiveUi.useThemeVars(),le=vue.computed(()=>({"--n-primary-color-highlight":changeColor(O.value.primaryColor,{alpha:Number(O.value.opacity5)}),"--n-border-color":O.value.borderColor,"--n-border-radius":O.value.borderRadius,"--n-table-header-color":O.value.tableHeaderColor,"--n-hover-color":O.value.hoverColor,"--n-text-color-1":O.value.textColor1,"--n-text-color-2":O.value.textColor2,"--n-text-color-3":O.value.textColor3,"--n-font-size":O.value.fontSize,"--n-font-weight-strong":O.value.fontWeightStrong,"--n-cubic-bezier-ease-out":O.value.cubicBezierEaseOut,"--n-item-height":toPx(r.itemHeight)}));return mountStyle$1$1(),(C,T)=>{const D=naiveUi.NDropdown,j=naiveUi.NEmpty;return vue.openBlock(),vue.createElementBlock("div",{class:"nb-danmaku-table",style:vue.normalizeStyle(vue.unref(le))},[vue.createElementVNode("div",_hoisted_1$1$1,[(vue.openBlock(),vue.createElementBlock(vue.Fragment,null,vue.renderList(y,E=>vue.createElementVNode("div",{key:E.key,class:"nb-danmaku-table__cell nb-danmaku-table__header-cell",style:vue.normalizeStyle(E.style),onClick:L=>m(E.key)},[vue.createElementVNode("span",null,vue.toDisplayString(E.label),1),vue.createElementVNode("span",{class:vue.normalizeClass(["nb-danmaku-table__sort-indicator",{"nb-danmaku-table__sort-indicator--active":l(E.key),"nb-danmaku-table__sort-indicator--desc":l(E.key)&&vue.unref(f)==="desc"}])},null,2)],12,_hoisted_2$1$1)),64))]),vue.unref(k).length?(vue.openBlock(),vue.createBlock(vue.unref(_sfc_main$3$1),{key:0,ref_key:"vListRef",ref:a,class:"nb-danmaku-table__body",items:vue.unref(k),"item-size":r.itemHeight,"key-field":"__key","item-resizable":""},{default:vue.withCtx(({item:E})=>[vue.createElementVNode("div",{class:vue.normalizeClass(["nb-danmaku-table__row",{"nb-danmaku-table__row--highlight":vue.unref(s)===E.__key}]),style:vue.normalizeStyle({minHeight:vue.unref(toPx)(r.itemHeight)}),onClick:L=>o("row-click",E.__raw)},[vue.createElementVNode("div",_hoisted_4$4,vue.toDisplayString(vue.unref(formatProgress$1)(E.progress??0)),1),vue.unref(h)?(vue.openBlock(),vue.createBlock(D,{key:0,trigger:"hover",placement:"bottom-end","show-arrow":!1,to:r.to,options:Y(E.__raw,E.__index),onSelect:L=>q(L,E.__raw,E.__index)},{default:vue.withCtx(()=>[vue.createElementVNode("div",_hoisted_5,vue.toDisplayString(E.content||""),1)]),_:2},1032,["to","options","onSelect"])):(vue.openBlock(),vue.createElementBlock("div",_hoisted_6,vue.toDisplayString(E.content||""),1)),vue.createElementVNode("div",_hoisted_7,vue.toDisplayString(vue.unref(formatTimestamp)(E.ctime)),1)],14,_hoisted_3$4)]),_:1},8,["items","item-size"])):(vue.openBlock(),vue.createElementBlock("div",_hoisted_8,[vue.createVNode(j,{class:"nb-danmaku-table__empty",description:"暂无弹幕"})]))],4)}}},style$8=c([cB("nb-user-card",css`
+      color: var(--n-text-color-1);
+      border: 1px solid var(--n-border-color);
+      border-radius: var(--n-border-radius);
+    `,[cE("header",css`
+          align-items: flex-start;
+
+          @media (max-width: 768px) {
+            flex-wrap: wrap;
+          }
+        `),cE("avatar-image",css`
+          flex: 0 0 auto;
+          border-radius: 50%;
+          overflow: hidden;
+        `),cE("info",css`
+          min-width: 0;
+          flex: 1;
+        `),cE("name",css`
+          font-size: var(--n-font-size-large);
+          font-weight: var(--n-font-weight-strong);
+          color: var(--n-text-color-1);
+        `),cE("sign",css`
+          display: block;
+          white-space: pre-wrap;
+        `),cE("desc",css`
+          font-size: var(--n-font-size-mini);
+          color: var(--n-text-color-3);
+        `),cE("label",css`
+          font-weight: var(--n-font-weight-strong);
+        `),cE("mid-link",css`
+          display: inline-flex;
+          vertical-align: baseline;
+        `),cE("clickable-tag",css`
+          cursor: pointer;
+          user-select: none;
+        `),cE("divider",css`
+          margin: 20px 0;
+        `)])]);function mountStyle$8(){useTheme("nb-user-card",style$8)}const _hoisted_1$e=["href"],_hoisted_2$6=["href"],_sfc_main$a=Object.assign({name:"UserCard"},{__name:"UserCard",props:{userCard:{type:Object,default:()=>({})},midHash:{type:String,default:""}},setup(e){const t=e,n={0:"无",1:"个人认证 - 知名UP主",2:"个人认证 - 大V达人",3:"机构认证 - 企业",4:"机构认证 - 组织",5:"机构认证 - 媒体",6:"机构认证 - 政府",7:"个人认证 - 高能主播",9:"个人认证 - 社会知名人士"},r=vue.computed(()=>t.userCard?.card||{}),o=vue.computed(()=>r.value?.face||""),a=vue.computed(()=>r.value?.mid||""),s=vue.computed(()=>a.value?`https://space.bilibili.com/${a.value}`:""),i=vue.computed(()=>{const k=r.value?.Official;return!k||Number(k.type)===-1?null:{typeText:n[k.role]||"未知认证",title:k.title||"（无标题）",desc:k.desc||""}}),v=vue.computed(()=>[{label:"关注数",value:r.value?.friend},{label:"粉丝数",value:t.userCard?.follower},{label:"获赞数",value:t.userCard?.like_num},{label:"稿件数",value:t.userCard?.archive_count}]),f=naiveUi.useMessage(),y=async k=>{if(k)try{await navigator.clipboard.writeText(String(k)),f.success("midHash 已复制")}catch{f.error("复制失败")}},g=naiveUi.useThemeVars(),_=vue.computed(()=>({"--n-primary-color-hover":g.value.primaryColorHover,"--n-border-color":g.value.borderColor,"--n-border-radius":g.value.borderRadius,"--n-divider-color":g.value.dividerColor,"--n-tag-color":g.value.tagColor,"--n-tag-text-color":g.value.textColor3,"--n-text-color-1":g.value.textColor1,"--n-text-color-2":g.value.textColor2,"--n-text-color-3":g.value.textColor3,"--n-font-size":g.value.fontSize,"--n-font-size-mini":g.value.fontSizeMini,"--n-font-size-large":g.value.fontSizeLarge,"--n-font-weight-strong":g.value.fontWeightStrong}));return mountStyle$8(),(k,u)=>{const l=naiveUi.NText,m=naiveUi.NTag,d=naiveUi.NFlex,h=naiveUi.NButton,$=naiveUi.NDivider,b=naiveUi.NStatistic,M=naiveUi.NGridItem,V=naiveUi.NGrid,z=naiveUi.NCard;return vue.openBlock(),vue.createBlock(z,{bordered:!0,class:"nb-user-card",style:vue.normalizeStyle(vue.unref(_))},{default:vue.withCtx(()=>[vue.createVNode(d,{size:20,wrap:!1,class:"nb-user-card__header"},{default:vue.withCtx(()=>[vue.unref(o)?(vue.openBlock(),vue.createBlock(vue.unref(_sfc_main$7$1),{key:0,src:vue.unref(o),size:"100",class:"nb-user-card__avatar-image",lazy:""},null,8,["src"])):vue.createCommentVNode("",!0),vue.createVNode(d,{vertical:"",size:10,class:"nb-user-card__info"},{default:vue.withCtx(()=>[vue.createVNode(d,{align:"center",size:8,wrap:!0},{default:vue.withCtx(()=>[vue.createVNode(l,{class:"nb-user-card__name"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(r)?.name||"未知用户"),1)]),_:1}),vue.unref(r)?.sex&&vue.unref(r).sex!=="保密"?(vue.openBlock(),vue.createBlock(m,{key:0,size:"small",type:"info"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(r).sex),1)]),_:1})):vue.createCommentVNode("",!0),vue.unref(r)?.level_info?(vue.openBlock(),vue.createBlock(m,{key:1,size:"small",type:"success"},{default:vue.withCtx(()=>[vue.createTextVNode(" LV"+vue.toDisplayString(vue.unref(r).level_info.current_level),1)]),_:1})):vue.createCommentVNode("",!0),vue.unref(r)?.vip?.vipStatus===1?(vue.openBlock(),vue.createBlock(m,{key:2,size:"small",type:"warning"},{default:vue.withCtx(()=>[...u[1]||(u[1]=[vue.createTextVNode("大会员",-1)])]),_:1})):vue.createCommentVNode("",!0)]),_:1}),vue.createVNode(l,{class:"nb-user-card__desc nb-user-card__sign"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(r)?.sign||"这位用户很神秘，什么都没写。"),1)]),_:1}),vue.createVNode(d,{align:"center",size:8,wrap:!0},{default:vue.withCtx(()=>[vue.createVNode(l,{class:"nb-user-card__label"},{default:vue.withCtx(()=>[...u[2]||(u[2]=[vue.createTextVNode("MID：",-1)])]),_:1}),vue.unref(s)?(vue.openBlock(),vue.createBlock(h,{key:0,text:"",tag:"a",href:vue.unref(s),target:"_blank",type:"primary",class:"nb-user-card__mid-link"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(a)),1)]),_:1},8,["href"])):(vue.openBlock(),vue.createBlock(l,{key:1},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(a)||"-"),1)]),_:1})),t.midHash?(vue.openBlock(),vue.createBlock(m,{key:2,size:"small",class:"nb-user-card__clickable-tag",title:"复制 midHash",onClick:u[0]||(u[0]=Y=>y(t.midHash))},{default:vue.withCtx(()=>[vue.createTextVNode(" Hash: "+vue.toDisplayString(t.midHash),1)]),_:1})):vue.createCommentVNode("",!0)]),_:1}),vue.unref(i)?(vue.openBlock(),vue.createBlock(d,{key:0,align:"center",size:8,wrap:!0},{default:vue.withCtx(()=>[vue.createVNode(l,{class:"nb-user-card__label"},{default:vue.withCtx(()=>[...u[3]||(u[3]=[vue.createTextVNode("认证：",-1)])]),_:1}),vue.createVNode(m,{size:"small",type:"info"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(i).typeText),1)]),_:1}),vue.createVNode(l,null,{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(i).title),1)]),_:1}),vue.unref(i).desc?(vue.openBlock(),vue.createBlock(l,{key:0,class:"nb-user-card__desc"},{default:vue.withCtx(()=>[vue.createTextVNode("（"+vue.toDisplayString(vue.unref(i).desc)+"）",1)]),_:1})):vue.createCommentVNode("",!0)]),_:1})):vue.createCommentVNode("",!0),vue.unref(r)?.nameplate?.name?(vue.openBlock(),vue.createBlock(d,{key:1,align:"center",size:8,wrap:!0},{default:vue.withCtx(()=>[vue.createVNode(l,{class:"nb-user-card__label"},{default:vue.withCtx(()=>[...u[4]||(u[4]=[vue.createTextVNode("勋章：",-1)])]),_:1}),vue.unref(r)?.nameplate?.image?(vue.openBlock(),vue.createElementBlock("a",{key:0,href:vue.unref(r).nameplate.image,target:"_blank",rel:"noopener noreferrer",title:"点击查看大图"},[vue.createVNode(m,{size:"small",type:"info",class:"nb-user-card__clickable-tag"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(r).nameplate.name),1)]),_:1})],8,_hoisted_1$e)):(vue.openBlock(),vue.createBlock(m,{key:1,size:"small",type:"info"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(r).nameplate.name),1)]),_:1})),vue.createVNode(l,{class:"nb-user-card__desc"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(r).nameplate.level)+" - "+vue.toDisplayString(vue.unref(r).nameplate.condition),1)]),_:1})]),_:1})):vue.createCommentVNode("",!0),vue.unref(r)?.pendant?.name&&vue.unref(r)?.pendant?.image?(vue.openBlock(),vue.createBlock(d,{key:2,align:"center",size:8,wrap:!0},{default:vue.withCtx(()=>[vue.createVNode(l,{class:"nb-user-card__label"},{default:vue.withCtx(()=>[...u[5]||(u[5]=[vue.createTextVNode("挂件：",-1)])]),_:1}),vue.createElementVNode("a",{href:vue.unref(r).pendant.image,target:"_blank",rel:"noopener noreferrer",title:"点击查看大图"},[vue.createVNode(m,{size:"small",type:"info",class:"nb-user-card__clickable-tag"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(r).pendant.name),1)]),_:1})],8,_hoisted_2$6)]),_:1})):vue.createCommentVNode("",!0)]),_:1})]),_:1}),vue.createVNode($,{class:"nb-user-card__divider"}),vue.createVNode(V,{cols:4,"x-gap":20,"y-gap":12,responsive:"screen"},{default:vue.withCtx(()=>[(vue.openBlock(!0),vue.createElementBlock(vue.Fragment,null,vue.renderList(vue.unref(v),Y=>(vue.openBlock(),vue.createBlock(M,{key:Y.label},{default:vue.withCtx(()=>[vue.createVNode(b,{label:Y.label,value:vue.unref(formatStatValue)(Y.value)},null,8,["label","value"])]),_:2},1024))),128))]),_:1})]),_:1},8,["style"])}}}),virtualListStyle=c$2(".v-vl",{maxHeight:"inherit",height:"100%",overflow:"auto",minWidth:"1px"},[c$2("&:not(.v-vl--show-scrollbar)",{scrollbarWidth:"none"},[c$2("&::-webkit-scrollbar, &::-webkit-scrollbar-track-piece, &::-webkit-scrollbar-thumb",{width:0,height:0,display:"none"})])]),binderStyle=c$2([c$2(".v-binder-follower-container",{position:"absolute",left:"0",right:"0",top:"0",height:"0",pointerEvents:"none",zIndex:"auto"}),c$2(".v-binder-follower-content",{position:"absolute",zIndex:"auto"},[c$2("> *",{pointerEvents:"all"})])]);let mountedDefault=!1;const mountedByParent=new WeakSet,mountOne=(e,t,n)=>{e.mount({id:t,head:!0,anchorMetaName:cssrAnchorMetaName$1,parent:n})};function mountVueucStyles(e){if(e&&typeof e=="object"){if(mountedByParent.has(e))return;mountOne(virtualListStyle,"vueuc/virtual-list",e),mountOne(binderStyle,"vueuc/binder",e),mountedByParent.add(e);return}mountedDefault||(mountOne(virtualListStyle,"vueuc/virtual-list"),mountOne(binderStyle,"vueuc/binder"),mountedDefault=!0)}const style$7=c$3([cB$2("bds-dm-loader-panel",css$1`
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    `,[cE$2("btn",css$1`
+          min-width: 150px;
+        `),cE$2("action-row",css$1`
+          padding: 2px 0;
+        `),cE$2("hint-btn",css$1`
+          width: 20px;
+          height: 20px;
+          font-size: 12px;
+        `),cE$2("range",css$1`
+          width: 280px;
+        `),cE$2("progress-row",css$1`
+          margin-top: 12px;
+        `),cE$2("progress",css$1`
+          width: 260px;
+        `)])]);function mountStyle$7(e){useTheme$1("bds-dm-loader-panel-style",style$7,e)}const _hoisted_1$6={class:"bds-dm-loader-panel"},_sfc_main$9={__name:"DmDataLoaderPanel",props:{arcMgr:{type:Object,default:null},dmMgr:{type:Object,default:null},to:{type:[String,Object],default:void 0}},emits:["sync-data","set-error","initial-load-finished"],setup(e,{emit:t}){const n=e,r=t,o=vue.inject("styleMountTarget",null);mountStyle$7(o);function a(N){const w=N.getFullYear(),U=String(N.getMonth()+1).padStart(2,"0"),R=String(N.getDate()).padStart(2,"0");return`${w}-${U}-${R}`}const s=vue.ref(!1),i=vue.ref(!0),v=a(new Date),f=vue.ref([v,v]),y=vue.ref(storage.get("dmLoader.autoLoadXml",!1)),g=vue.ref(storage.get("dmLoader.autoLoadPb",!0));let _=null;const k=naiveUi.useMessage(),u=[{label:"JSON",key:"json",children:[{label:"无缩进",key:"json:none"},{label:"缩进 2",key:"json:2"},{label:"缩进 4",key:"json:4"}]}],l=vue.reactive({visible:!1,current:0,total:0,text:"",detail:"",addedDm:0,scannedDays:0,startTs:0}),m=N=>{const w=Number(N);return!Number.isFinite(w)||w<=0?null:w>1e12?w:w*1e3},d=N=>{const w=new Date(N);return w.setHours(0,0,0,0),w.getTime()},h=vue.computed(()=>{const N=m(n.arcMgr?.info?.pubtime);return N?d(N):null}),$=()=>d(Date.now()),b=vue.ref(0),M=vue.ref(0),V=vue.computed(()=>b.value+M.value),z=()=>{b.value=Number(n.dmMgr?.errors?.segments?.length)||0,M.value=Number(n.dmMgr?.errors?.dates?.length)||0},Y=(N,w)=>!Array.isArray(N)||!Array.isArray(w)?!1:N[0]===w[0]&&N[1]===w[1],G=N=>{const w=d(N);return w>$()||h.value!=null&&w<h.value},q=(N=f.value)=>{const w=a(new Date),U=h.value!=null?a(new Date(h.value)):"";let[R,H]=N||[];R||(R=U||w),H||(H=w),U&&R<U&&(R=U),U&&H<U&&(H=U),R>w&&(R=w),H>w&&(H=w),R>H&&(R=H);const Q=[R,H];Y(f.value,Q)||(f.value=Q)},A=()=>{const N=a(new Date),w=h.value!=null?a(new Date(h.value)):"";f.value=[w||N,N]},Z=N=>{f.value=Array.isArray(N)?N:["",""],q(f.value)},O=()=>{l.visible=!1,l.current=0,l.total=0,l.text="",l.detail="",l.addedDm=0,l.scannedDays=0,l.startTs=0},le=()=>{l.visible=!0,l.current=0,l.total=0,l.text="准备中...",l.detail="",l.addedDm=0,l.scannedDays=0,l.startTs=Date.now()},C=(N,w,U,R)=>{l.current=Number(N)||0,l.total=Number(w)||0;const H=String(U||"-"),Q=Number(R)||0,oe=Math.max(1,Math.floor((Date.now()-l.startTs)/1e3));if(H.startsWith("扫描月份:")){l.scannedDays+=Math.max(0,Q),l.text=`扫描历史日期 ${l.current}/${l.total}`,l.detail=`${H} | 本月发现 ${Q} 天 | 累计 ${l.scannedDays} 天`;return}Q>0&&(l.addedDm+=Q);const ee=Math.round(l.addedDm/oe);l.text=`拉取弹幕 ${l.current}/${l.total}`,l.detail=`${H} | 当前 +${Q} | 累计 +${l.addedDm} | ${ee}/s`},T=async N=>{if(n.dmMgr){s.value=!0,r("set-error","");try{return await N(),!0}catch(w){const U=String(w?.message||w);return r("set-error",U),k.error(U||"载入失败"),!1}finally{s.value=!1}}},D=()=>{const N=n.dmMgr?.data?.danmaku_list||[],w=n.dmMgr?.data?.danmaku_view?.commandDms||[];r("sync-data",{list:N,commandDms:w}),z()},j=async()=>{if(!n.dmMgr)return;let N=0;if(!await T(async()=>{if(O(),N=Number(await n.dmMgr.getDmXml())||0,N<0)throw new Error("XML 载入失败，请检查稿件信息");D()}))return;const U=Math.max(0,N);k.success(`XML 载入完成，新增 ${U.toLocaleString()} 条`)},E=async()=>{if(!n.dmMgr)return;let N=0;if(!await T(async()=>{if(le(),N=Number(await n.dmMgr.getDmPb(C))||0,N<0)throw new Error("ProtoBuf 载入失败，请检查稿件信息");D(),O()}))return;const U=Math.max(0,N);k.success(`ProtoBuf 载入完成，新增 ${U.toLocaleString()} 条`)},L=async()=>{if(!n.dmMgr)return;const[N,w]=f.value||[];if(!N||!w){r("set-error","请先选择起始与结束日期");return}if(!/^\d{4}-\d{2}-\d{2}$/.test(N)||!/^\d{4}-\d{2}-\d{2}$/.test(w)){r("set-error","日期格式错误，应为 YYYY-MM-DD");return}if(N>w){r("set-error","起始日期不能晚于结束日期");return}let U=0;if(!await T(async()=>{if(le(),U=Number(await n.dmMgr.getDmPbHisRange({start:N,end:w},C))||0,U<0)throw new Error("历史区间载入失败，请检查稿件信息");D(),O()}))return;const H=Math.max(0,U);k.success(`历史区间载入完成，新增 ${H.toLocaleString()} 条`)},J=async()=>{if(!n.dmMgr)return;if(!V.value){r("set-error","当前没有可重试的错误片段");return}await T(async()=>{le(),await n.dmMgr.retryErrors(C),D(),O()})&&k.success("重试完成")},de=()=>{n.dmMgr&&(n.dmMgr.clearData(),D(),r("set-error",""),k.success("已清除弹幕列表"))},ce=(N=2)=>{if(!n.dmMgr||!n.arcMgr)return;const w={...n.dmMgr.data||{},...n.arcMgr.data||{}},U=n.arcMgr?.info?.id?.replace(/[\\/:*?"<>|]/g,"_")||"bds-data",R=N==="none"?void 0:Number(N)||2,H=N==="none"?JSON.stringify(w):JSON.stringify(w,null,R),Q=new Blob([H],{type:"application/json"}),oe=URL.createObjectURL(Q),ee=document.createElement("a");ee.href=oe,ee.download=`${U}.json`,document.body.appendChild(ee),ee.click(),document.body.removeChild(ee),URL.revokeObjectURL(oe)},ne=N=>{if(N==="json:none"){ce("none");return}if(N==="json:4"){ce(4);return}N==="json:2"&&ce(2)},me=vue.computed(()=>{const N=Number(l.total||0),w=Number(l.current||0);return N<=0?0:Math.max(0,Math.min(100,Math.floor(w/N*100)))});return vue.onMounted(async()=>{A(),q(),z(),D(),n.dmMgr&&_!==n.dmMgr&&(_=n.dmMgr,y.value&&await j(),g.value&&await E()),r("initial-load-finished")}),vue.watch(y,N=>{storage.set("dmLoader.autoLoadXml",!!N)}),vue.watch(g,N=>{storage.set("dmLoader.autoLoadPb",!!N)}),vue.onBeforeUnmount(()=>{O()}),vue.watch(()=>n.dmMgr,()=>{z()},{immediate:!0}),(N,w)=>{const U=naiveUi.NAlert,R=naiveUi.NButton,H=naiveUi.NCheckbox,Q=naiveUi.NIcon,oe=naiveUi.NTooltip,ee=naiveUi.NFlex,_e=naiveUi.NDatePicker,we=naiveUi.NDropdown,fe=naiveUi.NButtonGroup,pe=naiveUi.NTag,xe=naiveUi.NProgress,te=naiveUi.NText;return vue.openBlock(),vue.createElementBlock("div",_hoisted_1$6,[vue.unref(i)?(vue.openBlock(),vue.createBlock(U,{key:0,type:"warning",closable:"",style:{"margin-bottom":"12px"},onClose:w[0]||(w[0]=ge=>i.value=!1)},{default:vue.withCtx(()=>[...w[4]||(w[4]=[vue.createTextVNode(" 请勿短时间频繁载入，避免触发 B 站风控 ",-1)])]),_:1})):vue.createCommentVNode("",!0),vue.createVNode(ee,{size:12,align:"center",wrap:"",class:"bds-dm-loader-panel__action-row"},{default:vue.withCtx(()=>[vue.createVNode(R,{class:"bds-dm-loader-panel__btn",type:"primary",size:"small",loading:vue.unref(s),onClick:j},{default:vue.withCtx(()=>[...w[5]||(w[5]=[vue.createTextVNode(" 载入 XML 实时弹幕 ",-1)])]),_:1},8,["loading"]),vue.createVNode(H,{checked:vue.unref(y),"onUpdate:checked":w[1]||(w[1]=ge=>vue.isRef(y)?y.value=ge:null),size:"small"},{default:vue.withCtx(()=>[...w[6]||(w[6]=[vue.createTextVNode(" 自动载入 ",-1)])]),_:1},8,["checked"]),vue.createVNode(oe,{trigger:"hover",placement:"top",to:e.to},{trigger:vue.withCtx(()=>[vue.createVNode(R,{size:"tiny",quaternary:"",circle:"",class:"bds-dm-loader-panel__hint-btn"},{default:vue.withCtx(()=>[vue.createVNode(Q,{component:vue.unref(InfoCircle)},null,8,["component"])]),_:1})]),default:vue.withCtx(()=>[w[7]||(w[7]=vue.createTextVNode(" 实时弹幕池容量有限，通常是更近期的弹幕。 ",-1))]),_:1},8,["to"])]),_:1}),vue.createVNode(ee,{size:12,align:"center",wrap:"",class:"bds-dm-loader-panel__action-row"},{default:vue.withCtx(()=>[vue.createVNode(R,{class:"bds-dm-loader-panel__btn",type:"primary",size:"small",loading:vue.unref(s),onClick:E},{default:vue.withCtx(()=>[...w[8]||(w[8]=[vue.createTextVNode(" 载入 ProtoBuf 弹幕 ",-1)])]),_:1},8,["loading"]),vue.createVNode(H,{checked:vue.unref(g),"onUpdate:checked":w[2]||(w[2]=ge=>vue.isRef(g)?g.value=ge:null),size:"small"},{default:vue.withCtx(()=>[...w[9]||(w[9]=[vue.createTextVNode(" 自动载入 ",-1)])]),_:1},8,["checked"]),vue.createVNode(oe,{trigger:"hover",placement:"top",to:e.to},{trigger:vue.withCtx(()=>[vue.createVNode(R,{size:"tiny",quaternary:"",circle:"",class:"bds-dm-loader-panel__hint-btn"},{default:vue.withCtx(()=>[vue.createVNode(Q,{component:vue.unref(InfoCircle)},null,8,["component"])]),_:1})]),default:vue.withCtx(()=>[w[10]||(w[10]=vue.createTextVNode(" 二进制分片数据，B站当前使用的数据，通常覆盖更全。 ",-1))]),_:1},8,["to"])]),_:1}),vue.createVNode(ee,{size:12,align:"center",wrap:"",class:"bds-dm-loader-panel__action-row"},{default:vue.withCtx(()=>[vue.createVNode(_e,{"formatted-value":vue.unref(f),type:"daterange",size:"small","value-format":"yyyy-MM-dd","is-date-disabled":G,to:e.to,clearable:!1,class:"bds-dm-loader-panel__range","onUpdate:formattedValue":Z},null,8,["formatted-value","to"]),vue.createVNode(R,{class:"bds-dm-loader-panel__btn",type:"primary",size:"small",loading:vue.unref(s),onClick:L},{default:vue.withCtx(()=>[...w[11]||(w[11]=[vue.createTextVNode(" 载入区间历史弹幕 ",-1)])]),_:1},8,["loading"])]),_:1}),vue.createVNode(ee,{size:12,align:"center",wrap:""},{default:vue.withCtx(()=>[vue.createVNode(R,{size:"small",type:"error",onClick:de},{default:vue.withCtx(()=>[...w[12]||(w[12]=[vue.createTextVNode("清除弹幕",-1)])]),_:1}),vue.createVNode(fe,null,{default:vue.withCtx(()=>[vue.createVNode(R,{size:"small",type:"success",onClick:w[3]||(w[3]=ge=>ce("none"))},{default:vue.withCtx(()=>[...w[13]||(w[13]=[vue.createTextVNode("下载数据",-1)])]),_:1}),vue.createVNode(we,{trigger:"click",options:u,placement:"bottom-end",to:e.to,onSelect:ne},{default:vue.withCtx(()=>[vue.createVNode(R,{size:"small",type:"success","aria-label":"下载选项"},{default:vue.withCtx(()=>[...w[14]||(w[14]=[vue.createTextVNode(" ▼ ",-1)])]),_:1})]),_:1},8,["to"])]),_:1}),vue.unref(V)?(vue.openBlock(),vue.createBlock(R,{key:0,size:"small",type:"warning",loading:vue.unref(s),onClick:J},{default:vue.withCtx(()=>[...w[15]||(w[15]=[vue.createTextVNode(" 重试错误 ",-1)])]),_:1},8,["loading"])):vue.createCommentVNode("",!0),vue.unref(V)?(vue.openBlock(),vue.createBlock(pe,{key:1,size:"small",type:"warning"},{default:vue.withCtx(()=>[vue.createTextVNode(" 待重试 日期 "+vue.toDisplayString(vue.unref(M))+" / 片段 "+vue.toDisplayString(vue.unref(b)),1)]),_:1})):vue.createCommentVNode("",!0)]),_:1}),vue.createVNode(ee,{align:"center",size:12,wrap:"",class:"bds-dm-loader-panel__progress-row"},{default:vue.withCtx(()=>[vue.unref(l).visible?(vue.openBlock(),vue.createBlock(xe,{key:0,type:"line",percentage:vue.unref(me),"show-indicator":!0,class:"bds-dm-loader-panel__progress"},null,8,["percentage"])):vue.createCommentVNode("",!0),vue.unref(l).visible?(vue.openBlock(),vue.createBlock(te,{key:1,depth:"2"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(l).text),1)]),_:1})):vue.createCommentVNode("",!0),vue.unref(l).visible&&vue.unref(l).detail?(vue.openBlock(),vue.createBlock(te,{key:2,depth:"3"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(l).detail),1)]),_:1})):vue.createCommentVNode("",!0)]),_:1})])}}},style$6=c$3([cB$2("bds-dm-chart-manager",css$1`
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+      height: 100%;
+      max-height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-gutter: stable;
+    `,[cE$2("body",css$1`
+          position: relative;
+          flex: 1;
+          min-height: 0;
+          min-width: 0;
+        `),cE$2("empty",css$1`
+          min-height: 220px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `),cE$2("item",css$1`
+          position: relative;
+          height: var(--item-height, 50%);
+          min-height: 320px;
+        `),cE$2("actions",css$1`
+          position: absolute;
+          top: 8px;
+          right: 10px;
+          display: flex;
+          direction: rtl;
+          align-items: center;
+          gap: 3px;
+          opacity: 1;
+          z-index: 10;
+          transition: opacity 0.2s;
+        `),cE$2("action-btn",css$1`
+          width: 24px;
+          height: 24px;
+          border-radius: 999px;
+          border: none;
+          outline: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: rgba(128, 128, 128, 0.45);
+          color: #fff;
+          font-weight: bold;
+          font-size: 12px;
+          cursor: pointer;
+
+          &:hover {
+            background-color: rgba(90, 90, 90, 0.75);
+          }
+
+          &:disabled {
+            cursor: not-allowed;
+            opacity: 0.35;
+          }
+        `),cE$2("chart",css$1`
+          width: 100%;
+          height: 100%;
+        `)])]);function mountStyle$6(e){useTheme$1("bds-dm-chart-manager-style",style$6,e)}const userChart={key:"user",title:"用户弹幕统计",expandedH:!1,actions:[{key:"locate-user",icon:"⚲",title:"定位用户",method:"locate"}],selection:{source:"chart:user",template:"用户 {value}",wrapTag:!1,formatValue(e){const t=String(e||"").trim();if(!t)return"-";const n=this.ctx.ui?.NButton;return n?this.ctx.h(n,{text:!0,onClick:r=>{r?.stopPropagation?.(),this.ctx.queryMidHash?.(t)}},{default:()=>t}):t},predicate:(e,t)=>String(e?.midHash||"")===String(t||"")},isValidMidHash(e){return/^[0-9a-f]+$/i.test(String(e||"").trim())},getMenuItems(){return[{getName:e=>`发送者：${e?.midHash||"-"}`,onSelect:e=>{const t=String(e?.midHash||"").trim();if(!t)return;const n=this.ctx.element;n?.scrollIntoView&&n.scrollIntoView({behavior:"smooth",block:"center"}),this.locateInChart(t)}}]},locate(){const e=this.ctx.ui?.NInput,t=this.ctx.feedback;if(!e||!t?.dialog){const r=window.prompt("请输入要定位的 midHash：","");if(!r)return;this.locateInChart(String(r).trim());return}let n="";t.dialog.create({title:"定位用户",positiveText:"定位",negativeText:"取消",content:()=>this.ctx.h(e,{defaultValue:n,placeholder:"请输入 midHash（十六进制）",autofocus:!0,onUpdateValue:r=>{n=String(r||"")},onKeyup:r=>{r?.key==="Enter"&&r?.stopPropagation?.()}}),onPositiveClick:()=>{const r=String(n||"").trim();return this.isValidMidHash(r)?(this.locateInChart(r),!0):(t.message?.error?.("请输入正确的 midHash（十六进制格式）"),!1)}})},locateInChart(e){if(!this.instance||!e)return;const t=this.ctx.feedback,r=this.instance.getOption()?.yAxis?.[0]?.data||[],o=r.indexOf(e);if(o<0){t?.dialog?t.dialog.warning({title:"定位失败",content:`未在当前图表中找到用户 ${e}`,positiveText:"知道了"}):t?.message?.warning?.(`未在当前图表中找到用户 ${e}`);return}const a=this.expandedH?20:8,s=Math.min(r.length-a,Math.max(0,o-3)),i=Math.min(r.length-1,s+a-1);this.instance.setOption({yAxis:{axisLabel:{formatter:v=>v===e?`{highlight|${v}}`:v,rich:{highlight:{color:"#2080f0",fontWeight:"bold"}}}},dataZoom:[{startValue:s,endValue:i}]}),t?.message?.success?.(`已定位到用户 ${e}`)},render(){const e=this.ctx.items||[],t={};for(const i of e){const v=String(i?.midHash||"-");t[v]=(t[v]||0)+1}const n=Object.entries(t).map(([i,v])=>({user:i,count:v})).sort((i,v)=>v.count-i.count),r=n.map(i=>i.user),o=n.map(i=>i.count),a=Math.max(1,...o),s=this.expandedH?20:8;this.instance.setOption({title:{text:"用户弹幕统计",subtext:`共 ${r.length} 位用户`},tooltip:{},grid:{left:100},xAxis:{type:"value",min:0,max:Math.ceil(a*1.1),scale:!1},yAxis:{type:"category",data:r,inverse:!0},dataZoom:[{type:"slider",yAxisIndex:0,startValue:0,endValue:r.length>=s?s-1:r.length,width:20}],series:[{type:"bar",data:o,label:{show:!0,position:"right",formatter:"{c}",fontSize:12}}]})}},wordcloudChart={key:"wordcloud",title:"弹幕词云",expandedH:!1,segmentMode:"simple",minLen:2,topN:1e3,actions:[{key:"toggle-segment",icon:"📝",title:"切换分词模式",method:"toggleSegmentMode"}],selection:{source:"chart:wordcloud",template:"包含词语 {value}",predicate:(e,t)=>{const n=String(e?.content||"").toLowerCase(),r=String(t||"").toLowerCase();return!!r&&n.includes(r)}},getModeLabel(){return this.segmentMode==="jieba"?"jieba":"普通"},toggleSegmentMode(){this.instance?.clear?.(),this.segmentMode=this.segmentMode==="jieba"?"simple":"jieba",this.ctx.feedback?.message?.success?.(`已切换到${this.getModeLabel()}分词`),this.ctx.rerender?.()},async render(){const e=this.ctx.items||[],t=this.segmentMode==="jieba"?"jieba":"simple",n=String(this.ctx.arcMgr?.info?.id||"").trim();let r=[];const o=this.ctx.segmentWords;typeof o!="function"?this.ctx.feedback?.message?.error?.("分词服务不可用"):r=await o({mode:t,items:e,minLen:this.minLen,topN:this.topN,archiveId:n}),this.instance?.setOption({title:{text:this.segmentMode==="jieba"?"弹幕词云[jieba分词]":"弹幕词云"},tooltip:{},series:[{type:"wordCloud",gridSize:8,sizeRange:[12,40],rotationRange:[0,0],shape:"circle",data:Array.isArray(r)?r:[]}]})}},toDateString=e=>{const t=new Date(e),n=t.getFullYear(),r=String(t.getMonth()+1).padStart(2,"0"),o=String(t.getDate()).padStart(2,"0");return`${n}-${r}-${o}`},formatProgress=e=>{const t=Math.max(0,Math.floor(Number(e||0)/1e3)),n=Math.floor(t/3600),r=String(Math.floor(t%3600/60)).padStart(2,"0"),o=String(t%60).padStart(2,"0");return n>0?`${n}:${r}:${o}`:`${r}:${o}`},parseProgressToSec=e=>{const t=String(e||"").trim();if(!t)return null;const n=t.match(/^(\d{1,2})[:：](\d{2})(?:[:：](\d{2}))?$/);if(!n)return null;const r=Number(n[1]),o=Number(n[2]),a=n[3]==null?null:Number(n[3]);return!Number.isInteger(r)||!Number.isInteger(o)||a!=null&&!Number.isInteger(a)||o>59||a!=null&&a>59?null:a==null?r*60+o:r*3600+o*60+a},parseRangeValue=e=>{const t=/^(\d+)-(\d+)$/.exec(String(e||""));if(!t)return null;const n=Number(t[1]),r=Number(t[2]);return!Number.isFinite(n)||!Number.isFinite(r)?null:{start:n,end:r}},modeLabelMap={1:"普通弹幕",2:"普通弹幕",3:"普通弹幕",4:"底部弹幕",5:"顶部弹幕",6:"逆向弹幕",7:"高级弹幕",8:"代码弹幕",9:"BAS弹幕"},poolLabelMap={0:"普通池",1:"字幕池",2:"特殊池",3:"互动池"},densityChart={key:"density",title:"弹幕密度分布",refresh:!0,labelText:"",labelPosition:"end",rangeSelectionSec:null,_labelMarks:[],actions:[{key:"set-label",icon:"📌",title:"添加标记",method:"setLabel"},{key:"range-filter",icon:"▭",title:"范围筛选",method:"openRangeFilterDialog"}],applyLabelText(e){this.labelText=String(e||"");const t=/(\d{1,2}[:：]\d{2}(?:[:：]\d{2})?)/,n=[];for(const r of this.labelText.split(`
+`)){const o=String(r||"").trim();if(!o)continue;const a=o.match(t);if(!a)continue;const s=parseProgressToSec(a[1]);if(!Number.isFinite(s))continue;const i=o.replace(a[1],"").trim()||o;n.push({name:i,xAxis:s})}this._labelMarks=n,this.ctx.rerender?.()},setLabel(){const e=this.ctx.ui?.NInput,t=this.ctx.ui?.NText,n=this.ctx.ui?.NRadioGroup,r=this.ctx.ui?.NRadioButton,o=this.ctx.feedback;if(!e||!t||!n||!r||!o?.dialog){const i=window.prompt("请输入标记（每行一个，格式 mm:ss 文本）",this.labelText||"");if(i==null)return;this.applyLabelText(i);return}let a=String(this.labelText||""),s=String(this.labelPosition||"end");o.dialog.create({title:"添加标记",positiveText:"应用",negativeText:"取消",content:()=>this.ctx.h("div",[this.ctx.h(t,{type:"info"},{default:()=>"请输入标记时间和文本"}),this.ctx.h(e,{type:"textarea",rows:8,defaultValue:a,placeholder:`6:06 示例
+12:12 示例2`,autofocus:!0,style:"margin: 12px 0px;",onUpdateValue:i=>{a=String(i||"")}}),this.ctx.h("div",[this.ctx.h(t,{type:"info"},{default:()=>"标记位置："}),this.ctx.h(n,{value:s,size:"small",style:"margin-left: 8px; vertical-align: top;",onUpdateValue:i=>{s=String(i||"end")}},{default:()=>[this.ctx.h(r,{value:"end"},{default:()=>"顶端"}),this.ctx.h(r,{value:"insideEnd"},{default:()=>"内部"})]})])]),onPositiveClick:()=>(this.labelPosition=s==="insideEnd"?"insideEnd":"end",this.applyLabelText(a),!0)})},getDurationSec(){const e=this.ctx.items||[],t=Math.max(0,...e.map(r=>Number(r?.progress||0))),n=Number(this.ctx.arcMgr?.info?.duration||0);return n>0?Math.max(1,Math.ceil(n)):Math.max(1,Math.ceil(t/1e3))},normalizeRangeSec(e,t){const n=[0,t];if(!Array.isArray(e)||e.length<2)return n;const r=Math.max(0,Math.min(t,Math.floor(Number(e[0])||0))),o=Math.max(0,Math.min(t,Math.floor(Number(e[1])||0)));return r<=o?[r,o]:[o,r]},openRangeFilterDialog(){const e=this.ctx.ui?.NSlider,t=this.ctx.ui?.NInput,n=this.ctx.feedback,r=this.getDurationSec(),o=this.normalizeRangeSec(this.rangeSelectionSec,r),a=l=>formatProgress(Number(l||0)*1e3);if(!e||!t||!n?.dialog){const l=window.prompt("请输入范围（秒），格式：start,end",`${o[0]},${o[1]}`);if(!l)return;const m=String(l).split(",").map($=>Number($.trim()));if(m.length<2||!Number.isFinite(m[0])||!Number.isFinite(m[1]))return;const[d,h]=this.normalizeRangeSec(m,r);this.rangeSelectionSec=[d,h],this.applyRangeFilter(d*1e3,h*1e3),this.ctx.rerender?.();return}const s=vue.ref([...o]),i=vue.ref(a(o[0])),v=vue.ref(a(o[1])),f=vue.ref(!1),y=vue.ref(!1),g=(l=!1)=>{(l||!f.value)&&(i.value=a(s.value[0])),(l||!y.value)&&(v.value=a(s.value[1]))},_=(l,m)=>{const d=parseProgressToSec(m);if(!Number.isFinite(d))return;const h=l==="start"?[d,s.value[1]]:[s.value[0],d];s.value=this.normalizeRangeSec(h,r),g()},k=l=>{l==="start"?f.value=!1:y.value=!1;const m=l==="start"?i.value:v.value,d=parseProgressToSec(m);if(!Number.isFinite(d))return;const h=l==="start"?[d,s.value[1]]:[s.value[0],d];s.value=this.normalizeRangeSec(h,r),g(!0)},u=vue.defineComponent({name:"DensityRangeFilterDialogContent",setup:()=>()=>this.ctx.h("div",[this.ctx.h("div",{style:"display: flex; align-items: center; gap: 8px;"},[this.ctx.h(t,{value:i.value,placeholder:"mm:ss 或 hh:mm:ss",onFocus:()=>{f.value=!0},onBlur:()=>{k("start")},onUpdateValue:l=>{i.value=String(l||""),_("start",i.value)}}),this.ctx.h("span",{style:"color: var(--n-text-color-3);"},"~"),this.ctx.h(t,{value:v.value,placeholder:"mm:ss 或 hh:mm:ss",onFocus:()=>{y.value=!0},onBlur:()=>{k("end")},onUpdateValue:l=>{v.value=String(l||""),_("end",v.value)}})]),this.ctx.h(e,{style:"margin-top: 10px;",range:!0,step:1,min:0,max:r,value:s.value,formatTooltip:l=>a(l),onUpdateValue:l=>{!Array.isArray(l)||l.length<2||(s.value=this.normalizeRangeSec(l,r),g())}})])});n.dialog.create({title:"范围筛选",positiveText:"筛选",negativeText:"取消",content:()=>this.ctx.h(u),onPositiveClick:()=>{const l=parseProgressToSec(i.value),m=parseProgressToSec(v.value);if(!Number.isFinite(l)||!Number.isFinite(m))return n.message?.error?.("请输入正确时间格式（mm:ss 或 hh:mm:ss）"),!1;const[d,h]=this.normalizeRangeSec([l,m],r);return this.rangeSelectionSec=[d,h],this.applyRangeFilter(d*1e3,h*1e3),this.ctx.rerender?.(),!0}})},applyRangeFilter(e,t){const n=Math.min(e,t),r=Math.max(e,t),o=`${n}-${r}`;this.ctx.stageFilter({source:"chart:density",value:o,template:"时间段 {value}",formatValue:a=>{const s=parseRangeValue(a);return s?`${formatProgress(s.start)} ~ ${formatProgress(s.end)}`:String(a||"")},predicate:(a,s)=>{const i=parseRangeValue(s);if(!i)return!1;const v=Number(a?.progress||0);return v>=i.start&&v<=i.end}})},onClick({params:e}){const t=Number(e?.value?.[0]);if(!Number.isFinite(t))return;const n=this.ctx.tableRef?.value;if(!n||typeof n.scrollToRow!="function")return;const r=n.getSortState?.();if(!r||r.key!=="progress"){this.ctx.feedback?.message?.warning?.("请先按时间排序后再定位");return}const o=this.ctx.tableItems||[];if(!Array.isArray(o)||!o.length)return;const a=t*1e3,s=o.reduce((i,v,f)=>{const y=Math.abs(Number(v?.progress||0)-a),g=Math.abs(Number(o[i]?.progress||0)-a);return y<g?f:i},0);n.scrollToRow(s)},render(){const e=this.ctx.items||[],t=Math.max(6e4,...e.map(l=>Number(l?.progress||0))),n=Number(this.ctx.arcMgr?.info?.duration||0),r=n>0?n*1e3:Math.max(6e4,t),o=[1,2,3,4,5,6,10,15,20,30];let a;if(n>0){let l=n/60,m=1e3;for(;l>45;)l/=60,m*=60;const d=o.reduce((h,$)=>Math.abs($-l)<Math.abs(h-l)?$:h);a=m*d}else a=Math.max(1e3,Math.ceil(r/90/1e3)*1e3);const s=Math.max(1,Math.ceil(r/a));this._intervalMs=a;const i=new Array(s).fill(0);for(const l of e){const m=Number(l?.progress||0),d=Math.min(s-1,Math.max(0,Math.floor(m/a)));i[d]+=1}const v=i.map((l,m)=>[Math.floor(m*a/1e3),l]),f=[];for(const l of this._labelMarks||[])f.push(l);const g=(this.ctx.stagedFilter||null)?.source==="chart:density",_=this.normalizeRangeSec(this.rangeSelectionSec,Math.ceil(r/1e3)),u=g&&Array.isArray(this.rangeSelectionSec)&&this.rangeSelectionSec.length>=2?[[{xAxis:_[0]},{xAxis:_[1]}]]:[];this.instance.setOption({title:{text:"弹幕密度分布"},tooltip:{trigger:"axis",formatter:l=>{const m=l?.[0];if(!m)return"";const d=Number(Array.isArray(m.value)?m.value[0]:m.axisValue||0),h=Number(Array.isArray(m.value)?m.value[1]:m.value||0);return`时间段：${formatProgress(d*1e3)}<br/>弹幕数：${h}`}},xAxis:{type:"value",name:"时间",min:0,max:Math.ceil(r/1e3),axisLabel:{formatter:l=>formatProgress(Number(l)*1e3)}},yAxis:{type:"value",name:"弹幕数量"},series:[{type:"line",smooth:!0,areaStyle:{},data:v,markLine:f.length?{silent:!0,animation:!1,symbol:"none",data:f,label:{position:this.labelPosition||"end",formatter:"{b}"}}:null,markArea:u.length?{silent:!0,itemStyle:{color:"rgba(255, 100, 100, 0.2)"},data:u}:null}]})}},dateChart={key:"date",title:"发送日期分布",render(){const e=this.ctx.items||[],t={};for(const v of e){const f=toDateString(Number(v?.ctime||0)*1e3);t[f]=(t[f]||0)+1}const n=Object.entries(t).sort((v,f)=>String(v[0]).localeCompare(String(f[0]))),r=n.map(([v])=>v),o=n.map(([,v])=>v),a=r.length,s=Math.max(0,a-30),i=a>1;this.instance.setOption({title:{text:"发送日期分布"},tooltip:{},xAxis:{type:"category",data:r},yAxis:{type:"value",name:"弹幕数量"},dataZoom:i?[{type:"slider",startValue:s,endValue:Math.max(0,a-1),xAxisIndex:0,height:20}]:[],series:[{type:"bar",data:r.map((v,f)=>({value:o[f],__selectionValue:v})),label:{show:!0,position:"top"}}]})},selection:{source:"chart:date",template:"日期 {value}",getValue:e=>e?.data?.__selectionValue??e?.name,predicate:(e,t)=>toDateString(Number(e?.ctime||0)*1e3)===String(t||"")}},hourChart={key:"hour",title:"发送时间分布",render(){const e=this.ctx.items||[],t=new Array(24).fill(0);for(const n of e){const r=new Date(Number(n?.ctime||0)*1e3).getHours();t[r]+=1}this.instance.setOption({title:{text:"发送时间分布"},tooltip:{},xAxis:{type:"category",data:t.map((n,r)=>`${r}时`)},yAxis:{type:"value",name:"弹幕数量"},series:[{type:"bar",data:t.map((n,r)=>({value:n,__selectionValue:r})),label:{show:!0,position:"top"}}]})},selection:{source:"chart:hour",template:"每天 {value} 点",getValue:e=>e?.data?.__selectionValue??Number.parseInt(e?.name,10),predicate:(e,t)=>new Date(Number(e?.ctime||0)*1e3).getHours()===Number(t)}},poolChart={key:"pool",title:"弹幕池分布",getLabel(e){const t=Number(e);return Number.isFinite(t)?`${t}-${poolLabelMap[t]??"未知池"}`:"_-未知池"},getMenuItems(){return[{getName:e=>`弹幕池：${this.getLabel(e?.pool)}`}]},selection:{source:"chart:pool",template:"弹幕池 {value}",formatValue:e=>`${e}`,getValue:e=>e?.data?.__selectionValue??e?.name,predicate:(e,t)=>{const n=Number(e?.pool),r=Number(t);return Number.isFinite(r)?n===r:!Number.isFinite(n)}},render(){const e=this.ctx.items||[],t={};for(const a of e){const s=Number(a?.pool),i=Number.isFinite(s)?s:"_";t[i]=(t[i]||0)+1}const n=Object.keys(t).sort((a,s)=>a==="_"?1:s==="_"?-1:Number(a)-Number(s)),r=n.map(a=>this.getLabel(a)),o=n.map(a=>t[a]);this.instance.setOption({title:{text:"弹幕池分布"},tooltip:{},xAxis:{type:"category",data:r},yAxis:{type:"value",name:"弹幕数量"},series:[{type:"bar",data:o.map((a,s)=>({value:a,__selectionValue:n[s]})),label:{show:!0,position:"top"}}]})}},weightChart={key:"weight",title:"弹幕屏蔽等级分布",menuItems:[{getName:e=>`屏蔽等级：${e?.weight??"-"}`}],selection:{source:"chart:weight",template:"屏蔽等级 {value}",getValue:e=>e?.data?.__selectionValue??e?.name,predicate:(e,t)=>Number(e?.weight)===Number(t)},render(){const e=this.ctx.items||[],t={};for(const a of e){const s=Number(a?.weight);t[s]=(t[s]||0)+1}const n=Object.keys(t).map(a=>Number(a)).sort((a,s)=>a-s),r=n,o=n.map(a=>t[a]);this.instance.setOption({title:{text:"弹幕屏蔽等级分布"},tooltip:{},xAxis:{type:"category",data:r},yAxis:{type:"value",name:"弹幕数"},series:[{type:"bar",data:o.map((a,s)=>({value:a,__selectionValue:n[s]})),label:{show:!0,position:"top"}}]})}},modeChart={key:"mode",title:"弹幕类型分布",getLabel(e){return`${e}-${modeLabelMap[e]||"未知类型"}`},getMenuItems(){return[{getName:e=>`类型：${this.getLabel(e?.mode)}`}]},selection:{source:"chart:mode",template:"类型 {value}",getValue:e=>e?.data?.__selectionValue??e?.name,formatValue:e=>`${e}-${modeLabelMap[e]||"未知类型"}`,predicate:(e,t)=>Number(e?.mode)===Number(t)},render(){const e=this.ctx.items||[],t={};for(const a of e){const s=Number(a?.mode);t[s]=(t[s]||0)+1}const n=Object.keys(t).map(a=>Number(a)).sort((a,s)=>a-s),r=n.map(a=>this.getLabel(a)),o=n.map(a=>t[a]);this.instance.setOption({title:{text:"弹幕类型分布"},tooltip:{},xAxis:{type:"category",data:r},yAxis:{type:"value",name:"弹幕数"},series:[{type:"bar",data:o.map((a,s)=>({value:a,__selectionValue:n[s]})),label:{show:!0,position:"top"}}]})}},attrChart={key:"attr",title:"弹幕属性分布",refresh:!0,chartMode:"bit",actions:[{key:"toggle-mode",icon:"⇄",title:"切换统计方式",method:"toggleChartMode"}],selection(){return{source:this.chartMode==="bit"?"chart:attr:bit":"chart:attr:value",template:this.chartMode==="bit"?"弹幕属性 bit位 {value}":"弹幕属性 {value}",getValue:e=>e?.data?.__selectionValue??e?.name,formatValue:e=>{const[t,n]=String(e||"").split(":");return t==="bit"?n==="-"||n===""||n==null?"bit:-":`bit:${n}`:t==="attr"?`${n} ${this.getAttrBits(n).str}`:String(e||"")},predicate:(e,t)=>{const[n,r]=String(t||"").split(":"),o=Number(e?.attr??0);if(n==="bit"){const a=Number(r);return!Number.isFinite(a)||a<0?o===0:(o&1<<a)!==0}return n==="attr"?o===Number(r):!1}}},getMenuItems(){return[{getName:e=>`属性：${this.getAttrBits(e?.attr).str}`}]},getAttrBits(e){const t=Number(e);if(!Number.isInteger(t)||t===0)return{str:"bit:-",bits:[]};const n=[];for(let r=0;r<32;r+=1)(t&1<<r)!==0&&n.push(r);return n.length?{str:`bit:${n.join("|")}`,bits:n}:{str:"bit:-",bits:[]}},toggleChartMode(){this.chartMode=this.chartMode==="attr"?"bit":"attr",this.instance?.clear&&this.instance.clear(),this.ctx.rerender()},render(){const e=this.ctx.items||[];if(this.chartMode==="bit"){const s=Array(32).fill(0);let i=0;for(const g of e){const _=this.getAttrBits(g?.attr).bits;if(!_.length)i+=1;else for(const k of _)s[k]+=1}const v=[],f=[],y=[];i>0&&(v.push("-"),f.push(i),y.push("bit:-"));for(let g=0;g<32;g+=1)s[g]<=0||(v.push(String(g)),f.push(s[g]),y.push(`bit:${g}`));this.instance.setOption({title:{text:"弹幕属性 bit位分布"},tooltip:{},xAxis:{type:"category",data:v,name:"bit位"},yAxis:{type:"value",name:"出现次数"},series:[{type:"bar",data:f.map((g,_)=>({value:g,__selectionValue:y[_]})),label:{show:!0,position:"top"}}]});return}const t={};for(const s of e){const i=Number(s?.attr??0);t[i]=(t[i]||0)+1}const n=Object.keys(t).map(s=>Number(s)).sort((s,i)=>s-i),r=n.map(s=>t[s]),o=Math.max(1,r.reduce((s,i)=>s+i,0)),a=r.map(s=>(s/o*100).toFixed(2));this.instance.setOption({title:{text:"弹幕属性分布"},tooltip:{trigger:"item",formatter:s=>{const i=Number(s?.name),v=n.indexOf(i);return`属性值：${i}<br/>数量：${s.value}<br/>占比：${a[v]}%<br/>位说明：${this.getAttrBits(i).str}`}},legend:{bottom:"bottom"},series:[{type:"pie",radius:"50%",data:n.map((s,i)=>({name:String(s),value:r[i],__selectionValue:`attr:${s}`})),label:{formatter:s=>`${s.name}
+${a[s.dataIndex]}%`}}]})}},colorCustomChartExample=`({
+  name: 'colorTreemapExample',
+  title: '弹幕颜色分布',
+  excludeWhite: true,
+  actions: [{
+    key: 'toggle-exclude-white',
+    icon: '⬜',
+    title: '排除白色',
+    method: 'toggleExcludeWhite'
+  }],
+  selection: {
+    source: 'chart:colorExample',
+    template: '颜色 {value}',
+    getValue: (params) => params?.data?.__selectionValue,
+    formatValue(value) {
+      const hex = '#' + ((Number(value) >>> 0) & 0xffffff).toString(16).padStart(6, '0').toUpperCase();
+      return this.ctx.h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '2px' } }, [
+        this.ctx.h('span', {
+          style: {
+            width: '10px',
+            height: '10px',
+            borderRadius: '2px',
+            border: '1px solid #00000033',
+            background: hex,
+            display: 'inline-block'
+          }
+        }),
+        this.ctx.h('span', null, hex)
+      ]);
+    },
+    predicate: (item, value) => Number(item?.color) === Number(value)
+  },
+  toggleExcludeWhite() {
+    this.excludeWhite = !this.excludeWhite;
+    this.ctx.rerender();
+  },
+  render() {
+    const MAX = 50;
+    const toHex = (v) => '#' + ((Number(v) >>> 0) & 0xffffff).toString(16).padStart(6, '0').toUpperCase();
+    const textColor = (hex) => {
+      const h = String(hex).replace('#', '');
+      const r = parseInt(h.slice(0, 2), 16);
+      const g = parseInt(h.slice(2, 4), 16);
+      const b = parseInt(h.slice(4, 6), 16);
+      return (0.299 * r + 0.587 * g + 0.114 * b) >= 165 ? '#111111' : '#ffffff';
+    };
+
+    const data = this.ctx.items || [];
+    const map = new Map();
+    for (const item of data) {
+      const color = Number(item?.color);
+      if (!Number.isFinite(color)) continue;
+      if (this.excludeWhite && (((color >>> 0) & 0xffffff) === 0xffffff)) continue;
+      map.set(color, (map.get(color) || 0) + 1);
+    }
+
+    const sorted = [...map.entries()]
+      .map(([color, count]) => ({ color, count, hex: toHex(color) }))
+      .sort((a, b) => b.count - a.count);
+
+    const top = sorted.slice(0, MAX);
+    const rest = sorted.slice(MAX).reduce((sum, item) => sum + item.count, 0);
+    const total = Math.max(1, data.length);
+
+    const treeData = top.map((item) => ({
+      name: item.hex,
+      value: item.count,
+      __selectionValue: item.color,
+      itemStyle: { color: item.hex, borderColor: '#ffffff66', borderWidth: 1 },
+      label: { color: textColor(item.hex) }
+    }));
+    if (rest > 0) {
+      treeData.push({
+        name: '其他',
+        value: rest,
+        __selectionValue: null,
+        itemStyle: { color: '#8c8c8c', borderColor: '#ffffff66', borderWidth: 1 },
+        label: { color: '#ffffff' }
+      });
+    }
+
+    this.instance.setOption({
+      title: { text: '弹幕颜色分布' },
+      tooltip: {
+        formatter: (params) => {
+          const item = params?.data;
+          if (!item) return '';
+          const count = Number(item.value || 0);
+          const ratio = ((count / total) * 100).toFixed(2);
+          if (item.name === '其他') {
+            return '颜色：其他<br/>次数：' + count.toLocaleString() + '<br/>占比：' + ratio + '%';
+          }
+          return '颜色：' + item.name + '<br/>次数：' + count.toLocaleString() + '<br/>占比：' + ratio + '%';
+        }
+      },
+      series: [{
+        type: 'treemap',
+        roam: false,
+        nodeClick: false,
+        leafDepth: 1,
+        breadcrumb: { show: false },
+        label: { show: true, formatter: (params) => params?.data?.name || '' },
+        upperLabel: { show: false },
+        data: treeData
+      }]
+    });
+  }
+})`,defaultCharts=[userChart,wordcloudChart,densityChart,dateChart,hourChart,poolChart,weightChart,modeChart,attrChart],REF_X=95.047,REF_Y=100,REF_Z=108.883,srgbToLinear=e=>{const t=e/255;return t<=.04045?t/12.92:((t+.055)/1.055)**2.4},rgbToXyz=(e,t,n)=>{const r=srgbToLinear(e),o=srgbToLinear(t),a=srgbToLinear(n),s=(r*.4124564+o*.3575761+a*.1804375)*100,i=(r*.2126729+o*.7151522+a*.072175)*100,v=(r*.0193339+o*.119192+a*.9503041)*100;return[s,i,v]},xyzPivot=e=>{const t=e/100;return t>.008856?Math.cbrt(t):7.787*t+16/116},xyzToLab=(e,t,n)=>{const r=xyzPivot(e/REF_X*100),o=xyzPivot(t/REF_Y*100),a=xyzPivot(n/REF_Z*100),s=116*o-16,i=500*(r-o),v=200*(o-a);return[s,i,v]},colorToLab=e=>{const[t,n,r]=rgba(String(e||"")),[o,a,s]=rgbToXyz(t,n,r);return xyzToLab(o,a,s)},deltaE=(e,t)=>{const[n,r,o]=colorToLab(e),[a,s,i]=colorToLab(t),v=n-a,f=r-s,y=o-i;return Math.sqrt(v*v+f*f+y*y)},_hoisted_1$5={class:"bds-dm-chart-manager"},_hoisted_2$3=["onMouseenter"],_hoisted_3$2={key:0,class:"bds-dm-chart-manager__actions"},_hoisted_4$2=["title","disabled","onClick"],_sfc_main$8={__name:"DmChartManager",props:{items:{type:Array,default:()=>[]},chartCtx:{type:Object,default:()=>({})},to:{type:[String,Object],default:void 0}},emits:["select-filter","update:chartMenus"],setup(__props,{expose:__expose,emit:__emit}){const props=__props,emit=__emit,styleMountTarget=vue.inject("styleMountTarget",null),runtimeWindow=vue.inject("runtimeWindow",window),injectedActiveTheme=vue.inject("activeTheme",null),themeSettings=vue.inject("themeSettings",null),messageApi=naiveUi__namespace.useMessage();mountStyle$6(styleMountTarget);const echartsLib=vue.computed(()=>runtimeWindow?.echarts||globalThis.echarts),chartDefs=vue.ref([]),chartDefMap=vue.computed(()=>new Map(chartDefs.value.map(e=>[e.key,e]))),chartTestRef=vue.ref(null),chartColors=vue.ref([]),visibleChartKeys=vue.ref([]),chartDomMap=vue.reactive({}),expandedByKey=vue.reactive({}),chartHover=vue.ref(null),chartRuntimeMap=new Map,chartInstanceMap=new Map,chartRenderTaskMap=new Map,chartSizeMap=new Map,chartBodyRef=vue.ref(null);let renderQueue=Promise.resolve();const echartsTheme=vue.computed(()=>vue.unref(injectedActiveTheme)==="dark"?"dark":"default"),applyToCharts=vue.computed(()=>!!themeSettings?.applyToCharts?.value),activePrimaryColor=vue.computed(()=>String(themeSettings?.activePrimary?.value||"").trim()),newChartCode=vue.ref(""),customChartCodeMap=vue.ref({}),customCharts=vue.computed(()=>chartDefs.value.filter(e=>e.isCustom).map(e=>({key:e.key,title:e.title||e.key}))),hasChart=vue.computed(()=>visibleChartKeys.value.length>0),sanitizeChartName=e=>String(e||Date.now()).trim().replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_\-]/g,"").slice(0,80),logError=(...e)=>{props.chartCtx?.BDM?.logger?.error?.(...e)},ensureChartColors=()=>{if(chartColors.value.length)return chartColors.value;if(!echartsLib.value?.init||!chartTestRef.value)return[];let e=null;try{e=echartsLib.value.init(chartTestRef.value,echartsTheme.value),e.setOption({});const t=e.getOption()?.color,n=Array.isArray(t)?t.filter(Boolean):[];if(!n.length)return[];const r=activePrimaryColor.value;if(!r)return chartColors.value=n,chartColors.value;let o=0,a=Number.POSITIVE_INFINITY;for(let i=0;i<n.length;i+=1)try{const v=deltaE(n[i],r);v<a&&(a=v,o=i)}catch{}const s=[r,...n.filter((i,v)=>v!==o)];return chartColors.value=s,s}catch(t){return logError("提取图表主题色失败",t),[]}finally{e?.dispose&&e.dispose()}},buildFilterPayload=(e,t={})=>{const n=t.value;return n==null||n===""||typeof t.predicate!="function"?null:{source:t.source||`chart:${e}`,value:n,template:t.template||"{value}",formatValue:t.formatValue||(r=>String(r)),predicate:t.predicate,wrapTag:t.wrapTag!==!1}},stageChartFilter=async(e,t)=>{const n=buildFilterPayload(e,t);n&&emit("select-filter",n)},createChartContext=e=>{const t={chartKey:e,get echarts(){return echartsLib.value},get instance(){return chartInstanceMap.get(e)||null},get element(){return chartDomMap[e]||null},get items(){return props.items},h:vue.h,ui:naiveUi__namespace,stageFilter:n=>stageChartFilter(e,n),rerender:()=>renderChart(e),resize:()=>resizeChart(e)};return new Proxy(t,{get(n,r,o){if(Reflect.has(n,r))return Reflect.get(n,r,o);const a=props.chartCtx||{};return Reflect.get(a,r)},has(n,r){if(Reflect.has(n,r))return!0;const o=props.chartCtx||{};return Reflect.has(o,r)}})},ensureRuntime=e=>{const t=chartRuntimeMap.get(e);if(t)return t;const n=chartDefMap.value.get(e);if(!n)return null;const r={...n};return r.key=r.key||n.key||e,r.title=r.title||n.title||e,r.actions=Array.isArray(r.actions)?r.actions:[],Object.prototype.hasOwnProperty.call(n,"expandedH")&&(e in expandedByKey||(expandedByKey[e]=!!n.expandedH),r.expandedH=!!expandedByKey[e]),r.ctx=createChartContext(e),chartRuntimeMap.set(e,r),r},disposeChart=e=>{const t=chartRuntimeMap.get(e);if(t&&typeof t.dispose=="function")try{t.dispose()}catch(r){logError("图表销毁钩子异常",e,r)}const n=chartInstanceMap.get(e);n&&typeof n.dispose=="function"&&n.dispose(),chartInstanceMap.delete(e),chartSizeMap.delete(e),t&&(t.instance=null)},disposeAllCharts=()=>{for(const e of chartInstanceMap.keys())disposeChart(e)},resizeChart=e=>{const t=chartRuntimeMap.get(e);if(t&&typeof t.resize=="function")try{if(t.resize()!==!1)return}catch(r){logError("图表尺寸钩子异常",e,r)}const n=chartInstanceMap.get(e);n?.resize&&n.resize()},getChartSizeKey=e=>{const t=chartDomMap[e];if(!t||typeof t.getBoundingClientRect!="function")return null;const n=t.getBoundingClientRect();return`${Math.round(n.width||0)}x${Math.round(n.height||0)}`},removeCustomChart=e=>{const t=chartDefs.value.findIndex(o=>o.key===e&&o.isCustom);if(t<0)return;chartDefs.value.splice(t,1);const n=visibleChartKeys.value.indexOf(e);n>=0&&visibleChartKeys.value.splice(n,1),disposeChart(e),chartRuntimeMap.delete(e),delete expandedByKey[e];const r=storage.get("charts.custom",{});r&&r[e]&&(delete r[e],storage.set("charts.custom",r)),customChartCodeMap.value[e]&&(delete customChartCodeMap.value[e],customChartCodeMap.value={...customChartCodeMap.value}),storage.set("charts.visible",visibleChartKeys.value),emitChartMenus()},normalizeChartMenuItem=(e,t,n)=>!n||typeof n!="object"?null:{...n,chart:e,getName:typeof n.getName=="function"?r=>n.getName.call(t,r):n.getName,onSelect:typeof n.onSelect=="function"?r=>n.onSelect.call(t,r):n.onSelect},buildChartMenus=()=>{const e=[];for(const t of visibleChartKeys.value){const n=ensureRuntime(t);if(!n)continue;const r=Array.isArray(n.menuItems)?n.menuItems:[],o=typeof n.getMenuItems=="function"?n.getMenuItems.call(n):[];for(const a of[...r,...Array.isArray(o)?o:[]]){const s=normalizeChartMenuItem(t,n,a);s&&e.push(s)}}return e},emitChartMenus=()=>{emit("update:chartMenus",buildChartMenus())},parseCustomChartCode=code=>{const chartDef=eval(`(${code})`);if(!chartDef||typeof chartDef!="object")throw new Error("图表代码不是对象");if(typeof chartDef.render!="function")throw new Error("图表缺少 render 方法");const baseName=sanitizeChartName(chartDef.name||chartDef.key||`chart_${Date.now()}`);if(!baseName)throw new Error("图表名称无效");const chartKey=baseName.startsWith("custom_")?baseName:`custom_${baseName}`;return{...chartDef,key:chartKey,title:chartDef.title||chartKey,actions:Array.isArray(chartDef.actions)?chartDef.actions:[],instance:null,ctx:null,isCustom:!0}},addCustomChart=()=>{const e=String(newChartCode.value||"").trim();if(!e)return"";try{const t=parseCustomChartCode(e),n=chartDefs.value.findIndex(o=>o.key===t.key);if(n>=0){if(!chartDefs.value[n]?.isCustom)throw new Error(`不能覆盖默认图表：${t.key}`);disposeChart(t.key),chartRuntimeMap.delete(t.key),chartDefs.value.splice(n,1,t)}else chartDefs.value.push(t),visibleChartKeys.value.includes(t.key)||visibleChartKeys.value.push(t.key);const r=storage.get("charts.custom",{});return r[t.key]=e,storage.set("charts.custom",r),customChartCodeMap.value={...customChartCodeMap.value,[t.key]:e},storage.set("charts.visible",visibleChartKeys.value),emitChartMenus(),vue.nextTick(()=>renderChart(t.key)),t.key}catch(t){const n=String(t?.message||t||"未知错误");return messageApi.error(`添加失败：${n}`),logError(t),""}},initCharts=()=>{customChartCodeMap.value={},chartDefs.value=defaultCharts.map(r=>({...r,isCustom:!1}));const e=storage.get("charts.custom",{});Object.entries(e||{}).forEach(([r,o])=>{try{const a=parseCustomChartCode(o);a.key!==r&&(a.key=r),a.title=a.title||r,chartDefs.value.push(a),customChartCodeMap.value[r]=String(o||"")}catch(a){const s=String(a?.message||a||"未知错误");messageApi.error(`图表 ${r} 加载失败：${s}`),logError("加载自定义图表失败",r,a)}});const t=storage.get("charts.visible",null),n=chartDefs.value.map(r=>r.key);if(Array.isArray(t)&&t.length)visibleChartKeys.value=t.filter(r=>n.includes(r));else{const r=["user","wordcloud","density"];visibleChartKeys.value=r.filter(o=>n.includes(o))}!visibleChartKeys.value.length&&n.length&&(visibleChartKeys.value=[n[0]]),emitChartMenus()},resolveSelection=(e,t,n)=>{const r=typeof e.selection=="function"?e.selection.call(t,n):e.selection;return!r||typeof r!="object"?null:r},runChartClick=async(e,t)=>{const n=chartDefMap.value.get(e),r=ensureRuntime(e);if(!n||!r)return;if(typeof n.onClick=="function"){r.instance=chartInstanceMap.get(e),await Promise.resolve(n.onClick.call(r,{params:t}));return}const o=resolveSelection(n,r,t);if(o?.predicate){const s=(typeof o.getValue=="function"?f=>o.getValue.call(r,f):f=>f?.name)(t);if(s==null||s==="")return;const i=typeof o.formatValue=="function"?f=>o.formatValue.call(r,f):f=>String(f),v=(f,y)=>o.predicate.call(r,f,y);emit("select-filter",{source:o.source||`chart:${e}`,template:o.template||"{value}",value:s,formatValue:i,predicate:v,wrapTag:o.wrapTag!==!1})}},renderChart=async e=>{const t=chartRenderTaskMap.get(e);await vue.nextTick(),t&&await t;const n=(async()=>{if(!echartsLib.value)return;const r=chartDefMap.value.get(e),o=ensureRuntime(e),a=chartDomMap[e];if(!(!r||!a||!o))try{typeof o.init=="function"&&await Promise.resolve(o.init.call(o));let s=chartInstanceMap.get(e);if(!s&&!o.noInstance&&(s=echartsLib.value.init(a,echartsTheme.value),chartInstanceMap.set(e,s)),s){s.off("click"),(typeof r.onClick=="function"||typeof r.selection=="function"||r.selection?.predicate)&&s.on("click",f=>{runChartClick(e,f).catch(y=>logError(y))});const v={title:{left:"left",top:"top"}};if(applyToCharts.value){const f=ensureChartColors();f.length&&(v.color=f)}s.setOption(v)}o.instance=s,await Promise.resolve(o.render.call(o));const i=getChartSizeKey(e);i&&chartSizeMap.set(e,i)}catch(s){logError("图表渲染异常",e,s)}})();chartRenderTaskMap.set(e,n);try{await vue.nextTick(),await n}finally{chartRenderTaskMap.get(e)===n&&chartRenderTaskMap.delete(e)}},enqueueRender=e=>(renderQueue=renderQueue.then(()=>e()).catch(t=>{logError("图表渲染队列异常",t)}),renderQueue),renderAllCharts=async()=>{await vue.nextTick();for(const e of visibleChartKeys.value)try{await renderChart(e)}catch(t){logError("图表渲染失败",e,t)}},moveUp=async e=>{const t=visibleChartKeys.value,n=t.indexOf(e);if(n<=0)return;const r=[...t];[r[n-1],r[n]]=[r[n],r[n-1]],visibleChartKeys.value=r,storage.set("charts.visible",visibleChartKeys.value),emitChartMenus(),await vue.nextTick();const o=chartDomMap[e];o?.scrollIntoView&&o.scrollIntoView({behavior:"smooth",block:"nearest"})},moveDown=async e=>{const t=visibleChartKeys.value,n=t.indexOf(e);if(n<0||n>=t.length-1)return;const r=[...t];[r[n],r[n+1]]=[r[n+1],r[n]],visibleChartKeys.value=r,storage.set("charts.visible",visibleChartKeys.value),emitChartMenus(),await vue.nextTick();const o=chartDomMap[e];o?.scrollIntoView&&o.scrollIntoView({behavior:"smooth",block:"center"})},closeChart=e=>{const t=visibleChartKeys.value.indexOf(e);t<0||(visibleChartKeys.value.splice(t,1),storage.set("charts.visible",visibleChartKeys.value),emitChartMenus(),disposeChart(e))},toggleExpand=async e=>{const t=ensureRuntime(e);if(!t||!("expandedH"in t))return;expandedByKey[e]=!expandedByKey[e],t.expandedH=!!expandedByKey[e],await vue.nextTick();const n=getChartSizeKey(e);n&&chartSizeMap.set(e,n),resizeChart(e)},getItemHeight=e=>(ensureRuntime(e),expandedByKey[e]?"100%":"50%"),runCustomAction=async(e,t)=>{const n=ensureRuntime(e);if(n){if(n.instance=chartInstanceMap.get(e),typeof t.handler=="function"){await Promise.resolve(t.handler.call(n));return}t.method&&typeof n[t.method]=="function"&&await Promise.resolve(n[t.method]())}},refreshChart=async e=>{disposeChart(e),await vue.nextTick(),await renderChart(e)},getActionList=(e,t)=>{const n=ensureRuntime(e),r=[];r.push({key:"remove",icon:"⨉",title:"移除图表",handler:()=>closeChart(e)}),r.push({key:"move-down",icon:"▼",title:"下移图表",disabled:t>=visibleChartKeys.value.length-1,handler:()=>moveDown(e)}),r.push({key:"move-up",icon:"▲",title:"上移图表",disabled:t===0,handler:()=>moveUp(e)}),n&&"refresh"in n&&r.push({key:"refresh",icon:"↻",title:"刷新图表",handler:()=>refreshChart(e)}),n&&"expandedH"in n&&r.push({key:"expand",icon:"⇕",title:"展开/收起",handler:()=>toggleExpand(e)});const o=n?.actions||[];for(const a of o){const s=typeof a.icon=="function"?a.icon(n):a.icon||"•";r.push({key:`custom-${a.key||a.method}`,icon:s,title:a.title||a.key||a.method,handler:()=>runCustomAction(e,a)})}return r},chartResize=()=>{for(const e of visibleChartKeys.value){const t=getChartSizeKey(e);t&&chartSizeMap.get(e)!==t&&(chartSizeMap.set(e,t),resizeChart(e))}};return vue.watch(()=>props.items,()=>{enqueueRender(renderAllCharts)}),vue.watch(()=>echartsTheme.value,()=>{chartColors.value=[];for(const e of chartInstanceMap.values())if(!(!e||typeof e.setTheme!="function"))try{e.setTheme(echartsTheme.value)}catch(t){logError("图表切换主题失败",t)}enqueueRender(renderAllCharts)}),vue.watch(()=>[applyToCharts.value,activePrimaryColor.value],([e],[t])=>{chartColors.value=[],t&&!e&&disposeAllCharts(),enqueueRender(renderAllCharts)}),vue.watch(()=>visibleChartKeys.value.slice(),(e,t=[])=>{enqueueRender(async()=>{const n=new Set(t),r=new Set(e);await vue.nextTick();for(const o of t)r.has(o)||disposeChart(o);for(const o of e)if(!n.has(o))try{await renderChart(o)}catch(a){logError("新增图表渲染失败",o,a)}storage.set("charts.visible",e),emitChartMenus()})},{deep:!1}),vue.watch(()=>chartDefs.value.map(e=>e.key).join(","),()=>{const e=new Set(chartDefs.value.map(t=>t.key));visibleChartKeys.value=visibleChartKeys.value.filter(t=>e.has(t)),emitChartMenus()}),vue.onMounted(async()=>{initCharts(),window.addEventListener("resize",chartResize)}),vue.onBeforeUnmount(()=>{window.removeEventListener("resize",chartResize),disposeAllCharts()}),__expose({chartResize,chartBodyEl:chartBodyRef,settings:{chartDefs,customCharts,visibleChartKeys,newChartCode,addCustomChart,removeCustomChart,getCustomChartCode:e=>customChartCodeMap.value[e]||""}}),(e,t)=>{const n=naiveUi.NAlert,r=naiveUi.NEmpty;return vue.openBlock(),vue.createElementBlock("div",_hoisted_1$5,[vue.unref(echartsLib)?vue.createCommentVNode("",!0):(vue.openBlock(),vue.createBlock(n,{key:0,type:"error",title:"ECharts 未加载，无法渲染图表"})),vue.unref(hasChart)?vue.createCommentVNode("",!0):(vue.openBlock(),vue.createBlock(r,{key:1,description:"暂无已启用图表",class:"bds-dm-chart-manager__empty"})),vue.createElementVNode("div",{style:{display:"none"},ref_key:"chartTestRef",ref:chartTestRef},null,512),vue.createElementVNode("div",{ref_key:"chartBodyRef",ref:chartBodyRef,class:"bds-dm-chart-manager__body"},[(vue.openBlock(!0),vue.createElementBlock(vue.Fragment,null,vue.renderList(vue.unref(visibleChartKeys),(o,a)=>(vue.openBlock(),vue.createElementBlock("div",{key:o,class:"bds-dm-chart-manager__item",style:vue.normalizeStyle({"--item-height":getItemHeight(o)}),onMouseenter:s=>chartHover.value=o,onMouseleave:t[0]||(t[0]=s=>chartHover.value=null)},[vue.unref(chartHover)===o?(vue.openBlock(),vue.createElementBlock("div",_hoisted_3$2,[(vue.openBlock(!0),vue.createElementBlock(vue.Fragment,null,vue.renderList(getActionList(o,a),s=>(vue.openBlock(),vue.createElementBlock("button",{key:`${o}:${s.key}`,class:"bds-dm-chart-manager__action-btn",type:"button",title:s.title,disabled:s.disabled,onClick:s.handler},vue.toDisplayString(s.icon),9,_hoisted_4$2))),128)),t[1]||(t[1]=vue.createElementVNode("span",null,null,-1))])):vue.createCommentVNode("",!0),vue.createElementVNode("div",{ref_for:!0,ref:s=>vue.unref(chartDomMap)[o]=s,class:"bds-dm-chart-manager__chart"},null,512)],44,_hoisted_2$3))),128))],512)])}}},style$5=cB$2("bds-chart-settings",css$1`
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  `,[cE$2("block",css$1`
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      `),cE$2("custom-row",css$1`
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      `)]);function mountStyle$5(e){useTheme$1("bds-chart-settings-style",style$5,e)}const _hoisted_1$4={class:"bds-chart-settings"},_hoisted_2$2={class:"bds-chart-settings__block"},_hoisted_3$1={class:"bds-chart-settings__block"},_hoisted_4$1={class:"bds-chart-settings__custom-row"},_sfc_main$7={__name:"ChartSettingsSection",props:{settings:{type:Object,default:null}},setup(e){const t=e,n=vue.inject("styleMountTarget",null);mountStyle$5(n);const r=vue.computed(()=>t.settings||null),o=vue.computed(()=>r.value?.chartDefs?.value||[]),a=vue.computed(()=>r.value?.customCharts?.value||[]),s=vue.computed(()=>o.value.map(u=>({label:u.title||u.key,value:u.key}))),i=vue.ref(""),v=vue.computed({get:()=>r.value?.visibleChartKeys?.value||[],set:u=>{r.value?.visibleChartKeys&&(r.value.visibleChartKeys.value=Array.isArray(u)?u:[])}}),f=vue.computed({get:()=>String(r.value?.newChartCode?.value||""),set:u=>{r.value?.newChartCode&&(r.value.newChartCode.value=String(u||""))}}),y=u=>{r.value?.removeCustomChart?.(u),i.value===u&&(i.value="")},g=()=>{const u=r.value?.addCustomChart?.();u&&(i.value=u)},_=()=>{i.value="",r.value?.newChartCode&&(r.value.newChartCode.value=colorCustomChartExample)},k=u=>{i.value=u;const l=r.value?.getCustomChartCode?.(u);r.value?.newChartCode&&(r.value.newChartCode.value=String(l||""))};return vue.onMounted(()=>{_()}),vue.watch(a,u=>{i.value&&(u.some(l=>l.key===i.value)||(i.value=""))}),(u,l)=>{const m=naiveUi.NDivider,d=naiveUi.NTransfer,h=naiveUi.NInput,$=naiveUi.NGi,b=naiveUi.NButton,M=naiveUi.NFlex,V=naiveUi.NEmpty,z=naiveUi.NIcon,Y=naiveUi.NListItem,G=naiveUi.NList,q=naiveUi.NGrid;return vue.openBlock(),vue.createElementBlock("div",_hoisted_1$4,[vue.createElementVNode("div",_hoisted_2$2,[vue.createVNode(m,{style:{margin:"4px 0"}},{default:vue.withCtx(()=>[...l[2]||(l[2]=[vue.createTextVNode("可见图表",-1)])]),_:1}),vue.createVNode(d,{value:vue.unref(v),"onUpdate:value":l[0]||(l[0]=A=>vue.isRef(v)?v.value=A:null),options:vue.unref(s),"source-title":"全部图表","target-title":"已启用图表"},null,8,["value","options"])]),vue.createElementVNode("div",_hoisted_3$1,[vue.createVNode(m,{style:{margin:"4px 0"}},{default:vue.withCtx(()=>[...l[3]||(l[3]=[vue.createTextVNode("自定义图表",-1)])]),_:1}),vue.createVNode(q,{cols:24,"x-gap":12,"y-gap":12},{default:vue.withCtx(()=>[vue.createVNode($,{span:16},{default:vue.withCtx(()=>[vue.createVNode(h,{value:vue.unref(f),"onUpdate:value":l[1]||(l[1]=A=>vue.isRef(f)?f.value=A:null),type:"textarea",rows:13,placeholder:"输入图表对象代码，如 ({ name:'demo', title:'示例', expandedH:false, refresh:true, render(){ ... } })"},null,8,["value"])]),_:1}),vue.createVNode($,{span:8},{default:vue.withCtx(()=>[vue.createVNode(M,{vertical:"",align:"center"},{default:vue.withCtx(()=>[vue.createVNode(M,{style:{"margin-bottom":"12px",width:"100%"}},{default:vue.withCtx(()=>[vue.createVNode(b,{type:"primary",size:"small",style:{flex:"1"},onClick:_},{default:vue.withCtx(()=>[...l[4]||(l[4]=[vue.createTextVNode(" 新建 ",-1)])]),_:1}),vue.createVNode(b,{type:"primary",size:"small",style:{flex:"1"},onClick:g},{default:vue.withCtx(()=>[...l[5]||(l[5]=[vue.createTextVNode(" 保存 ",-1)])]),_:1})]),_:1}),vue.unref(a).length?(vue.openBlock(),vue.createBlock(G,{key:1,hoverable:"",clickable:"",style:{width:"100%"}},{default:vue.withCtx(()=>[(vue.openBlock(!0),vue.createElementBlock(vue.Fragment,null,vue.renderList(vue.unref(a),A=>(vue.openBlock(),vue.createBlock(Y,{key:A.key,onClick:Z=>k(A.key)},{default:vue.withCtx(()=>[vue.createElementVNode("div",_hoisted_4$1,[vue.createVNode(b,{text:"",type:A.key===vue.unref(i)?"primary":"default"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(A.title||A.key),1)]),_:2},1032,["type"]),vue.createVNode(b,{size:"tiny",tertiary:"",type:"error",title:"删除图表","aria-label":"删除图表",onClick:vue.withModifiers(Z=>y(A.key),["stop"])},{icon:vue.withCtx(()=>[vue.createVNode(z,null,{default:vue.withCtx(()=>[vue.createVNode(vue.unref(Trash))]),_:1})]),_:1},8,["onClick"])])]),_:2},1032,["onClick"]))),128))]),_:1})):(vue.openBlock(),vue.createBlock(V,{key:0,description:"暂无自定义图表",size:"small"}))]),_:1})]),_:1})]),_:1})])])}}},EXTERNAL_PANEL_SELECTED_KEY$1="external.panelUrl.selected",EXTERNAL_PANEL_CUSTOM_LIST_KEY="external.panelUrl.customList",_sfc_main$6={__name:"ExternalPageSettingsSection",setup(e){const t=["https://zbpine.github.io/bili-data-statistic/"],n=h=>String(h||"").trim(),r=h=>{const $=new Set,b=[];for(const M of h){const V=n(M);!V||$.has(V)||($.add(V),b.push(V))}return b},o=h=>({label:h,value:h}),a=r(t),s=vue.ref(r(storage.get(EXTERNAL_PANEL_CUSTOM_LIST_KEY,[]))),i=vue.computed(()=>r([...a,...s.value])),v=vue.computed(()=>i.value.map(h=>o(h))),f=vue.ref(""),y=()=>{storage.set(EXTERNAL_PANEL_CUSTOM_LIST_KEY,[...s.value])},g=h=>{storage.set(EXTERNAL_PANEL_SELECTED_KEY$1,h)},_=h=>{a.includes(h)||s.value.includes(h)||(s.value=[...s.value,h],y())},k=h=>{const $=h&&typeof h=="object"&&"value"in h?h.value:h,b=n($);b&&(_(b),f.value=b,g(b))},u=h=>{const $=n(h),b=f.value||i.value[0]||a[0]||"";return o($||b)},l=()=>{const h=n(storage.get(EXTERNAL_PANEL_SELECTED_KEY$1,""));f.value=h||i.value[0]||"",f.value&&g(f.value)},m=h=>{const $=n(h);if(!$)return;const b=s.value.filter(M=>M!==$);if(b.length!==s.value.length&&(s.value=b,y(),f.value===$)){const M=i.value[0]||a[0]||"";f.value=M,M&&g(M)}},d=({node:h,option:$})=>{const b=n($?.value);if(!(!!b&&!a.includes(b)))return h;const V=z=>{z.preventDefault(),z.stopPropagation(),m(b)};return vue.h("div",{style:{position:"relative",display:"flex",alignItems:"center",width:"100%"}},[vue.h("div",{style:{minWidth:0,flex:1}},[h]),vue.h(naiveUi.NButton,{quaternary:!0,circle:!0,size:"tiny",title:"删除自定义 URL",onClick:V,style:{position:"absolute",right:"28px",top:"50%",transform:"translateY(-50%)",color:"#c03a3a",zIndex:2}},{icon:()=>vue.h(naiveUi.NIcon,null,{default:()=>vue.h(TrashX)}),default:()=>null})])};return l(),vue.watch(i,()=>{i.value.length&&(i.value.includes(f.value)||(f.value=i.value[0],g(f.value)))}),(h,$)=>{const b=naiveUi.NAlert,M=naiveUi.NSelect,V=naiveUi.NFormItem,z=naiveUi.NForm,Y=naiveUi.NSpace;return vue.openBlock(),vue.createBlock(Y,{vertical:"",size:12},{default:vue.withCtx(()=>[vue.createVNode(b,{type:"info","show-icon":!1,title:"输入 URL 后请在下拉列表中选择该项以添加"}),vue.createVNode(z,{"label-placement":"top"},{default:vue.withCtx(()=>[vue.createVNode(V,{label:"外部页面 URL",style:{"margin-bottom":"8px"}},{default:vue.withCtx(()=>[vue.createVNode(M,{value:vue.unref(f),filterable:"",tag:"",options:vue.unref(v),"render-option":d,placeholder:"输入 URL 后在下拉中选择","on-create":u,"onUpdate:value":k},null,8,["value","options"])]),_:1})]),_:1})]),_:1})}}},style$4=cB$2("bds-theme-settings",css$1`
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  `,[]);function mountStyle$4(e){useTheme$1("bds-theme-settings-style",style$4,e)}const _hoisted_1$3={class:"bds-theme-settings"},_sfc_main$5={__name:"ThemeSettingsSection",props:{themeSettings:{type:Object,default:null},active:{type:Boolean,default:!1}},setup(e){const t=e,n=vue.inject("styleMountTarget",null),r=vue.inject("activeTheme",vue.computed(()=>"light"));mountStyle$4(n);const o=vue.ref("#00a1d6"),a=vue.ref(""),s=vue.computed(()=>t.themeSettings?.mode?.value||"auto"),i=vue.computed({get:()=>!!t.themeSettings?.applyToCharts?.value,set:m=>{t.themeSettings?.applyToCharts&&(t.themeSettings.applyToCharts.value=!!m)}}),v=vue.computed(()=>r?.value==="dark"?"dark":"light"),f=vue.computed(()=>v.value==="dark"?"暗色主题色":"亮色主题色"),y=vue.computed(()=>{const m=String(a.value||"").trim();if(m)return v.value==="dark"?createDarkThemeOverrides(m):createLightThemeOverrides(m)}),g=()=>{a.value="",o.value=String(v.value==="dark"?t.themeSettings?.darkPrimary?.value:t.themeSettings?.lightPrimary?.value)||"#00a1d6"},_=m=>{t.themeSettings?.setMode?.(m)},k=()=>{const m=String(t.themeSettings?.lightPrimary?.value||DEFAULT_THEME.lightPrimary),d=String(t.themeSettings?.darkPrimary?.value||DEFAULT_THEME.darkPrimary);t.themeSettings?.applyColors?.({light:v.value==="light"?o.value:m,dark:v.value==="dark"?o.value:d}),a.value="",g()},u=()=>{a.value=o.value},l=()=>{const m=v.value==="dark"?DEFAULT_THEME.darkPrimary:DEFAULT_THEME.lightPrimary;o.value=m,k()};return vue.watch(()=>[t.active,v.value],([m])=>{m&&g()},{immediate:!0}),(m,d)=>{const h=naiveUi.NRadioButton,$=naiveUi.NSpace,b=naiveUi.NRadioGroup,M=naiveUi.NFormItem,V=naiveUi.NColorPicker,z=naiveUi.NButton,Y=naiveUi.NCheckbox,G=naiveUi.NFlex,q=naiveUi.NConfigProvider;return vue.openBlock(),vue.createBlock(q,{"theme-overrides":vue.unref(y)},{default:vue.withCtx(()=>[vue.createElementVNode("div",_hoisted_1$3,[vue.createVNode(M,{label:"主题模式",style:{"margin-bottom":"0"}},{default:vue.withCtx(()=>[vue.createVNode(b,{value:vue.unref(s),"onUpdate:value":_},{default:vue.withCtx(()=>[vue.createVNode($,null,{default:vue.withCtx(()=>[vue.createVNode(h,{value:"light"},{default:vue.withCtx(()=>[...d[2]||(d[2]=[vue.createTextVNode("亮色",-1)])]),_:1}),vue.createVNode(h,{value:"dark"},{default:vue.withCtx(()=>[...d[3]||(d[3]=[vue.createTextVNode("暗色",-1)])]),_:1}),vue.createVNode(h,{value:"auto"},{default:vue.withCtx(()=>[...d[4]||(d[4]=[vue.createTextVNode("跟随系统",-1)])]),_:1})]),_:1})]),_:1},8,["value"])]),_:1}),vue.createVNode(M,{label:vue.unref(f),style:{"margin-bottom":"0"}},{default:vue.withCtx(()=>[vue.createVNode(V,{value:vue.unref(o),"onUpdate:value":d[0]||(d[0]=A=>vue.isRef(o)?o.value=A:null),modes:["hex"],"show-alpha":!1},null,8,["value"]),vue.createVNode(z,{type:"primary",style:{"margin-left":"8px"},onClick:u},{default:vue.withCtx(()=>[...d[5]||(d[5]=[vue.createTextVNode("测试主题色",-1)])]),_:1})]),_:1},8,["label"]),vue.createVNode(G,{justify:"end",align:"center"},{default:vue.withCtx(()=>[vue.createVNode(Y,{checked:vue.unref(i),"onUpdate:checked":d[1]||(d[1]=A=>vue.isRef(i)?i.value=A:null)},{default:vue.withCtx(()=>[...d[6]||(d[6]=[vue.createTextVNode("应用于图表",-1)])]),_:1},8,["checked"]),vue.createVNode(z,{onClick:l},{default:vue.withCtx(()=>[...d[7]||(d[7]=[vue.createTextVNode("恢复默认",-1)])]),_:1}),vue.createVNode(z,{type:"primary",onClick:k},{default:vue.withCtx(()=>[...d[8]||(d[8]=[vue.createTextVNode("应用主题色",-1)])]),_:1})]),_:1})])]),_:1},8,["theme-overrides"])}}},style$3=c$3([cB$2("bds-panel-settings-body",css$1`
+      max-height: 50vh;
+      overflow: auto;
+    `)]);function mountStyle$3(e){useTheme$1("bds-panel-settings-style",style$3,e)}const _hoisted_1$2={class:"bds-panel-settings-body"},_sfc_main$4={__name:"PanelSettings",props:{chartSettings:{type:Object,default:null},themeSettings:{type:Object,default:null},mode:{type:String,default:"script"}},setup(e){const t=e,n=vue.inject("styleMountTarget",null);mountStyle$3(n);const r=vue.ref("chart");return(o,a)=>{const s=naiveUi.NTabPane,i=naiveUi.NTabs;return vue.openBlock(),vue.createElementBlock("div",_hoisted_1$2,[vue.createVNode(i,{value:vue.unref(r),"onUpdate:value":a[0]||(a[0]=v=>vue.isRef(r)?r.value=v:null),type:"line",animated:""},{default:vue.withCtx(()=>[vue.createVNode(s,{name:"chart",tab:"图表设置"},{default:vue.withCtx(()=>[vue.createVNode(_sfc_main$7,{settings:t.chartSettings},null,8,["settings"])]),_:1}),vue.createVNode(s,{name:"theme",tab:"主题设置"},{default:vue.withCtx(()=>[vue.createVNode(_sfc_main$5,{"theme-settings":t.themeSettings,active:vue.unref(r)==="theme"},null,8,["theme-settings","active"])]),_:1}),t.mode==="script"?(vue.openBlock(),vue.createBlock(s,{key:0,name:"external",tab:"外部页面"},{default:vue.withCtx(()=>[vue.createVNode(_sfc_main$6)]),_:1})):vue.createCommentVNode("",!0)]),_:1},8,["value"])])}}},style$2=c$3([cB$2("bds-share-qrs",css$1`
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    `,[cE$2("item",css$1`
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+          padding: 10px;
+          border: 1px solid var(--n-border-color);
+          border-radius: 10px;
+          cursor: pointer;
+          user-select: none;
+          transition: border-color 0.2s, transform 0.15s;
+
+          &:hover,
+          &:focus-visible {
+            border-color: var(--n-primary-color);
+            transform: translateY(-1px);
+            outline: none;
+          }
+        `),cE$2("title",css$1`
+          font-size: 12px;
+        `)])]);function mountStyle$2(e){useTheme$1("bds-share-qrs-style",style$2,e)}const _hoisted_1$1={class:"bds-share-qrs"},_hoisted_2$1=["title","onClick","onKeydown"],_sfc_main$3={__name:"ShareQrLinks",props:{links:{type:Array,default:()=>[]}},setup(e){const t=vue.inject("styleMountTarget",null);mountStyle$2(t);const n=naiveUi.useThemeVars(),r=e,o=vue.computed(()=>n.value.baseColor||n.value.cardColor||"#fff"),a=vue.computed(()=>n.value.textColorBase||"#000"),s=v=>{v&&window.open(v,"_blank","noopener,noreferrer")},i=vue.computed(()=>(Array.isArray(r.links)?r.links:[]).map((v,f)=>{const y=String(v?.url||"").trim(),g=String(v?.title||"").trim()||`Link ${f+1}`,_=String(v?.icon||"").trim();return y?{key:`${g}-${y}`,url:y,title:g,icon:_}:null}).filter(Boolean));return(v,f)=>{const y=naiveUi.NText,g=naiveUi.NQrCode;return vue.openBlock(),vue.createElementBlock("div",_hoisted_1$1,[(vue.openBlock(!0),vue.createElementBlock(vue.Fragment,null,vue.renderList(vue.unref(i),_=>(vue.openBlock(),vue.createElementBlock("div",{key:_.key,class:"bds-share-qrs__item",role:"button",tabindex:"0",title:`打开 ${_.title}`,onClick:k=>s(_.url),onKeydown:[vue.withKeys(vue.withModifiers(k=>s(_.url),["prevent"]),["enter"]),vue.withKeys(vue.withModifiers(k=>s(_.url),["prevent"]),["space"])]},[vue.createVNode(y,{depth:"2",class:"bds-share-qrs__title"},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(_.title),1)]),_:2},1024),vue.createVNode(g,{value:_.url,type:"svg",size:64,padding:10,"icon-src":_.icon||void 0,"icon-size":16,"background-color":vue.unref(o),color:vue.unref(a)},null,8,["value","icon-src","background-color","color"])],40,_hoisted_2$1))),128))])}}},style$1=c$3([cB$2("bds-user-panel",css$1`
+    `)]);function mountStyle$1(e){useTheme$1("bds-user-panel-style",style$1,e)}const BILI_DATA_MANAGER_CDN="https://cdn.jsdelivr.net/gh/ZBpine/bili-data-manager@main/dist/bili-data-manager.min.js";let hashWorker=null,hashReqId=0;const pendingHashTasks=new Map,ensureHashWorker=()=>{if(hashWorker)return hashWorker;const e=`
+let converter = null;
+const ensureConverter = (bdmUrl) => {
+  if (converter) return converter;
+  importScripts(bdmUrl);
+  converter = self.BiliDataManager?.BiliUser || null;
+  return converter;
+};
+
+self.onmessage = (event) => {
+  const { id, hash, maxTry, bdmUrl } = event.data || {};
+  try {
+    const workerConverter = ensureConverter(bdmUrl);
+    if (!workerConverter || typeof workerConverter.hashToMid !== 'function') {
+      self.postMessage({ id, ok: false, error: '反查能力不可用' });
+      return;
+    }
+    const mid = workerConverter.hashToMid(hash, maxTry);
+    self.postMessage({ id, ok: true, mid });
+  } catch (error) {
+    self.postMessage({ id, ok: false, error: String(error?.message || error) });
+  }
+};
+`,t=new Blob([e],{type:"application/javascript"}),n=URL.createObjectURL(t);return hashWorker=new Worker(n),URL.revokeObjectURL(n),hashWorker.onmessage=r=>{const o=r.data||{},a=pendingHashTasks.get(o.id);if(a){if(pendingHashTasks.delete(o.id),clearTimeout(a.timer),!o.ok){a.reject(new Error(o.error||"反查失败"));return}a.resolve(o.mid)}},hashWorker.onerror=()=>{const r=Array.from(pendingHashTasks.values());pendingHashTasks.clear(),r.forEach(o=>{clearTimeout(o.timer),o.reject(new Error("反查失败"))}),hashWorker&&(hashWorker.terminate(),hashWorker=null)},hashWorker},hashToMidByWorker=(e,t=1e8)=>new Promise((n,r)=>{const o=ensureHashWorker(),a=++hashReqId,s=setTimeout(()=>{pendingHashTasks.delete(a),r(new Error("反查超时"))},3e4);pendingHashTasks.set(a,{resolve:n,reject:r,timer:s}),o.postMessage({id:a,hash:e,maxTry:t,bdmUrl:BILI_DATA_MANAGER_CDN})}),_sfc_main$2={__name:"UserPanel",props:{url:{type:String,default:""},midHash:{type:String,default:""},mode:{type:String,default:"script"}},setup(e){const t=e,n=vue.inject("styleMountTarget",null),r=vue.inject("BDM",null);mountStyle$1(n);const o=vue.ref(!1),a=vue.ref(""),s=naiveUi.useLoadingBar(),i=vue.ref(null),v=vue.ref({}),f=vue.ref(""),y=vue.computed(()=>t.mode==="readonly"),g=u=>String(u||"").trim().toLowerCase(),_=()=>new Promise(u=>{if(typeof requestAnimationFrame!="function"){setTimeout(u,0);return}requestAnimationFrame(()=>requestAnimationFrame(u))}),k=async()=>{if(!r){a.value="BDM 不可用";return}const u=String(t.url||"").trim(),l=g(t.midHash);if(!(!u&&!l)){o.value=!0,a.value="",s.start(),await vue.nextTick(),await _();try{let m=u,d="";if(l){if(typeof r?.BiliUser?.hashToMid!="function")throw new Error("反查能力不可用");const V=await hashToMidByWorker(l);if(!V||V===-1)throw new Error("未能查到用户ID或用户不存在");d=String(V),m=`https://space.bilibili.com/${d}`}if(y.value){v.value={card:{mid:d,name:"查找结果",sign:"此ID通过弹幕哈希本地计算得出，非官方公开数据，请谨慎使用"}},f.value="",typeof r.BiliUser.midToHash=="function"&&(f.value=g(r.BiliUser.midToHash(d))),s.finish();return}if(!r?.BiliUser)throw new Error("BDM 不可用");const h=new r.BiliUser(m),$=await h.getCard(!0);if(!$||typeof $!="object"||!$.card)throw new Error("无用户信息");const b=g(h.getMidHash());if(l&&b&&b!==l)throw new Error("用户信息校验失败，可能匹配到错误用户");v.value=$,f.value=h.getMidHash()||(d?r.BiliUser.midToHash(d):""),s.finish()}catch(m){v.value={},f.value="",a.value=String(m?.message||m),s.error()}finally{o.value=!1}}};return vue.watch(()=>[t.url,t.midHash,t.mode],()=>{k()},{immediate:!0}),(u,l)=>{const m=naiveUi.NAlert,d=naiveUi.NSpin,h=naiveUi.NFlex,$=naiveUi.NLoadingBarProvider;return vue.openBlock(),vue.createBlock($,{to:vue.unref(i)||void 0},{default:vue.withCtx(()=>[vue.createElementVNode("div",{ref_key:"userPanelEl",ref:i,class:"bds-user-panel"},[vue.createVNode(h,{vertical:"",size:8},{default:vue.withCtx(()=>[vue.unref(a)?(vue.openBlock(),vue.createBlock(m,{key:0,type:"error",title:vue.unref(a)},null,8,["title"])):vue.createCommentVNode("",!0),vue.createVNode(d,{show:vue.unref(o)},{default:vue.withCtx(()=>[vue.createVNode(vue.unref(_sfc_main$a),{"user-card":vue.unref(v),"mid-hash":vue.unref(f)},null,8,["user-card","mid-hash"])]),_:1},8,["show"])]),_:1})],512)]),_:1},8,["to"])}}},style=c$3([cB$2("bds-dm-panel",css$1`
+            height: 100%;
+            min-height: 0;
+            min-width: 0;
+        `,[cE$2("main",css$1`
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                    gap: 12px;
+                    align-items: stretch;
+                    height: 100%;
+                    min-height: 0;
+                    min-width: 0;
+                    overflow: hidden;
+                `),cE$2("left",css$1`
+                    min-width: 0;
+                    min-height: 0;
+                    overflow: auto;
+                    padding: 2px;
+                `),cE$2("right",css$1`
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    min-width: 0;
+                    min-height: 0;
+                    overflow: hidden;
+                `),cE$2("right-header",css$1`
+                    padding: 8px;
+                    border-bottom: 1px solid var(--dm-border-color);
+                    box-shadow: rgba(0, 0, 0, 0.05) 2px 2px 2px;
+                `),cE$2("result-block",css$1`
+                    padding: 0 8px;
+                    border-left: 2px solid var(--dm-border-color);
+                `),cE$2("table-block",css$1`
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(100% - 4px);
+                    min-height: 360px;
+                    flex-shrink: 0;
+                `),cE$2("table",css$1`
+                    flex: 1;
+                    min-height: 0;
+                `),c$3("@media (max-width: 1100px)",[cE$2("main",css$1`
+                        grid-template-columns: 1fr;
+                    `)])])]);function mountStyle(e){useTheme$1("bds-dm-panel-style",style,e)}const JIEBA_WASM_MODULE_URL="https://cdn.jsdelivr.net/npm/jieba-wasm@2.4.0/pkg/web/jieba_rs_wasm.js",simpleTokenCache=new Map,jiebaTokenCache=new Map;let currentArchiveId="",segmentWorker=null,segmentReqId=0;const pendingSegmentTasks=new Map,setCache=(e,t,n)=>{e.set(t,n)},normalizeWords=e=>Array.isArray(e)?e.map(t=>String(t||"").trim()).filter(t=>t.length>0):[],simpleSegment=e=>{const t=String(e||"").replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g," ").split(/\s+/);return normalizeWords(t)},ensureSegmentWorker=()=>{if(segmentWorker)return segmentWorker;const e=`
+let jiebaModulePromise = null;
+
+const ensureJieba = async (moduleUrl) => {
+  if (!jiebaModulePromise) {
+    jiebaModulePromise = (async () => {
+      const mod = await import(moduleUrl);
+      if (typeof mod.default === 'function') {
+        await mod.default();
+      }
+      return mod;
+    })();
+  }
+  return jiebaModulePromise;
+};
+
+const compressRepeats = (text, maxRepeat = 3) => {
+  let next = String(text || '');
+  for (let len = 1; len <= 8; len += 1) {
+    const regex = new RegExp('((.{1,' + len + '}))\\\\1{' + maxRepeat + ',}', 'g');
+    next = next.replace(regex, (_, __, word) => word.repeat(maxRepeat));
+  }
+  return next;
+};
+
+const normalizeWords = (words) => {
+  if (!Array.isArray(words)) return [];
+  return words
+    .map((word) => String(word || '').trim())
+    .filter((word) => word.length > 0);
+};
+
+self.onmessage = async (event) => {
+  const { id, contents, jiebaUrl } = event.data || {};
+  try {
+    const source = Array.isArray(contents) ? contents : [];
+    const jieba = await ensureJieba(jiebaUrl);
+    const list = [];
+    for (const row of source) {
+      const content = String(row || '');
+      if (!content) continue;
+      const safeContent = compressRepeats(content);
+      const words = typeof jieba.cut === 'function' ? jieba.cut(safeContent, true) : [];
+      list.push({ content, tokens: normalizeWords(words) });
+    }
+    self.postMessage({ id, ok: true, list });
+  } catch (error) {
+    self.postMessage({ id, ok: false, error: String(error?.message || error) });
+  }
+};
+`,t=new Blob([e],{type:"application/javascript"}),n=URL.createObjectURL(t);return segmentWorker=new Worker(n,{name:"segment-words-worker"}),URL.revokeObjectURL(n),segmentWorker.onmessage=r=>{const o=r.data||{},a=pendingSegmentTasks.get(o.id);if(a){if(pendingSegmentTasks.delete(o.id),clearTimeout(a.timer),!o.ok){a.reject(new Error(o.error||"分词失败"));return}a.resolve(Array.isArray(o.list)?o.list:[])}},segmentWorker.onerror=()=>{const r=Array.from(pendingSegmentTasks.values());pendingSegmentTasks.clear(),r.forEach(o=>{clearTimeout(o.timer),o.reject(new Error("分词失败"))}),segmentWorker&&(segmentWorker.terminate(),segmentWorker=null)},segmentWorker},segmentJiebaMissing=(e,t=3e4)=>new Promise((n,r)=>{const o=ensureSegmentWorker(),a=++segmentReqId,s=setTimeout(()=>{pendingSegmentTasks.delete(a),r(new Error("分词超时"))},Math.max(1e3,Number(t)||3e4));pendingSegmentTasks.set(a,{resolve:n,reject:r,timer:s}),o.postMessage({id:a,contents:e,jiebaUrl:JIEBA_WASM_MODULE_URL})}),addItemTokensToFreq=(e,t,n)=>{const r=new Set((Array.isArray(t)?t:[]).filter(o=>o.length>=n));for(const o of r)e[o]=(e[o]||0)+1},aggregateByItems=(e,t,n)=>{const r=Object.create(null);for(const o of Array.isArray(e)?e:[]){const a=String(o?.content||"");if(!a)continue;let s=t.get(a);Array.isArray(s)||(s=simpleSegment(a),setCache(t,a,s)),addItemTokensToFreq(r,s,n)}return r},segmentWords=async({mode:e="simple",items:t=[],minLen:n=2,topN:r=1e3,timeout:o=3e4,archiveId:a=""}={})=>{const s=e==="jieba"?"jieba":"simple",i=Math.max(1,Number(n)||2),v=Math.max(1,Number(r)||1e3),f=String(a||"").trim();f!==currentArchiveId&&(simpleTokenCache.clear(),jiebaTokenCache.clear(),currentArchiveId=f);const y=s==="jieba"?jiebaTokenCache:simpleTokenCache,g=Array.isArray(t)?t:[],_=s==="jieba"?Array.from(new Set(g.map(u=>String(u?.content||"")).filter(u=>u&&!y.has(u)))):[];if(s==="simple"){const u=aggregateByItems(g,y,i);return Object.entries(u).map(([l,m])=>({name:l,value:m})).sort((l,m)=>m.value-l.value).slice(0,v)}else if(_.length>0){const u=await segmentJiebaMissing(_,o);for(const l of u){const m=String(l?.content||"");if(!m)continue;const d=normalizeWords(l?.tokens||[]);setCache(y,m,d)}}const k=Object.create(null);for(const u of g){const l=String(u?.content||"");l&&addItemTokensToFreq(k,y.get(l)||[],i)}return Object.entries(k).map(([u,l])=>({name:u,value:l})).sort((u,l)=>l.value-u.value).slice(0,v)},INJECT_SCRIPT_ID="bds-injected-data",safeSerialize=e=>JSON.stringify(e).replace(/<\//g,"<\\/"),injectPanelData=(e,t)=>{const n=String(e||"");if(!n.trim())throw new Error("静态模板为空");const r=new DOMParser().parseFromString(n,"text/html"),o=safeSerialize(t||{});r.querySelectorAll('script[data-bds-echarts], script[src*="echarts.min.js"], script[src*="echarts-wordcloud.min.js"]').forEach(v=>v.remove());const s=r.getElementById(INJECT_SCRIPT_ID);s&&s.remove();const i=r.createElement("script");if(i.id=INJECT_SCRIPT_ID,i.type="application/json",i.textContent=o,!r.body){const v=r.createElement("body");r.documentElement.appendChild(v)}return r.body.appendChild(i),`<!doctype html>
+${r.documentElement.outerHTML}`},downloadHtmlText=(e,t)=>{const n=new Blob([e],{type:"text/html;charset=utf-8"}),r=URL.createObjectURL(n),o=document.createElement("a");o.href=r,o.download=t,document.body.appendChild(o),o.click(),o.remove(),URL.revokeObjectURL(r)},_hoisted_1={class:"bds-dm-panel__main"},_hoisted_2={class:"bds-dm-panel__left"},_hoisted_3={class:"bds-dm-panel__table-block"},_hoisted_4={class:"bds-dm-panel__right"},ECHARTS_URL="https://cdn.jsdelivr.net/npm/echarts@6/dist/echarts.min.js",WORDCLOUD_URL="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2/dist/echarts-wordcloud.min.js",HTML2CANVAS_URL="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",DEFAULT_EXTERNAL_PANEL_URL="https://zbpine.github.io/bili-data-statistic/",EXTERNAL_PANEL_SELECTED_KEY="external.panelUrl.selected",EXTERNAL_PANEL_LEGACY_KEY="external.panelUrl",EXTERNAL_PANEL_WINDOW_NAME="bds-readonly-panel",PANEL_TRANSFER_TYPE$1="BDS_PANEL_TRANSFER",PANEL_TRANSFER_ACK_TYPE$1="BDS_PANEL_TRANSFER_ACK",_sfc_main$1={__name:"DmPanel",props:{url:{type:String,default:""},to:{type:[String,Object],default:void 0},active:{type:Boolean,default:!1},mode:{type:String,default:"script"}},emits:["update:url"],setup(e,{emit:t}){let n=null,r=null,o=null;const a=new Map,s=x=>Array.from(document.scripts||[]).find(p=>String(p?.src||"").includes(x)),i=x=>{if(a.has(x))return a.get(x);if(s(x))return Promise.resolve();const S=new Promise((B,F)=>{const W=document.createElement("script");W.src=x,W.async=!0,W.dataset.bdsEcharts="true",W.onload=()=>{W.dataset.bdsLoaded="true",B()},W.onerror=()=>{a.delete(x),F(new Error(`load script failed: ${x}`))},(document.head||document.documentElement).appendChild(W)});return a.set(x,S),S},v=async()=>{n||(n=(async()=>{if(d?.echarts?.init||await i(ECHARTS_URL),await i(WORDCLOUD_URL),!d?.echarts?.init)throw new Error("echarts 未加载到 window")})()),await n},f=async()=>(r||(r=(async()=>{if(d?.html2canvas||await i(HTML2CANVAS_URL),!d?.html2canvas)throw new Error("html2canvas 未加载到 window");return d.html2canvas})()),await r),y=x=>{const p=String(x||"").trim();if(!p)return null;try{const S=new URL(p);return["http:","https:"].includes(S.protocol)?S.href:null}catch{return null}},g=()=>{const x=y(storage.get(EXTERNAL_PANEL_SELECTED_KEY,""));if(x)return x;const p=y(storage.get(EXTERNAL_PANEL_LEGACY_KEY,""));return p||DEFAULT_EXTERNAL_PANEL_URL},_=e,k=t,u=vue.inject("styleMountTarget",null),l=vue.inject("BDM",null),m=vue.inject("data",vue.shallowRef(null)),d=vue.inject("runtimeWindow",window),h=vue.inject("getStaticHtmlText",null),$=vue.inject("themeSettings",null);mountStyle(u);const b=vue.shallowRef(null),M=vue.shallowRef(null),V=vue.ref(""),z=vue.shallowRef({}),Y=vue.shallowRef([]),G=vue.shallowRef([]),q=vue.shallowRef([]),A=vue.shallowRef([]),Z=vue.ref(null),O=vue.ref(null),le=vue.ref(null),C=vue.ref([]),T=vue.ref(null),D=vue.ref("^(哈|呵|h|ha|H|HA|233+)+$"),j=vue.ref(!1),E=vue.ref([]),L=vue.ref(!1),J=vue.ref(!1),de=vue.ref(!1),ce=vue.ref(""),ne=vue.ref(_.mode==="readonly"?["list"]:["load","list"]),me=vue.ref(!1),N=vue.ref(null),w=vue.ref(!1),U=vue.ref(!1),R=vue.ref(!1),H=vue.ref(""),Q=vue.shallowRef(null),oe=vue.ref(!1),ee=[{url:"https://greasyfork.org/zh-CN/scripts/534432",title:"GreasyFork",icon:"https://greasyfork.org/vite/assets/blacklogo96-CxYTSM_T.png"},{url:"https://scriptcat.org/zh-CN/script-show-page/3750",title:"ScriptCat",icon:"https://scriptcat.org/favicon.ico"}];let _e=1;const we=vue.ref(!1),fe=vue.ref(""),pe=vue.computed(()=>_.mode==="readonly"),xe=vue.ref(!!d?.echarts?.init),te=naiveUi.useMessage(),ge=naiveUi.useDialog(),je=naiveUi.useNotification(),He=naiveUi.useModal(),Ne=naiveUi.useThemeVars(),Oe=vue.computed(()=>({"--dm-border-color":Ne.value.borderColor})),Me=vue.computed(()=>Ne.value.baseColor||Ne.value.cardColor||"#fff"),We=vue.computed(()=>({BDM:l,arcMgr:b.value,dmMgr:M.value,tableRef:Z,tableItems:A.value,stagedFilter:T.value,committedFilters:C.value,segmentWords,feedback:{message:te,dialog:ge,notification:je,modal:He},queryMidHash:it})),qe=vue.computed(()=>ne.value.includes("list")),Ye=vue.computed(()=>O.value?.settings||null),he=x=>{V.value=x?String(x?.message||x):""},Ve=()=>{T.value=null},Xe=(x,p)=>{const S=x?.wrapTag!==!1,B=typeof x.formatValue=="function"?x.formatValue(p):String(p),F=B==null||B===""?String(p):B;return!S||vue.isVNode(F)?F:vue.h(naiveUi.NTag,{size:"small"},{default:()=>String(F)})},De=vue.defineComponent({name:"FilterLabel",props:{filter:{type:Object,required:!0}},setup(x){return()=>{const p=x.filter,B=(Array.isArray(p.values)?p.values:[]).flatMap((W,X)=>{const P=Xe(p,W);return X===0?[P]:[", ",P]}),F=String(p.template||"{value}");if(F.includes("{value}")){const[W,X=""]=F.split("{value}");return vue.h("span",[W,...B,X])}return vue.h("span",[F," ",...B])}}}),Ae=(x,p)=>{const S=Array.isArray(p.values)?p.values:[];return!S.length||typeof p.predicate!="function"?x:x.filter(B=>{const F=S.some(W=>p.predicate(B,W));return p.exclude?!F:F})},ke=x=>{let p=[...x];return T.value&&(p=Ae(p,{...T.value,exclude:!1})),p},be=()=>{let x=[...G.value];const p=C.value.filter(S=>S.enabled);for(const S of p)x=Ae(x,S);q.value=x,A.value=ke(x)},Re=()=>{C.value=[],Ve(),j.value=!1,q.value=[...G.value],A.value=[...G.value]},Ke=()=>{try{const x=new RegExp(D.value,"i"),p={id:`f-${_e++}`,source:"regex",template:"正则筛选 {value}",values:[D.value],formatValue:B=>`/${B}/i`,predicate:B=>x.test(String(B?.content||"")),wrapTag:!0,enabled:!0,exclude:j.value},S=C.value.findIndex(B=>B.source==="regex");S>=0?C.value.splice(S,1,p):C.value.push(p),Ve(),he(""),be()}catch{he("无效正则表达式")}},Ge=x=>{if(!x||typeof x.predicate!="function")return;const p=String(x.source||"chart:unknown"),S=x.value;if(S==null||S==="")return;if(!T.value||T.value.source!==p){T.value={source:p,template:x.template||"{value}",values:[S],formatValue:x.formatValue||(W=>String(W)),predicate:x.predicate,wrapTag:x.wrapTag!==!1},A.value=ke(q.value);return}const B=T.value;B.template=x.template||B.template,B.formatValue=x.formatValue||B.formatValue,B.predicate=x.predicate,B.wrapTag=x.wrapTag!==!1;const F=B.values.findIndex(W=>W===S);F>=0?B.values.splice(F,1):B.values.push(S),B.values.length||(T.value=null),A.value=ke(q.value)},Je=()=>{const x=T.value;!x||!x.values.length||(C.value.push({id:`f-${_e++}`,source:x.source,template:x.template,values:[...x.values],formatValue:x.formatValue,predicate:x.predicate,wrapTag:x.wrapTag!==!1,enabled:!0,exclude:!1}),T.value=null,be())},Qe=()=>{T.value=null,A.value=ke(q.value)},Ze=x=>{const p=C.value.find(S=>S.id===x);p&&(p.enabled=!p.enabled,be())},et=x=>{const p=C.value.find(S=>S.id===x);p&&(p.exclude=!p.exclude,p.source==="regex"&&(j.value=p.exclude),be())},tt=x=>{const p=C.value.findIndex(B=>B.id===x);if(p<0)return;const S=C.value[p];C.value.splice(p,1),S.source==="regex"&&(j.value=!1),be()},ze=vue.computed(()=>!!(T.value&&Array.isArray(T.value.values)&&T.value.values.length>0)),nt=vue.computed(()=>C.value.length>0||ze.value),Ue=({list:x=[],commandDms:p=[]}={})=>{G.value=Array.isArray(x)?[...x]:[],Y.value=Array.isArray(p)?p:[],Re()};let Ee=!1,Se=!1,Ce=null;const Fe=async()=>Ee?(Se=!0,Ce):(Ee=!0,Ce=(async()=>{let x=null;do{Se=!1;try{await rt(),x=null}catch(p){x=p}}while(Se);if(x)throw x})().finally(()=>{Ee=!1,Ce=null}),Ce),rt=async()=>{if(!l?.BiliArchive||!l?.BiliDanmaku)throw new Error("BDM 不可用");let x=String(_.url||"").trim();const p=m?.value;if(m.value=null,p&&typeof p=="object"){const K=new l.BiliArchive,re=K.setData(p)||K.info||{},ae=new l.BiliDanmaku(re);ae.setData(p);const ue=String(re?.id||`upload-${Date.now()}`).trim();b.value=K,z.value=re,M.value=ae,x=String(re?.url||"").trim(),k("update:url",x),fe.value!==ue&&(ne.value=pe.value?["list"]:["load","list"],me.value=!1),fe.value=ue}if(Ue({list:M.value?.data?.danmaku_list||[],commandDms:M.value?.data?.danmaku_view?.commandDms||[]}),pe.value)return;if(!x){if(p&&typeof p=="object")return;throw new Error("未提供稿件 URL")}const S=typeof l.BiliArchive.parseUrl=="function"?l.BiliArchive.parseUrl(x):{},B=String(S?.id||"").trim();if(!B)throw new Error("无法从URL中解析稿件 ID");if(b.value&&M.value&&fe.value===B)return;const F=new l.BiliArchive,X=await F.getData(x)||F.info||{},P=String(X?.id||B).trim();if(!P)throw new Error("稿件信息获取失败");b.value=F,z.value=X,M.value=new l.BiliDanmaku(X),x=String(X?.url||"").trim(),k("update:url",x),fe.value!==P&&(ne.value=pe.value?["list"]:["load","list"],me.value=!1),fe.value=P},ot=vue.computed(()=>[...[{getName:p=>`点赞数：${Number.isInteger(p?.likes)?p.likes:"点击获取"}`,onSelect:async p=>{if(!(!M.value?.api||!z.value?.cid||!p?.idStr))try{const S=await M.value.api.getLikes(z.value.cid,[String(p.idStr)]);p.likes=S?.[String(p.idStr)]?.likes??0}catch(S){l?.logger?.warn("[dm likes] 查询失败",S)}},disabled:pe.value}],...E.value]),at=x=>{E.value=Array.isArray(x)?x:[]},st=async x=>{const p=String(x||"").trim();if(p)try{await navigator.clipboard.writeText(p),te.success("midHash已复制到剪贴板")}catch(S){l?.logger?.error?.("midHash复制失败",S),te.error("复制失败")}},it=x=>{const p=String(x||"").trim();p&&(ce.value=p,J.value=!0)},Be=()=>{H.value&&(URL.revokeObjectURL(H.value),H.value=""),Q.value=null},lt=(x,p="image/png")=>new Promise((S,B)=>{x.toBlob(F=>{F?S(F):B(new Error("图片导出失败"))},p)}),ct=async()=>{if(w.value)return;const x=f(),p=N.value?.$el,S=Z.value?.$el?.parentElement,B=le.value?.$el,F=O.value?.chartBodyEl||null,W=Array.from(F?.children||[]);try{w.value=!0,await vue.nextTick();const X=[p,S,B,...W].filter(ie=>ie?window.getComputedStyle(ie).display!=="none":!1);if(!X.length)throw new Error("找不到截图区域");const P=Math.max(1,Number(window.devicePixelRatio)||1),K={scale:P,backgroundColor:Me.value,useCORS:!0},ve=await x,re=(await Promise.all(X.map(ie=>ve(ie,K)))).filter(Boolean);if(!re.length)throw new Error("截图生成失败");const ae=Math.round(24*P),ue=Math.max(...re.map(ie=>ie.width)),se=ue+ae*2,$e=ae*2+re.reduce((ie,Te)=>ie+Te.height,0),I=document.createElement("canvas");I.width=se,I.height=$e;const ye=I.getContext("2d");if(!ye)throw new Error("无法创建绘图上下文");ye.fillStyle=Me.value,ye.fillRect(0,0,se,$e);let Pe=ae;for(const ie of re){const Te=ae+Math.floor((ue-ie.width)/2);ye.drawImage(ie,Te,Pe),Pe+=ie.height}const Ie=await lt(I,"image/png");Be(),Q.value=Ie,H.value=URL.createObjectURL(Ie),R.value=!0}catch(X){l?.logger?.error?.("分享图片生成失败",X),te.error("截图生成失败")}finally{w.value=!1}},ut=()=>{const x=Q.value;if(!x)return;const p=URL.createObjectURL(x),S=document.createElement("a"),B=String(z.value?.id||"bili-data-statistic").trim()||"bili-data-statistic";S.href=p,S.download=`${B}.png`,document.body.appendChild(S),S.click(),document.body.removeChild(S),URL.revokeObjectURL(p)},Le=()=>{const x={...M.value?.data||{},...b.value?.data||{}};return Object.keys(x).length>0?x:m?.value&&typeof m.value=="object"?m.value:null},dt=async()=>{if(U.value)return;if(typeof h!="function"){te.error("静态模板读取能力不可用");return}const x=Le();if(!x){te.warning("当前没有可导出的弹幕数据");return}try{U.value=!0;const p=await h(),S=injectPanelData(p,x),B=String(z.value?.id||"bili-data-statistics").trim()||"bili-data-statistics";downloadHtmlText(S,`${B}.html`),te.success("静态面板已下载")}catch(p){l?.logger?.error?.("静态面板下载失败",p),te.error("静态面板下载失败")}finally{U.value=!1}},vt=async()=>{if(oe.value)return;const x=g(),p=new URL(x).origin,S=Le();if(!S){te.warning("当前没有可发送的弹幕数据");return}let B=o;if(!!(B&&!B.closed)?B.focus?.():(B=window.open(x,EXTERNAL_PANEL_WINDOW_NAME),o=B||null),!B){te.error("打开外部页面失败，请检查浏览器拦截设置");return}oe.value=!0;const W=`${Date.now()}-${Math.random().toString(36).slice(2,10)}`,X={type:PANEL_TRANSFER_TYPE$1,sessionId:W,version:1,payload:S};let P=null,K=null;const ve=()=>{P&&(clearInterval(P),P=null),K&&(clearTimeout(K),K=null),window.removeEventListener("message",ae),oe.value=!1},re=()=>{try{B.postMessage(X,p)}catch{}},ae=ue=>{if(ue.origin!==p||ue.source!==B)return;const se=ue.data;!se||typeof se!="object"||se.type===PANEL_TRANSFER_ACK_TYPE$1&&se.sessionId===W&&(ve(),te.success("已新标签页打开并发送数据"))};window.addEventListener("message",ae),re(),P=setInterval(re,400),K=setTimeout(()=>{ve(),te.warning("外部页面未响应，可在外部页面加载完成后重试")},1e4)},mt=()=>{J.value=!1,de.value=!0},ft=x=>{me.value=!0,ne.value=Array.isArray(x)?x:[]},pt=()=>{me.value||pe.value||(ne.value=ne.value.filter(x=>x!=="load"))};return vue.watch(()=>_.active,async x=>{if(x){we.value||(mountVueucStyles(u||void 0),we.value=!0);try{he(""),await Fe(),xe.value?(await vue.nextTick(),O.value?.chartResize?.()):v().then(()=>{xe.value=!0,vue.nextTick(()=>{O.value?.chartResize?.()})}).catch(p=>{he(p)})}catch(p){he(p)}}},{immediate:!0}),vue.watch(()=>m?.value,async(x,p)=>{if(_.active&&!(!x||typeof x!="object")&&x!==p)try{he(""),await Fe()}catch(S){he(S)}}),vue.watch(nt,(x,p)=>{!x||p||ne.value.includes("result")||(ne.value=[...ne.value,"result"])}),vue.onBeforeUnmount(()=>{Be()}),(x,p)=>{const S=naiveUi.NAlert,B=naiveUi.NDivider,F=naiveUi.NCollapseItem,W=naiveUi.NCheckbox,X=naiveUi.NIcon,P=naiveUi.NButton,K=naiveUi.NFlex,ve=naiveUi.NText,re=naiveUi.NCollapse,ae=naiveUi.NInput,ue=naiveUi.NPopover,se=naiveUi.NModal,$e=naiveUi.NTag;return vue.openBlock(),vue.createElementBlock("div",{class:"bds-dm-panel",style:vue.normalizeStyle(vue.unref(Oe))},[vue.createElementVNode("div",_hoisted_1,[vue.createElementVNode("div",_hoisted_2,[vue.createVNode(K,{size:12,vertical:"",ref_key:"leftContentRef",ref:N},{default:vue.withCtx(()=>[vue.unref(V)?(vue.openBlock(),vue.createBlock(S,{key:0,type:"error",title:vue.unref(V)},null,8,["title"])):vue.createCommentVNode("",!0),vue.createVNode(vue.unref(_sfc_main$6$1),{"archive-info":vue.unref(z)},null,8,["archive-info"]),vue.createVNode(B,{style:{margin:"4px 0"}}),vue.unref(b)&&vue.unref(M)?(vue.openBlock(),vue.createBlock(re,{key:1,"display-directive":"show","expanded-names":vue.unref(ne),"onUpdate:expandedNames":ft},{default:vue.withCtx(()=>[vue.createVNode(F,{name:"load",title:`载入弹幕 ${vue.unref(G).length.toLocaleString()} 条`},{default:vue.withCtx(()=>[vue.unref(pe)?vue.createCommentVNode("",!0):(vue.openBlock(),vue.createBlock(vue.unref(_sfc_main$9),{key:vue.unref(z).id||vue.unref(fe),"arc-mgr":vue.unref(b),"dm-mgr":vue.unref(M),to:_.to,onSyncData:Ue,onSetError:he,onInitialLoadFinished:pt},null,8,["arc-mgr","dm-mgr","to"]))]),_:1},8,["title"]),vue.unref(Y).length?(vue.openBlock(),vue.createBlock(F,{key:0,name:"command",title:`互动弹幕 ${vue.unref(Y).length.toLocaleString()} 条`},{default:vue.withCtx(()=>[vue.createVNode(vue.unref(_sfc_main$5$1),{"command-dms":vue.unref(Y)},null,8,["command-dms"])]),_:1},8,["title"])):vue.createCommentVNode("",!0),vue.createVNode(F,{name:"result",title:`筛选弹幕 ${vue.unref(q).length.toLocaleString()} 条`},{default:vue.withCtx(()=>[vue.createVNode(K,{vertical:"",size:8,class:"bds-dm-panel__result-block"},{default:vue.withCtx(()=>[vue.unref(C).length?(vue.openBlock(),vue.createBlock(K,{key:0,vertical:"",size:8},{default:vue.withCtx(()=>[(vue.openBlock(!0),vue.createElementBlock(vue.Fragment,null,vue.renderList(vue.unref(C),I=>(vue.openBlock(),vue.createBlock(K,{key:I.id,align:"center",size:[12,4],wrap:""},{default:vue.withCtx(()=>[vue.createVNode(W,{checked:I.enabled,"onUpdate:checked":()=>Ze(I.id)},null,8,["checked","onUpdate:checked"]),vue.createVNode(vue.unref(De),{filter:I},null,8,["filter"]),vue.createVNode(W,{checked:I.exclude,style:{"margin-left":"auto"},"onUpdate:checked":()=>et(I.id)},{default:vue.withCtx(()=>[...p[10]||(p[10]=[vue.createTextVNode(" 排除 ",-1)])]),_:1},8,["checked","onUpdate:checked"]),vue.createVNode(P,{size:"tiny",tertiary:"",type:"error",title:"清除筛选",onClick:ye=>tt(I.id)},{default:vue.withCtx(()=>[vue.createVNode(X,null,{default:vue.withCtx(()=>[vue.createVNode(vue.unref(TrashX))]),_:1})]),_:1},8,["onClick"])]),_:2},1024))),128))]),_:1})):vue.createCommentVNode("",!0),vue.unref(ze)?(vue.openBlock(),vue.createBlock(K,{key:1,vertical:"",size:6},{default:vue.withCtx(()=>[vue.createVNode(K,{align:"center",size:[12,4],wrap:""},{default:vue.withCtx(()=>[vue.createVNode(vue.unref(De),{filter:vue.unref(T)},null,8,["filter"]),vue.createVNode(ve,{depth:"3"},{default:vue.withCtx(()=>[vue.createTextVNode("弹幕共 "+vue.toDisplayString(vue.unref(A).length.toLocaleString())+" 条",1)]),_:1}),vue.createVNode(P,{size:"tiny",tertiary:"",type:"error",title:"清除子筛选",onClick:Qe,style:{"margin-left":"auto"}},{default:vue.withCtx(()=>[vue.createVNode(X,null,{default:vue.withCtx(()=>[vue.createVNode(vue.unref(TrashX))]),_:1})]),_:1}),vue.createVNode(P,{size:"tiny",tertiary:"",type:"success",title:"提交子筛选结果作为新的数据源",onClick:Je},{default:vue.withCtx(()=>[vue.createVNode(X,null,{default:vue.withCtx(()=>[vue.createVNode(vue.unref(SquareCheck))]),_:1})]),_:1})]),_:1})]),_:1})):vue.createCommentVNode("",!0)]),_:1})]),_:1},8,["title"]),vue.createVNode(F,{name:"list",title:`列表弹幕 ${vue.unref(A).length.toLocaleString()} 条`},null,8,["title"])]),_:1},8,["expanded-names"])):vue.createCommentVNode("",!0)]),_:1},512),vue.withDirectives(vue.createElementVNode("div",_hoisted_3,[vue.createVNode(vue.unref(_sfc_main$1$1),{class:"bds-dm-panel__table",items:vue.unref(A),"item-height":38,"menu-items":vue.unref(ot),to:_.to,ref_key:"danmakuTableRef",ref:Z},null,8,["items","menu-items","to"])],512),[[vue.vShow,vue.unref(qe)]]),vue.withDirectives(vue.createVNode(B,{style:{padding:"16px 0"},ref_key:"dividerRef",ref:le},null,512),[[vue.vShow,vue.unref(w)]])]),vue.createElementVNode("div",_hoisted_4,[vue.createVNode(K,{align:"center",size:8,wrap:"",class:"bds-dm-panel__right-header"},{default:vue.withCtx(()=>[vue.createVNode(ae,{value:vue.unref(D),"onUpdate:value":p[0]||(p[0]=I=>vue.isRef(D)?D.value=I:null),placeholder:"请输入正则表达式",size:"small",style:{flex:"1","min-width":"200px"}},null,8,["value"]),vue.createVNode(P,{size:"small",type:vue.unref(C).length?void 0:"warning",onClick:Ke},{default:vue.withCtx(()=>[...p[11]||(p[11]=[vue.createTextVNode("筛选",-1)])]),_:1},8,["type"]),vue.createVNode(P,{size:"small",type:vue.unref(C).length?"warning":void 0,onClick:Re},{default:vue.withCtx(()=>[...p[12]||(p[12]=[vue.createTextVNode("取消筛选",-1)])]),_:1},8,["type"]),_.mode!=="script"?(vue.openBlock(),vue.createBlock(P,{key:0,size:"small",circle:"",title:"转为图片",loading:vue.unref(w),onClick:ct},{icon:vue.withCtx(()=>[vue.createVNode(X,null,{default:vue.withCtx(()=>[vue.createVNode(vue.unref(Camera))]),_:1})]),_:1},8,["loading"])):(vue.openBlock(),vue.createBlock(P,{key:1,size:"small",circle:"",title:"新标签页打开",loading:vue.unref(oe),onClick:vt},{icon:vue.withCtx(()=>[vue.createVNode(X,null,{default:vue.withCtx(()=>[vue.createVNode(vue.unref(ExternalLink))]),_:1})]),_:1},8,["loading"])),vue.createVNode(P,{size:"small",circle:"",title:"下载面板",loading:vue.unref(U),onClick:dt},{icon:vue.withCtx(()=>[vue.createVNode(X,null,{default:vue.withCtx(()=>[vue.createVNode(vue.unref(FileDownload))]),_:1})]),_:1},8,["loading"]),vue.createVNode(ue,{trigger:"hover",placement:"bottom-end",to:_.to},{trigger:vue.withCtx(()=>[vue.createVNode(P,{size:"small",circle:"",title:"设置",onClick:p[1]||(p[1]=I=>L.value=!0)},{icon:vue.withCtx(()=>[vue.createVNode(X,null,{default:vue.withCtx(()=>[vue.createVNode(vue.unref(Settings))]),_:1})]),_:1})]),default:vue.withCtx(()=>[vue.createVNode(vue.unref(_sfc_main$3),{links:ee})]),_:1},8,["to"])]),_:1}),vue.unref(xe)?(vue.openBlock(),vue.createBlock(vue.unref(_sfc_main$8),{key:1,ref_key:"chartManagerRef",ref:O,items:vue.unref(q),"chart-ctx":vue.unref(We),to:_.to,onSelectFilter:Ge,"onUpdate:chartMenus":at},null,8,["items","chart-ctx","to"])):(vue.openBlock(),vue.createBlock(S,{key:0,type:"info",title:"图表库加载中..."}))])]),vue.createVNode(se,{show:vue.unref(L),"onUpdate:show":p[2]||(p[2]=I=>vue.isRef(L)?L.value=I:null),preset:"card",title:"设置",style:{width:"50vw","max-height":"60vh"},to:_.to},{default:vue.withCtx(()=>[vue.createVNode(vue.unref(_sfc_main$4),{"chart-settings":vue.unref(Ye),"theme-settings":vue.unref($),mode:_.mode},null,8,["chart-settings","theme-settings","mode"])]),_:1},8,["show","to"]),vue.createVNode(se,{show:vue.unref(J),"onUpdate:show":p[5]||(p[5]=I=>vue.isRef(J)?J.value=I:null),preset:"card",title:"提示",style:{width:"450px"},to:_.to},{default:vue.withCtx(()=>[vue.createVNode(K,{vertical:"",size:10},{default:vue.withCtx(()=>[vue.createVNode(ve,null,{default:vue.withCtx(()=>[...p[13]||(p[13]=[vue.createTextVNode("是否尝试反查用户ID？",-1)])]),_:1}),vue.createVNode($e,{size:"small",type:"info",style:{cursor:"pointer","align-self":"flex-start"},title:"点击复制 midHash",onClick:p[3]||(p[3]=I=>st(vue.unref(ce)))},{default:vue.withCtx(()=>[vue.createTextVNode(vue.toDisplayString(vue.unref(ce)),1)]),_:1}),vue.createVNode(ve,{depth:"3"},{default:vue.withCtx(()=>[...p[14]||(p[14]=[vue.createTextVNode("可能需要一段时间，且10位数以上ID容易查错",-1)])]),_:1}),vue.createVNode(K,{justify:"end",size:8},{default:vue.withCtx(()=>[vue.createVNode(P,{size:"small",onClick:p[4]||(p[4]=I=>J.value=!1)},{default:vue.withCtx(()=>[...p[15]||(p[15]=[vue.createTextVNode("否",-1)])]),_:1}),vue.createVNode(P,{size:"small",type:"warning",onClick:mt},{default:vue.withCtx(()=>[...p[16]||(p[16]=[vue.createTextVNode("是",-1)])]),_:1})]),_:1})]),_:1})]),_:1},8,["show","to"]),vue.unref(de)?(vue.openBlock(),vue.createBlock(se,{key:0,show:!0,preset:"card",title:"用户信息",style:{width:"60vw"},to:_.to,"onUpdate:show":p[6]||(p[6]=I=>{I||(de.value=!1)})},{default:vue.withCtx(()=>[vue.createVNode(_sfc_main$2,{url:_.url,"mid-hash":vue.unref(ce),mode:_.mode},null,8,["url","mid-hash","mode"])]),_:1},8,["to"])):vue.createCommentVNode("",!0),vue.createVNode(se,{show:vue.unref(R),"onUpdate:show":[p[8]||(p[8]=I=>vue.isRef(R)?R.value=I:null),p[9]||(p[9]=I=>{I||Be()})],preset:"card",title:"截图预览",style:{width:"50vw"},to:_.to},{default:vue.withCtx(()=>[vue.createVNode(K,{vertical:"",size:12},{default:vue.withCtx(()=>[vue.unref(H)?(vue.openBlock(),vue.createBlock(vue.unref(_sfc_main$7$1),{key:0,src:vue.unref(H),alt:"截图预览",width:"100%","object-fit":"contain",style:{"max-height":"60vh"}},null,8,["src"])):vue.createCommentVNode("",!0),vue.createVNode(K,{justify:"end",size:8},{default:vue.withCtx(()=>[vue.createVNode(P,{onClick:p[7]||(p[7]=I=>R.value=!1)},{default:vue.withCtx(()=>[...p[17]||(p[17]=[vue.createTextVNode("关闭",-1)])]),_:1}),vue.createVNode(P,{type:"warning",onClick:ut},{default:vue.withCtx(()=>[...p[18]||(p[18]=[vue.createTextVNode("保存图片",-1)])]),_:1})]),_:1})]),_:1})]),_:1},8,["show","to"])],4)}}},appError="",_sfc_main={__name:"App",setup(e){const t=vue.inject("styleMountTarget",null),n=vue.inject("BDM",null),r=vue.inject("APP_MODE",vue.ref("script")),o=vue.inject("data",vue.shallowRef(null)),a=vue.inject("sourceUrl",vue.shallowRef(""));mountStyle$c(t);const s=vue.ref(!1),i=vue.computed(()=>r.value==="script"),v=vue.computed(()=>!!(o?.value&&typeof o.value=="object"));i.value&&(a.value=location.href);const f=vue.computed(()=>{const E=String(a?.value||"").trim();if(!E)return!1;try{return new URL(E).hostname==="space.bilibili.com"}catch{return!1}}),y=vue.computed(()=>i.value?f.value?60:80:90),g=vue.computed(()=>f.value?"用户信息":"弹幕统计"),_=vue.ref(normalizeThemeMode(storage.get("theme.mode",DEFAULT_THEME.mode))),k=vue.ref(normalizeThemeColor(storage.get("theme.lightPrimary",DEFAULT_THEME.lightPrimary),DEFAULT_THEME.lightPrimary)),u=vue.ref(normalizeThemeColor(storage.get("theme.darkPrimary",DEFAULT_THEME.darkPrimary),DEFAULT_THEME.darkPrimary)),l=vue.ref(!!storage.get("theme.applyToCharts",!1)),m=naiveUi.useOsTheme(),d=vue.computed(()=>_.value==="dark"?!0:_.value==="light"?!1:m.value==="dark"),h=vue.computed(()=>d.value?naiveUi.darkTheme:null),$=vue.computed(()=>({colorScheme:d.value?"dark":"light"})),b=vue.computed(()=>d.value?createDarkThemeOverrides(u.value):createLightThemeOverrides(k.value)),M=vue.computed(()=>d.value?"dark":"light"),V=vue.computed(()=>d.value?u.value:k.value),z=({light:E,dark:L})=>{const J=normalizeThemeColor(E,k.value),de=normalizeThemeColor(L,u.value);k.value=J,u.value=de,storage.set("theme.lightPrimary",J),storage.set("theme.darkPrimary",de)},Y=E=>{const L=normalizeThemeMode(E);_.value!==L&&(_.value=L,storage.set("theme.mode",L))};vue.provide("themeSettings",{mode:_,lightPrimary:k,darkPrimary:u,activePrimary:V,applyToCharts:l,setMode:Y,applyColors:z}),vue.provide("activeTheme",M),vue.watch(V,E=>{n.changeColor(E)},{immediate:!0}),vue.watch(l,E=>{storage.set("theme.applyToCharts",!!E)});const G=vue.ref(null),q=vue.computed(()=>G.value?.panelEl||null);let A=!1;const Z=E=>{if(!s.value)return;const L=q.value;if(!L)return;const J=typeof E.composedPath=="function"?E.composedPath():[];Array.isArray(J)&&J.length&&!J.includes(L)||(E.stopPropagation(),E.stopImmediatePropagation?.())},O=()=>{A||(window.addEventListener("keydown",Z,!0),window.addEventListener("keypress",Z,!0),window.addEventListener("keyup",Z,!0),A=!0)},le=()=>{A&&(window.removeEventListener("keydown",Z,!0),window.removeEventListener("keypress",Z,!0),window.removeEventListener("keyup",Z,!0),A=!1)},C=async E=>{s.value=!1,await vue.nextTick(),o.value=E,await vue.nextTick(),s.value=!0},T=async E=>{await C(E)},D=()=>{s.value=!0},j=()=>{const E=!s.value;E&&i.value&&(a.value=location.href),s.value=E};return vue.watch(s,E=>{E?O():le()}),vue.watch(v,E=>{i.value||E&&(s.value=!0)},{immediate:!0}),vue.onBeforeUnmount(()=>{le()}),(E,L)=>{const J=naiveUi.NLoadingBarProvider,de=naiveUi.NModalProvider,ce=naiveUi.NMessageProvider,ne=naiveUi.NNotificationProvider,me=naiveUi.NDialogProvider,N=naiveUi.NConfigProvider;return vue.openBlock(),vue.createBlock(N,{theme:vue.unref(h),"theme-overrides":vue.unref(b),locale:vue.unref(naiveUi.zhCN),"date-locale":vue.unref(naiveUi.dateZhCN),"style-mount-target":vue.unref(t)},{default:vue.withCtx(()=>[vue.createVNode(me,{to:vue.unref(q)||void 0},{default:vue.withCtx(()=>[vue.createVNode(ne,{to:vue.unref(q)||void 0},{default:vue.withCtx(()=>[vue.createVNode(ce,{to:vue.unref(q)||void 0},{default:vue.withCtx(()=>[vue.createVNode(de,{to:vue.unref(q)||void 0},{default:vue.withCtx(()=>[vue.createVNode(J,{to:vue.unref(q)||void 0},{default:vue.withCtx(()=>[vue.createElementVNode("div",{class:vue.normalizeClass(["bds-shell",{"bds-shell--static":!vue.unref(i)}]),style:vue.normalizeStyle(vue.unref($))},[vue.unref(i)?(vue.openBlock(),vue.createBlock(vue.unref(_sfc_main$d),{key:0,label:vue.unref(g),onToggle:j},null,8,["label"])):(vue.openBlock(),vue.createBlock(vue.unref(_sfc_main$b),{key:1,"source-url":vue.unref(a),"onUpdate:sourceUrl":L[0]||(L[0]=w=>vue.isRef(a)?a.value=w:null),"has-data":vue.unref(v),mode:vue.unref(r),onOpenPanel:D,onParsedData:T},null,8,["source-url","has-data","mode"])),vue.createVNode(vue.unref(_sfc_main$c),{ref_key:"panelShellRef",ref:G,show:vue.unref(s),"onUpdate:show":L[2]||(L[2]=w=>vue.isRef(s)?s.value=w:null),size:vue.unref(y),error:appError},{default:vue.withCtx(()=>[!vue.unref(f)&&vue.unref(n)?(vue.openBlock(),vue.createBlock(_sfc_main$1,{key:0,url:vue.unref(a),"onUpdate:url":L[1]||(L[1]=w=>vue.isRef(a)?a.value=w:null),to:vue.unref(q)||void 0,active:vue.unref(s),mode:vue.unref(r)},null,8,["url","to","active","mode"])):vue.createCommentVNode("",!0),vue.unref(f)&&vue.unref(n)?(vue.openBlock(),vue.createBlock(_sfc_main$2,{key:1,mode:vue.unref(r),url:vue.unref(a)},null,8,["mode","url"])):vue.createCommentVNode("",!0)]),_:1},8,["show","size"])],6)]),_:1},8,["to"])]),_:1},8,["to"])]),_:1},8,["to"])]),_:1},8,["to"])]),_:1},8,["to"])]),_:1},8,["theme","theme-overrides","locale","date-locale","style-mount-target"])}}},PANEL_TRANSFER_TYPE="BDS_PANEL_TRANSFER",PANEL_TRANSFER_ACK_TYPE="BDS_PANEL_TRANSFER_ACK",BRIDGE_EVENT="BDS_HTTP_BRIDGE_READY",mount=document.getElementById("app");if(!mount)throw new Error("静态版挂载节点 #app 不存在");const BiliDataManager=globalThis.BiliDataManager||null,hasHttpBridge=()=>typeof globalThis.__BDS_HTTP_REQUEST__=="function";if(!BiliDataManager)throw new Error("BiliDataManager 未加载");const getThemeLoggerColor=()=>{const e=normalizeThemeMode(storage.get("theme.mode",DEFAULT_THEME.mode)),t=normalizeThemeColor(storage.get("theme.lightPrimary",DEFAULT_THEME.lightPrimary),DEFAULT_THEME.lightPrimary),n=normalizeThemeColor(storage.get("theme.darkPrimary",DEFAULT_THEME.darkPrimary),DEFAULT_THEME.darkPrimary);return e==="dark"||e==="auto"&&window.matchMedia?.("(prefers-color-scheme: dark)")?.matches?n:t},createBDM=e=>{const t={name:"BDS",isLog:!0,loggerColor:getThemeLoggerColor()};return typeof e=="function"&&(t.httpRequest=e),BiliDataManager.create(t)};let currentBDM=createBDM(hasHttpBridge()?globalThis.__BDS_HTTP_REQUEST__:null);const BDM=new Proxy({},{get(e,t){return currentBDM?.[t]}}),data=vue.shallowRef(null),sourceUrl=vue.shallowRef(""),appMode=vue.shallowRef(hasHttpBridge()?"live":"readonly"),runtimeWindow=window;runtimeWindow.BDM=BDM;const applyBridgeLive=()=>{hasHttpBridge()&&(currentBDM=createBDM(globalThis.__BDS_HTTP_REQUEST__),appMode.value="live")};window.addEventListener(BRIDGE_EVENT,applyBridgeLive),applyBridgeLive();const isObjectPayload=e=>!!e&&typeof e=="object"&&!Array.isArray(e),applyTransferPayload=e=>isObjectPayload(e)?(data.value=e,!0):!1;window.addEventListener("message",e=>{const t=e?.data;if(!(!isObjectPayload(t)||t.type!==PANEL_TRANSFER_TYPE||!applyTransferPayload(t.payload)))try{e.source?.postMessage({type:PANEL_TRANSFER_ACK_TYPE,sessionId:t.sessionId,ok:!0},e.origin)}catch{}});const applyInjectedData=()=>{const e=document.getElementById("bds-injected-data");if(e?.tagName!=="SCRIPT")return!1;const t=String(e.textContent||"").trim();return t?applyTransferPayload(JSON.parse(t)):!1};let injectedApplied=!1;try{injectedApplied=applyInjectedData()}catch{injectedApplied=!1}injectedApplied||window.addEventListener("DOMContentLoaded",()=>{try{applyInjectedData()}catch{}},{once:!0});const getStaticHtmlText=async()=>`<!doctype html>
+`+document.documentElement.outerHTML;vue.createApp(_sfc_main).provide("styleMountTarget",document.head).provide("BDM",BDM).provide("APP_MODE",appMode).provide("data",data).provide("sourceUrl",sourceUrl).provide("runtimeWindow",runtimeWindow).provide("getStaticHtmlText",getStaticHtmlText).mount(mount)})(Vue,naive);
+
+  </script>
+</body>
+</html>

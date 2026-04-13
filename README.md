@@ -1,0 +1,26 @@
+# bili-data-statistic
+
+获取B站弹幕数据，并生成统计。
+
+## 主要特性
+
+- 支持视频页与番剧页弹幕统计
+- 支持 XML、ProtoBuf、历史区间弹幕加载
+- 支持正则筛选、图表交互筛选
+- 支持用户弹幕统计与 midHash 反查
+- 支持下载弹幕 JSON、导出可离线打开的统计 HTML
+- 支持生成截图（需打开外部页面才能生成截图）
+- 支持自定义图表
+
+![legend](./assets/legend.png)
+
+## 3.0.0 版本更新说明
+
+旧版本：[bili-danmaku-statistic](https://github.com/ZBpine/bili-danmaku-statistic)
+
+- ElementPlus转向NaiveUI，支持切换主题色
+- 面板挂载从 `iframe` 改为 `ShadowDOM`，大幅提升打开面板速度（副作用：html2canvas截图时因B站页面原因会卡很久，故现在只有打开外部页面才能截图）
+- 其他小功能升级：
+  - 图表筛选可多选
+  - 词云改用jieba分词
+  - 弹幕列表可排序
