@@ -983,8 +983,8 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <n-modal v-model:show="panelSettingsVisible" preset="card" title="设置" style="width: 50vw; max-height: 60vh;"
-      :to="props.to">
+    <n-modal v-model:show="panelSettingsVisible" preset="card" title="设置"
+      style="width: max(600px, 50vw); max-height: 60vh;" :to="props.to">
       <panel-settings :chart-settings="chartSettings" :theme-settings="themeSettings" :mode="props.mode" />
     </n-modal>
 

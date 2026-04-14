@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站弹幕统计
 // @namespace    https://github.com/ZBpine/bili-data-statistic
-// @version      3.0.1
+// @version      3.0.2
 // @description  获取B站弹幕数据，并生成统计页面。
 // @icon         https://cdn.jsdelivr.net/gh/ZBpine/bili-data-statistic@main/docs/favicon.ico
 // @match        https://www.bilibili.com/video/*
@@ -9,7 +9,8 @@
 // @match        https://www.bilibili.com/bangumi/play/*
 // @match        https://space.bilibili.com/*
 // @match        https://zbpine.github.io/bili-data-statistic/*
-// @match        https://bili-data-statistic.edgeone.run/*
+// @match        https://bili-data-statistic.pages.dev/*
+// @match        https://bds.zbpine.abrdns.com/*
 // @require      https://cdn.jsdelivr.net/gh/ZBpine/bili-data-manager@ed2aaf5f8fedf7e157a22d10e995df2f61eeb917/dist/bili-data-manager.min.js
 // @require      https://cdn.jsdelivr.net/npm/vue@3.5.31/dist/vue.global.prod.js
 // @require      data:application/javascript,%3Bwindow.Vue%3DVue%3BglobalThis.Vue%3DVue%3B
@@ -1298,16 +1299,11 @@ ${style2}
     css$1`
     min-height: 100vh;
     background-color: var(--bds-upload-screen-bg-base);
-    background-image:
+    background-image: 
       radial-gradient(
-        120% 90% at 0% 0%,
-        var(--bds-upload-screen-bg-radial) 0%,
-        var(--bds-upload-screen-bg-base-transparent) 30%
-      ),
-      radial-gradient(
-        90% 60% at 100% 108%,
-        var(--bds-upload-screen-bg-radial) 0%,
-        var(--bds-upload-screen-bg-base-transparent) 60%
+        ellipse farthest-corner at center,
+        var(--bds-upload-screen-bg-base) 70%,
+        var(--bds-upload-screen-bg-radial) 100%
       );
     background-repeat: no-repeat;
     display: flex;
@@ -1392,9 +1388,7 @@ ${style2}
         const base = themeVars.value.bodyColor || themeVars.value.baseColor || themeVars.value.cardColor || "#ffffff";
         return {
           "--bds-upload-screen-bg-base": base,
-          "--bds-upload-screen-bg-base-transparent": changeColor(base, { alpha: 0 }),
-          "--bds-upload-screen-bg-radial": changeColor(primary, { alpha: 0.18 }),
-          "--bds-upload-screen-bg-accent": changeColor(primary, { alpha: 0.1 }),
+          "--bds-upload-screen-bg-radial": changeColor(primary, { alpha: 0.2 }),
           "--bds-upload-bg": changeColor(base, { alpha: 0.88 }),
           "--bds-upload-border": changeColor(primary, { alpha: 0.45 }),
           "--bds-upload-drag-border": primary,
@@ -7441,7 +7435,20 @@ ${percentages[params.dataIndex]}%`
   const _sfc_main$6 = {
     __name: "ExternalPageSettingsSection",
     setup(__props2) {
-      const DEFAULT_EXTERNAL_PANEL_URL_LIST = ["https://zbpine.github.io/bili-data-statistic/", "https://bili-data-statistic.edgeone.run/cn/"];
+      const DEFAULT_EXTERNAL_PANEL_OPTIONS = [
+        {
+          label: "Github Page",
+          value: "https://zbpine.github.io/bili-data-statistic/"
+        },
+        {
+          label: "Cloudflare Page",
+          value: "https://bili-data-statistic.pages.dev/cn/"
+        },
+        {
+          label: "EdgeOne Page",
+          value: "https://bds.zbpine.abrdns.com/cn/"
+        }
+      ];
       const normalizeText = (value) => String(value || "").trim();
       const uniqueUrlList = (list) => {
         const seen = new Set();
@@ -7454,14 +7461,26 @@ ${percentages[params.dataIndex]}%`
         }
         return output;
       };
-      const createOption = (url) => ({
-        label: url,
+      const createOption = (url, label = url) => ({
+        label,
         value: url
       });
-      const defaultUrlList = uniqueUrlList(DEFAULT_EXTERNAL_PANEL_URL_LIST);
+      const defaultOptionItems = DEFAULT_EXTERNAL_PANEL_OPTIONS.map((item) => createOption(item.value, item.label));
+      const defaultUrlList = defaultOptionItems.map((item) => item.value);
       const customUrlList = vue.ref(uniqueUrlList(storage.get(EXTERNAL_PANEL_CUSTOM_LIST_KEY, [])));
-      const optionList = vue.computed(() => uniqueUrlList([...defaultUrlList, ...customUrlList.value]));
-      const optionItems = vue.computed(() => optionList.value.map((url) => createOption(url)));
+      const optionItems = vue.computed(() => {
+        const seen = new Set();
+        const output = [...defaultOptionItems];
+        for (const item of defaultOptionItems) seen.add(item.value);
+        for (const value of customUrlList.value) {
+          const text = normalizeText(value);
+          if (!text || seen.has(text)) continue;
+          seen.add(text);
+          output.push(createOption(text));
+        }
+        return output;
+      });
+      const optionList = vue.computed(() => optionItems.value.map((item) => item.value));
       const selectedUrl = vue.ref("");
       const persistCustomList = () => {
         storage.set(EXTERNAL_PANEL_CUSTOM_LIST_KEY, [...customUrlList.value]);
@@ -8369,7 +8388,7 @@ self.onmessage = (event) => {
                     min-height: 0;
                 `
         ),
-        c$3("@media (max-width: 1100px)", [
+        c$3("@media (max-width: 1000px)", [
           cE$2(
             "main",
             css$1`
@@ -9703,7 +9722,7 @@ ${doc.documentElement.outerHTML}`;
             "onUpdate:show": _cache[2] || (_cache[2] = ($event) => vue.isRef(panelSettingsVisible) ? panelSettingsVisible.value = $event : null),
             preset: "card",
             title: "设置",
-            style: { "width": "50vw", "max-height": "60vh" },
+            style: { "width": "max(600px, 50vw)", "max-height": "60vh" },
             to: props2.to
           }, {
             default: vue.withCtx(() => [

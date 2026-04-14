@@ -74,7 +74,7 @@ const style = c([
                     min-height: 0;
                 `,
             ),
-            c("@media (max-width: 1100px)", [
+            c("@media (max-width: 1000px)", [
                 cE(
                     "main",
                     css`

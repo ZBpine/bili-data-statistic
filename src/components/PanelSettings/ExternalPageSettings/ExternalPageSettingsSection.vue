@@ -4,7 +4,20 @@ import { TrashX } from '@vicons/tabler';
 import { NButton, NIcon } from 'naive-ui';
 import storage from '../../../utils/storage';
 
-const DEFAULT_EXTERNAL_PANEL_URL_LIST = ['https://zbpine.github.io/bili-data-statistic/', 'https://bili-data-statistic.edgeone.run/cn/'];
+const DEFAULT_EXTERNAL_PANEL_OPTIONS = [
+  {
+    label: 'Github Page',
+    value: 'https://zbpine.github.io/bili-data-statistic/',
+  },
+  {
+    label: 'Cloudflare Page',
+    value: 'https://bili-data-statistic.pages.dev/cn/',
+  },
+  {
+    label: 'EdgeOne Page',
+    value: 'https://bds.zbpine.abrdns.com/cn/',
+  },
+];
 const EXTERNAL_PANEL_SELECTED_KEY = 'external.panelUrl.selected';
 const EXTERNAL_PANEL_CUSTOM_LIST_KEY = 'external.panelUrl.customList';
 
@@ -22,16 +35,29 @@ const uniqueUrlList = (list) => {
   return output;
 };
 
-const createOption = (url) => ({
-  label: url,
+const createOption = (url, label = url) => ({
+  label,
   value: url,
 });
 
-const defaultUrlList = uniqueUrlList(DEFAULT_EXTERNAL_PANEL_URL_LIST);
+const defaultOptionItems = DEFAULT_EXTERNAL_PANEL_OPTIONS.map((item) => createOption(item.value, item.label));
+
+const defaultUrlList = defaultOptionItems.map((item) => item.value);
 
 const customUrlList = ref(uniqueUrlList(storage.get(EXTERNAL_PANEL_CUSTOM_LIST_KEY, [])));
-const optionList = computed(() => uniqueUrlList([...defaultUrlList, ...customUrlList.value]));
-const optionItems = computed(() => optionList.value.map((url) => createOption(url)));
+const optionItems = computed(() => {
+  const seen = new Set();
+  const output = [...defaultOptionItems];
+  for (const item of defaultOptionItems) seen.add(item.value);
+  for (const value of customUrlList.value) {
+    const text = normalizeText(value);
+    if (!text || seen.has(text)) continue;
+    seen.add(text);
+    output.push(createOption(text));
+  }
+  return output;
+});
+const optionList = computed(() => optionItems.value.map((item) => item.value));
 const selectedUrl = ref('');
 
 const persistCustomList = () => {

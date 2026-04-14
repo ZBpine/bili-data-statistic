@@ -5,16 +5,11 @@ const style = cB(
   css`
     min-height: 100vh;
     background-color: var(--bds-upload-screen-bg-base);
-    background-image:
+    background-image: 
       radial-gradient(
-        120% 90% at 0% 0%,
-        var(--bds-upload-screen-bg-radial) 0%,
-        var(--bds-upload-screen-bg-base-transparent) 30%
-      ),
-      radial-gradient(
-        90% 60% at 100% 108%,
-        var(--bds-upload-screen-bg-radial) 0%,
-        var(--bds-upload-screen-bg-base-transparent) 60%
+        ellipse farthest-corner at center,
+        var(--bds-upload-screen-bg-base) 70%,
+        var(--bds-upload-screen-bg-radial) 100%
       );
     background-repeat: no-repeat;
     display: flex;

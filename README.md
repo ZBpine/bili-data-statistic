@@ -10,17 +10,16 @@
 
 **UserScript**
 - [GreasyFork](https://greasyfork.org/zh-CN/scripts/534432)
-- [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/3750)
+- [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/3750) 无法访问 `github`/`jsdelivr` 的可安装脚本猫版本
 
 **Page**
-- [Github Page](https://zbpine.github.io/bili-data-statistic/)
-- [EdgeOne Page](https://bili-data-statistic.edgeone.run/cn/)
+- [Github Page](https://zbpine.github.io/bili-data-statistic/) 国内较难访问
+- [Cloudflare Page](https://bili-data-statistic.pages.dev/cn/) 国内访问还行
+- [EdgeOne Page](https://bds.zbpine.abrdns.com/cn/) 腾讯的服务，理论上国内是不能访问的（省的买域名），实际上大概率能访问
 
-> 安装油猴脚本后，在B站（视频、番剧）页面左下角悬浮按钮点击查看弹幕统计。
->
-> 无法访问 `github`/`jsdelivr` 的可安装ScriptCat版本
-> 
-> 直接访问 Page 只能靠上传数据来查看统计面板，安装油猴脚本后打开则可以输入B站URL抓取数据。
+安装油猴脚本后，在B站（视频、番剧）页面左下角悬浮按钮点击查看弹幕统计。
+
+直接访问 Page 只能靠上传数据来查看统计面板，安装油猴脚本后打开则可以输入B站URL抓取数据。
 
 ## 主要特性
 

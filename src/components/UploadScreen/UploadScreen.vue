@@ -38,9 +38,7 @@ const cssVars = computed(() => {
   const base = themeVars.value.bodyColor || themeVars.value.baseColor || themeVars.value.cardColor || '#ffffff';
   return {
     '--bds-upload-screen-bg-base': base,
-    '--bds-upload-screen-bg-base-transparent': changeColor(base, { alpha: 0 }),
-    '--bds-upload-screen-bg-radial': changeColor(primary, { alpha: 0.18 }),
-    '--bds-upload-screen-bg-accent': changeColor(primary, { alpha: 0.1 }),
+    '--bds-upload-screen-bg-radial': changeColor(primary, { alpha: 0.2 }),
     '--bds-upload-bg': changeColor(base, { alpha: 0.88 }),
     '--bds-upload-border': changeColor(primary, { alpha: 0.45 }),
     '--bds-upload-drag-border': primary,
