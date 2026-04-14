@@ -1,12 +1,26 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
-import monkey, { cdn, util } from 'vite-plugin-monkey';
+import monkey, { util } from 'vite-plugin-monkey';
+import { createCdnUrls, resolveCdnBase } from './src/config/cdn.js';
+
+const packageJson = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+const appVersion = String(packageJson?.version || '0.0.0');
+const cdnProfile = String(process.env.BDS_CDN_PROFILE || 'jsdelivr').trim();
+const cdnBase = resolveCdnBase(cdnProfile);
+const cdnUrls = createCdnUrls(cdnBase);
+const isCnProfile = cdnBase.includes('cdn.jsdmirror.com');
+
+const npmCdn = (path) => (version, name) => `${cdnBase}npm/${name}@${version}/${path}`;
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    __BDS_PROFILE_CDN_BASE__: JSON.stringify(cdnBase),
+  },
   plugins: [
     vue(),
     AutoImport({
@@ -22,7 +36,7 @@ export default defineConfig({
       entry: 'src/main.js',
       userscript: {
         name: 'B站弹幕统计',
-        version: '3.0.0',
+        version: appVersion,
         namespace: 'https://github.com/ZBpine/bili-data-statistic',
         description: '获取B站弹幕数据，并生成统计页面。',
         icon: 'https://www.bilibili.com/favicon.ico',
@@ -36,19 +50,18 @@ export default defineConfig({
         grant: ['GM_xmlhttpRequest', 'GM_getResourceText', 'unsafeWindow'],
         connect: ['api.bilibili.com'],
         resource: {
-          staticHtml: 'https://cdn.jsdelivr.net/gh/ZBpine/bili-data-statistic@main/docs/index.html',
+          staticHtml: isCnProfile ? cdnUrls.staticHtmlCn : cdnUrls.staticHtmlDefault,
         },
         require: [
-          'https://cdn.jsdelivr.net/gh/ZBpine/bili-data-manager@ed2aaf5f8fedf7e157a22d10e995df2f61eeb917/dist/bili-data-manager.min.js',
+          cdnUrls.biliDataManagerPinned,
         ],
         'run-at': 'document-end',
       },
       build: {
         externalGlobals: {
-          vue: cdn
-            .jsdelivr('Vue', 'dist/vue.global.prod.js')
+          vue: ['Vue', npmCdn('dist/vue.global.prod.js')]
             .concat(util.dataUrl(';window.Vue=Vue;globalThis.Vue=Vue;')),
-          'naive-ui': cdn.jsdelivr('naive', 'dist/index.prod.js'),
+          'naive-ui': ['naive', npmCdn('dist/index.prod.js')],
           // html2canvas: cdn.jsdelivr('html2canvas', 'dist/html2canvas.min.js'),
         },
       },

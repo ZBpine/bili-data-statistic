@@ -1,4 +1,6 @@
-const BILI_DATA_MANAGER_CDN = 'https://cdn.jsdelivr.net/gh/ZBpine/bili-data-manager@main/dist/bili-data-manager.min.js';
+import { runtimeCdnUrls } from '../config/cdn';
+
+const BILI_DATA_MANAGER_CDN = runtimeCdnUrls.biliDataManagerMain;
 
 let hashWorker = null;
 let hashReqId = 0;

@@ -1,4 +1,6 @@
-const JIEBA_WASM_MODULE_URL = 'https://cdn.jsdelivr.net/npm/jieba-wasm@2.4.0/pkg/web/jieba_rs_wasm.js';
+import { runtimeCdnUrls } from '../config/cdn';
+
+const JIEBA_WASM_MODULE_URL = runtimeCdnUrls.jiebaWasm;
 
 const simpleTokenCache = new Map();
 const jiebaTokenCache = new Map();

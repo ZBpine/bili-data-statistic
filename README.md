@@ -2,6 +2,18 @@
 
 获取B站弹幕数据，并生成统计。
 
+## 安装使用
+
+- [GreasyFork](https://greasyfork.org/zh-CN/scripts/534432)
+- [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/3750)
+- [GithubPage](https://zbpine.github.io/bili-data-statistic/)
+
+> 安装油猴脚本后，在B站（视频、番剧）页面左下角悬浮按钮点击查看弹幕统计。
+>
+> 无法访问 `github`/`jsdelivr` 的可安装ScriptCat版本
+> 
+> 直接访问 [GithubPage](https://zbpine.github.io/bili-data-statistic/) 只能上传数据查看统计面板，安装油猴脚本后打开则可以输入URL抓取数据。
+
 ## 主要特性
 
 - 支持视频页与番剧页弹幕统计
@@ -12,7 +24,11 @@
 - 支持生成截图（需打开外部页面才能生成截图）
 - 支持自定义图表
 
-![legend](./assets/legend.png)
+![legend](https://github.com/ZBpine/bili-data-statistic/raw/main/assets/legend.png)
+
+## GithubPage静态页面
+
+
 
 ## 3.0.0 版本更新说明
 
@@ -24,3 +40,8 @@
   - 图表筛选可多选
   - 词云改用jieba分词
   - 弹幕列表可排序
+
+## 项目依赖
+
+- [BiliDataManager](https://github.com/ZBpine/bili-data-manager)
+- [nb-ui](https://github.com/ZBpine/bili-data-viewer)

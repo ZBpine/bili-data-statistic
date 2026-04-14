@@ -1,15 +1,17 @@
 {
   "name": "bili-data-statistic",
   "private": true,
-  "version": "3.0.0",
+  "version": "3.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/build-all.mjs",
     "preview": "vite preview",
     "dev:static": "npm run build:static && npm run preview:static",
     "build:static": "vite build --config vite.static.config.js && node scripts/build-static-html.mjs",
-    "preview:static": "vite preview --config vite.static.config.js"
+    "preview:static": "vite preview --config vite.static.config.js",
+    "build:user:jsdelivr": "vite build",
+    "build:user:jsdmirror": "set BDS_CDN_PROFILE=jsdmirror&& vite build"
   },
   "dependencies": {
     "@css-render/plugin-bem": "^0.15.14",

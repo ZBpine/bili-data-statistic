@@ -18,10 +18,11 @@ import mountStyle from './DmPanel.style.cssr.js';
 import { segmentWords } from '../workers/segmentWordsWorker';
 import { downloadHtmlText, injectPanelData } from '../utils/panelExport';
 import storage from '../utils/storage';
+import { runtimeCdnUrls } from '../config/cdn';
 
-const ECHARTS_URL = 'https://cdn.jsdelivr.net/npm/echarts@6/dist/echarts.min.js';
-const WORDCLOUD_URL = 'https://cdn.jsdelivr.net/npm/echarts-wordcloud@2/dist/echarts-wordcloud.min.js';
-const HTML2CANVAS_URL = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+const ECHARTS_URL = runtimeCdnUrls.echarts;
+const WORDCLOUD_URL = runtimeCdnUrls.echartsWordcloud;
+const HTML2CANVAS_URL = runtimeCdnUrls.html2canvas;
 const DEFAULT_EXTERNAL_PANEL_URL = 'https://zbpine.github.io/bili-data-statistic/';
 const EXTERNAL_PANEL_SELECTED_KEY = 'external.panelUrl.selected';
 const EXTERNAL_PANEL_LEGACY_KEY = 'external.panelUrl';

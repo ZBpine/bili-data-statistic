@@ -10,9 +10,12 @@
 <body>
   <div id="app"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/naive-ui@2/dist/index.prod.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/ZBpine/bili-data-manager@main/dist/bili-data-manager.min.js"></script>
+  <script>
+    window.__BDS_CDN_BASE__ = '__CDN_BASE__';
+  </script>
+  <script src="__CDN_VUE_URL__"></script>
+  <script src="__CDN_NAIVE_UI_URL__"></script>
+  <script src="__CDN_BDM_URL__"></script>
   <script>
 __BDS_STATIC_APP_BUNDLE__
   </script>

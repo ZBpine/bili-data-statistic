@@ -11,11 +11,11 @@
   <div id="app"></div>
 
   <script>
-    window.__BDS_CDN_BASE__ = 'https://cdn.jsdelivr.net/';
+    window.__BDS_CDN_BASE__ = 'https://cdn.jsdmirror.com/';
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/naive-ui@2/dist/index.prod.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/ZBpine/bili-data-manager@main/dist/bili-data-manager.min.js"></script>
+  <script src="https://cdn.jsdmirror.com/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdmirror.com/npm/naive-ui@2/dist/index.prod.js"></script>
+  <script src="https://cdn.jsdmirror.com/gh/ZBpine/bili-data-manager@main/dist/bili-data-manager.min.js"></script>
   <script>
 (function(vue,naiveUi){"use strict";function _interopNamespaceDefault(t){const e=Object.create(null,{[Symbol.toStringTag]:{value:"Module"}});if(t){for(const n in t)if(n!=="default"){const r=Object.getOwnPropertyDescriptor(t,n);Object.defineProperty(e,n,r.get?r:{enumerable:!0,get:()=>t[n]})}}return e.default=t,Object.freeze(e)}const naiveUi__namespace=_interopNamespaceDefault(naiveUi);function ampCount(t){let e=0;for(let n=0;n<t.length;++n)t[n]==="&"&&++e;return e}const separatorRegex=/\s*,(?![^(]*\))\s*/g,extraSpaceRegex=/\s+/g;function resolveSelectorWithAmp(t,e){const n=[];return e.split(separatorRegex).forEach(r=>{let o=ampCount(r);if(o){if(o===1){t.forEach(s=>{n.push(r.replace("&",s))});return}}else{t.forEach(s=>{n.push((s&&s+" ")+r)});return}let a=[r];for(;o--;){const s=[];a.forEach(i=>{t.forEach(d=>{s.push(i.replace("&",d))})}),a=s}a.forEach(s=>n.push(s))}),n}function resolveSelector(t,e){const n=[];return e.split(separatorRegex).forEach(r=>{t.forEach(o=>{n.push((o&&o+" ")+r)})}),n}function parseSelectorPath(t){let e=[""];return t.forEach(n=>{n=n&&n.trim(),n&&(n.includes("&")?e=resolveSelectorWithAmp(e,n):e=resolveSelector(e,n))}),e.join(", ").replace(extraSpaceRegex," ")}function removeElement(t){if(!t)return;const e=t.parentElement;e&&e.removeChild(t)}function queryElement(t,e){return(e??document.head).querySelector(`style[cssr-id="${t}"]`)}function createElement(t){const e=document.createElement("style");return e.setAttribute("cssr-id",t),e}function isMediaOrSupports(t){return t?/^\s*@(s|m)/.test(t):!1}const kebabRegex=/[A-Z]/g;function kebabCase(t){return t.replace(kebabRegex,e=>"-"+e.toLowerCase())}function unwrapProperty(t,e="  "){return typeof t=="object"&&t!==null?` {
 `+Object.entries(t).map(n=>e+`  ${kebabCase(n[0])}: ${n[1]};`).join(`

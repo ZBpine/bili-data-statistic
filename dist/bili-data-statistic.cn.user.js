@@ -9,11 +9,11 @@
 // @match        https://www.bilibili.com/bangumi/play/*
 // @match        https://space.bilibili.com/*
 // @match        https://zbpine.github.io/bili-data-statistic/*
-// @require      https://cdn.jsdelivr.net/gh/ZBpine/bili-data-manager@ed2aaf5f8fedf7e157a22d10e995df2f61eeb917/dist/bili-data-manager.min.js
-// @require      https://cdn.jsdelivr.net/npm/vue@3.5.31/dist/vue.global.prod.js
+// @require      https://cdn.jsdmirror.com/gh/ZBpine/bili-data-manager@ed2aaf5f8fedf7e157a22d10e995df2f61eeb917/dist/bili-data-manager.min.js
+// @require      https://cdn.jsdmirror.com/npm/vue@3.5.31/dist/vue.global.prod.js
 // @require      data:application/javascript,%3Bwindow.Vue%3DVue%3BglobalThis.Vue%3DVue%3B
-// @require      https://cdn.jsdelivr.net/npm/naive-ui@2.44.1/dist/index.prod.js
-// @resource     staticHtml  https://cdn.jsdelivr.net/gh/ZBpine/bili-data-statistic@main/docs/index.html
+// @require      https://cdn.jsdmirror.com/npm/naive-ui@2.44.1/dist/index.prod.js
+// @resource     staticHtml  https://cdn.jsdmirror.com/gh/ZBpine/bili-data-statistic@main/docs/cn/index.html
 // @connect      api.bilibili.com
 // @grant        GM_getResourceText
 // @grant        GM_xmlhttpRequest
@@ -8067,7 +8067,7 @@ ${percentages[params.dataIndex]}%`
       if (fromWindow) return fromWindow;
     }
     {
-      const fromBuild = normalizeCdnBase("https://cdn.jsdelivr.net/");
+      const fromBuild = normalizeCdnBase("https://cdn.jsdmirror.com/");
       if (fromBuild) return fromBuild;
     }
     return DEFAULT_CDN_BASE;
