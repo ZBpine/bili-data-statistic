@@ -32,6 +32,7 @@ export const createCdnUrls = (profileOrBase) => {
     biliDataManagerPinned: buildGhUrl(base, 'ZBpine/bili-data-manager@ed2aaf5f8fedf7e157a22d10e995df2f61eeb917/dist/bili-data-manager.min.js'),
     staticHtmlDefault: buildGhUrl(base, 'ZBpine/bili-data-statistic@main/docs/index.html'),
     staticHtmlCn: buildGhUrl(base, 'ZBpine/bili-data-statistic@main/docs/cn/index.html'),
+    favicon: buildGhUrl(base, 'ZBpine/bili-data-statistic@main/docs/favicon.ico'),
     echarts: buildNpmUrl(base, 'echarts@6/dist/echarts.min.js'),
     echartsWordcloud: buildNpmUrl(base, 'echarts-wordcloud@2/dist/echarts-wordcloud.min.js'),
     html2canvas: buildNpmUrl(base, 'html2canvas@1.4.1/dist/html2canvas.min.js'),

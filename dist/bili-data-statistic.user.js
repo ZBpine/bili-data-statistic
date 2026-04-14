@@ -3,12 +3,13 @@
 // @namespace    https://github.com/ZBpine/bili-data-statistic
 // @version      3.0.1
 // @description  获取B站弹幕数据，并生成统计页面。
-// @icon         https://www.bilibili.com/favicon.ico
+// @icon         https://cdn.jsdelivr.net/gh/ZBpine/bili-data-statistic@main/docs/favicon.ico
 // @match        https://www.bilibili.com/video/*
 // @match        https://www.bilibili.com/list/watchlater*
 // @match        https://www.bilibili.com/bangumi/play/*
 // @match        https://space.bilibili.com/*
 // @match        https://zbpine.github.io/bili-data-statistic/*
+// @match        https://bili-data-statistic.edgeone.run/*
 // @require      https://cdn.jsdelivr.net/gh/ZBpine/bili-data-manager@ed2aaf5f8fedf7e157a22d10e995df2f61eeb917/dist/bili-data-manager.min.js
 // @require      https://cdn.jsdelivr.net/npm/vue@3.5.31/dist/vue.global.prod.js
 // @require      data:application/javascript,%3Bwindow.Vue%3DVue%3BglobalThis.Vue%3DVue%3B
@@ -7440,7 +7441,7 @@ ${percentages[params.dataIndex]}%`
   const _sfc_main$6 = {
     __name: "ExternalPageSettingsSection",
     setup(__props2) {
-      const DEFAULT_EXTERNAL_PANEL_URL_LIST = ["https://zbpine.github.io/bili-data-statistic/"];
+      const DEFAULT_EXTERNAL_PANEL_URL_LIST = ["https://zbpine.github.io/bili-data-statistic/", "https://bili-data-statistic.edgeone.run/cn/"];
       const normalizeText = (value) => String(value || "").trim();
       const uniqueUrlList = (list) => {
         const seen = new Set();
@@ -8055,6 +8056,7 @@ ${percentages[params.dataIndex]}%`
       biliDataManagerPinned: buildGhUrl(base, "ZBpine/bili-data-manager@ed2aaf5f8fedf7e157a22d10e995df2f61eeb917/dist/bili-data-manager.min.js"),
       staticHtmlDefault: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/index.html"),
       staticHtmlCn: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/cn/index.html"),
+      favicon: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/favicon.ico"),
       echarts: buildNpmUrl(base, "echarts@6/dist/echarts.min.js"),
       echartsWordcloud: buildNpmUrl(base, "echarts-wordcloud@2/dist/echarts-wordcloud.min.js"),
       html2canvas: buildNpmUrl(base, "html2canvas@1.4.1/dist/html2canvas.min.js"),
@@ -8626,7 +8628,6 @@ ${doc.documentElement.outerHTML}`;
       const HTML2CANVAS_URL = runtimeCdnUrls.html2canvas;
       let echartsLoadTask = null;
       let html2canvasLoadTask = null;
-      let externalPanelWindow = null;
       const pageScriptTasks = new Map();
       const findScriptBySrcPart = (srcPart) => {
         return Array.from(document.scripts || []).find((script) => String(script?.src || "").includes(srcPart));
@@ -9218,14 +9219,7 @@ ${doc.documentElement.outerHTML}`;
           message.warning("当前没有可发送的弹幕数据");
           return;
         }
-        let targetWindow = externalPanelWindow;
-        const reusedWindow = Boolean(targetWindow && !targetWindow.closed);
-        if (!reusedWindow) {
-          targetWindow = window.open(targetUrl, EXTERNAL_PANEL_WINDOW_NAME);
-          externalPanelWindow = targetWindow || null;
-        } else {
-          targetWindow.focus?.();
-        }
+        const targetWindow = window.open(targetUrl, EXTERNAL_PANEL_WINDOW_NAME);
         if (!targetWindow) {
           message.error("打开外部页面失败，请检查浏览器拦截设置");
           return;

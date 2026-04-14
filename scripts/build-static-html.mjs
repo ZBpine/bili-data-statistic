@@ -22,6 +22,7 @@ const renderHtml = (profile) => {
   const urls = createCdnUrls(profile);
   return templateHtml
     .replace(/__CDN_BASE__/g, urls.base)
+    .replace(/__CDN_FAVICON_URL__/g, urls.favicon)
     .replace(/__CDN_VUE_URL__/g, urls.vueGlobalProd)
     .replace(/__CDN_NAIVE_UI_URL__/g, urls.naiveUiProd)
     .replace(/__CDN_BDM_URL__/g, urls.biliDataManagerMain)

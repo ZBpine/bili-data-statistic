@@ -4,7 +4,7 @@ import { TrashX } from '@vicons/tabler';
 import { NButton, NIcon } from 'naive-ui';
 import storage from '../../../utils/storage';
 
-const DEFAULT_EXTERNAL_PANEL_URL_LIST = ['https://zbpine.github.io/bili-data-statistic/'];
+const DEFAULT_EXTERNAL_PANEL_URL_LIST = ['https://zbpine.github.io/bili-data-statistic/', 'https://bili-data-statistic.edgeone.run/cn/'];
 const EXTERNAL_PANEL_SELECTED_KEY = 'external.panelUrl.selected';
 const EXTERNAL_PANEL_CUSTOM_LIST_KEY = 'external.panelUrl.customList';
 
@@ -150,16 +150,8 @@ watch(optionList, () => {
     <n-alert type="info" :show-icon="false" title="输入 URL 后请在下拉列表中选择该项以添加" />
     <n-form label-placement="top">
       <n-form-item label="外部页面 URL" style="margin-bottom: 8px;">
-        <n-select
-          :value="selectedUrl"
-          filterable
-          tag
-          :options="optionItems"
-          :render-option="renderOption"
-          placeholder="输入 URL 后在下拉中选择"
-          :on-create="handleCreate"
-          @update:value="applySelected"
-        />
+        <n-select :value="selectedUrl" filterable tag :options="optionItems" :render-option="renderOption"
+          placeholder="输入 URL 后在下拉中选择" :on-create="handleCreate" @update:value="applySelected" />
       </n-form-item>
     </n-form>
   </n-space>

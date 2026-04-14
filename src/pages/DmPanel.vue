@@ -32,7 +32,6 @@ const PANEL_TRANSFER_ACK_TYPE = 'BDS_PANEL_TRANSFER_ACK';
 
 let echartsLoadTask = null;
 let html2canvasLoadTask = null;
-let externalPanelWindow = null;
 const pageScriptTasks = new Map();
 
 const findScriptBySrcPart = (srcPart) => {
@@ -727,14 +726,7 @@ const openExternalPanel = async () => {
     return;
   }
 
-  let targetWindow = externalPanelWindow;
-  const reusedWindow = Boolean(targetWindow && !targetWindow.closed);
-  if (!reusedWindow) {
-    targetWindow = window.open(targetUrl, EXTERNAL_PANEL_WINDOW_NAME);
-    externalPanelWindow = targetWindow || null;
-  } else {
-    targetWindow.focus?.();
-  }
+  const targetWindow = window.open(targetUrl, EXTERNAL_PANEL_WINDOW_NAME);
   if (!targetWindow) {
     message.error('打开外部页面失败，请检查浏览器拦截设置');
     return;
