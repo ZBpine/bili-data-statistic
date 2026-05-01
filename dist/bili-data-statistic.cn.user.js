@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站弹幕统计
 // @namespace    https://github.com/ZBpine/bili-data-statistic
-// @version      3.1.1
+// @version      3.1.2
 // @description  获取B站弹幕数据，并生成统计页面。
 // @icon         https://cdn.jsdmirror.com/gh/ZBpine/bili-data-statistic@main/docs/favicon.ico
 // @match        https://www.bilibili.com/video/*
@@ -11,7 +11,7 @@
 // @match        https://zbpine.github.io/bili-data-statistic/*
 // @match        https://bili-data-statistic.pages.dev/*
 // @match        https://bds.zbpine.abrdns.com/*
-// @require      https://cdn.jsdmirror.com/gh/ZBpine/bili-data-manager@642ebb7daba43bca7ac75b700aa12f9bd1935251/dist/bili-data-manager.min.js
+// @require      https://cdn.jsdmirror.com/gh/ZBpine/bili-data-manager@5ee8f7d9697428a8646b591a98141ffa07c42c9e/dist/bili-data-manager.min.js
 // @require      https://cdn.jsdmirror.com/npm/vue@3.5.31/dist/vue.global.prod.js
 // @require      data:application/javascript,%3Bwindow.Vue%3DVue%3BglobalThis.Vue%3DVue%3B
 // @require      https://cdn.jsdmirror.com/npm/naive-ui@2.44.1/dist/index.prod.js
@@ -7275,6 +7275,7 @@ ${percentages[params.dataIndex]}%`
       baseSpan = 4,
       maxArea = 1e8,
       removeBackEdges = false,
+      edgeMetaMap = {},
       getNodeLabel,
       getNodeValue,
       getEdgeLabel
@@ -7468,14 +7469,19 @@ ${percentages[params.dataIndex]}%`
         if (flowDelta === 0) flowSign = axisSign * baseSign;
         const sign = flowSign * axisSign * baseSign;
         const curveness = sign !== 0 ? sign * (baseCurve + idx * jitter) : idx === 0 ? 0 : (idx % 2 === 1 ? 1 : -1) * Math.ceil(idx / 2) * jitter;
-        links.push({
+        const edgeMeta = edgeMetaMap?.[sourceKey]?.[targetKey];
+        const link = {
           source: sourceKey,
           target: targetKey,
           label: optionLabel,
           lineStyle: {
             curveness
           }
-        });
+        };
+        if (edgeMeta && typeof edgeMeta === "object") {
+          link.meta = edgeMeta;
+        }
+        links.push(link);
       }
     }
     const viewport = estimateViewport();
@@ -7526,7 +7532,31 @@ ${percentages[params.dataIndex]}%`
       const currentScale = vue.ref(1);
       const graphElRef = vue.ref(null);
       const graphMapRef = vue.shallowRef({});
+      const edgeMetaMapRef = vue.shallowRef({});
+      const varsMapRef = vue.shallowRef({});
       let graphInstance = null;
+      const prettifyMathAssign = (text) => {
+        return String(text || "").replace(/([^=;\s]+)\s*=\s*\1\s*\+\s*([^;]+)/g, "$1+$2").replace(/([^=;\s]+)\s*=\s*\1\s*-\s*([^;]+)/g, "$1-$2");
+      };
+      const formatExpression = (text, varsMap) => {
+        return String(text || "").replace(/\$[A-Za-z0-9_]+/g, (match) => String(varsMap?.[match]?.name || match)).replace(/\b(-?\d+)\.00\b/g, "$1").replace(/\s*&&\s*/g, " 且 ").replace(/\s*\|\|\s*/g, " 或 ").replace(/\s*!=\s*/g, " ≠ ").replace(/\s*==\s*/g, " = ").trim();
+      };
+      const formatActionExpression = (text, varsMap) => {
+        const chunks = String(text || "").split(";").map((item) => prettifyMathAssign(item).trim()).filter(Boolean).map((item) => formatExpression(item, varsMap));
+        return chunks.join("；");
+      };
+      const formatEdgeTooltip = (params) => {
+        if (params?.dataType !== "edge") return "";
+        const meta = params?.data?.meta;
+        if (!meta || typeof meta !== "object") return "";
+        const action = formatActionExpression(meta?.action, varsMapRef.value);
+        const condition = formatExpression(meta?.condition, varsMapRef.value);
+        if (!action && !condition) return "";
+        const lines = [];
+        if (condition) lines.push(`条件：${condition}`);
+        if (action) lines.push(`行为：${action}`);
+        return lines.join("<br/>");
+      };
       const handleGraphClick = (params) => {
         emit2("graph-click", params?.data?.value);
       };
@@ -7550,12 +7580,14 @@ ${percentages[params.dataIndex]}%`
           layoutRatio: normalizedAspectRatio.value,
           baseGap,
           baseSpan: baseSpan.value,
-          removeBackEdges: removeBackEdges.value
+          removeBackEdges: removeBackEdges.value,
+          edgeMetaMap: edgeMetaMapRef.value
         });
         currentScale.value = Number(graph?.meta?.scale) || 1;
         instance.setOption({
           tooltip: {
-            show: false
+            show: true,
+            formatter: formatEdgeTooltip
           },
           series: [
             {
@@ -7610,8 +7642,13 @@ ${percentages[params.dataIndex]}%`
         instance.resize();
       };
       const refresh = async () => {
-        const graphMap = await props2.getGraph(dedupe.value) || {};
+        const payload = await props2.getGraph(dedupe.value) || {};
+        const graphMap = payload.graphMap || {};
+        const edgeMetaMap = payload?.edgeMetaMap || {};
+        const varsMap = payload?.varsMap || {};
         graphMapRef.value = graphMap;
+        edgeMetaMapRef.value = edgeMetaMap;
+        varsMapRef.value = varsMap;
         await renderByGraphMap(graphMap);
       };
       const updateBaseSpan = () => {
@@ -7703,7 +7740,8 @@ ${percentages[params.dataIndex]}%`
           baseGap,
           baseSpan: baseSpan.value,
           maxArea: 1e8,
-          removeBackEdges: removeBackEdges.value
+          removeBackEdges: removeBackEdges.value,
+          edgeMetaMap: edgeMetaMapRef.value
         });
         const data = Array.isArray(graph.data) ? graph.data : [];
         const links = Array.isArray(graph.links) ? graph.links : [];
@@ -7727,7 +7765,8 @@ ${percentages[params.dataIndex]}%`
           exportChart.setOption({
             animation: false,
             tooltip: {
-              show: false
+              show: true,
+              formatter: formatEdgeTooltip
             },
             series: [
               {
@@ -8839,7 +8878,7 @@ ${percentages[params.dataIndex]}%`
       base,
       vueGlobalProd: buildNpmUrl(base, "vue@3/dist/vue.global.prod.js"),
       naiveUiProd: buildNpmUrl(base, "naive-ui@2/dist/index.prod.js"),
-      biliDataManager: buildGhUrl(base, "ZBpine/bili-data-manager@642ebb7daba43bca7ac75b700aa12f9bd1935251/dist/bili-data-manager.min.js"),
+      biliDataManager: buildGhUrl(base, "ZBpine/bili-data-manager@5ee8f7d9697428a8646b591a98141ffa07c42c9e/dist/bili-data-manager.min.js"),
       staticHtmlDefault: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/index.html"),
       staticHtmlCn: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/cn/index.html"),
       favicon: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/favicon.ico"),
@@ -9658,7 +9697,11 @@ ${doc.documentElement.outerHTML}`;
       };
       const getInteractiveGraph = async (dedupe) => {
         if (!arcMgr.value?.invoke) return {};
-        return arcMgr.value.invoke("buildInteractGraph", Boolean(dedupe)) || {};
+        const graphMap = await arcMgr.value.invoke("buildInteractGraph", Boolean(dedupe)) || {};
+        const metaResult = await arcMgr.value.invoke("buildInteractEdgeMetaMap") || {};
+        const edgeMetaMap = metaResult?.edgeMetaMap || {};
+        const varsMap = metaResult?.varsMap || {};
+        return { graphMap, edgeMetaMap, varsMap };
       };
       const getInteractiveEcharts = async () => {
         await ensurePageEcharts();

@@ -258,7 +258,11 @@ const viewPointItemKey = (item, index) => {
 
 const getInteractiveGraph = async (dedupe) => {
   if (!arcMgr.value?.invoke) return {};
-  return arcMgr.value.invoke('buildInteractGraph', Boolean(dedupe)) || {};
+  const graphMap = await arcMgr.value.invoke('buildInteractGraph', Boolean(dedupe)) || {};
+  const metaResult = await arcMgr.value.invoke('buildInteractEdgeMetaMap') || {};
+  const edgeMetaMap = metaResult?.edgeMetaMap || {};
+  const varsMap = metaResult?.varsMap || {};
+  return { graphMap, edgeMetaMap, varsMap };
 };
 
 const getInteractiveEcharts = async () => {

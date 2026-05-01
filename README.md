@@ -46,6 +46,8 @@
 
 ### 3.1.0 新增互动视频支持
 
+`3.1.2` 鼠标悬浮于选项线可显示隐藏的条件/行为。注意**去重**可能导致条件/行为不一致的被合并
+
 ![legend01](https://cdn.jsdelivr.net/gh/ZBpine/bili-data-statistic@main/assets/legend01.png)
 
 

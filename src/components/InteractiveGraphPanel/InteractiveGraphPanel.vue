@@ -48,7 +48,48 @@ const capturing = ref(false);
 const currentScale = ref(1);
 const graphElRef = ref(null);
 const graphMapRef = shallowRef({});
+const edgeMetaMapRef = shallowRef({});
+const varsMapRef = shallowRef({});
 let graphInstance = null;
+
+const prettifyMathAssign = (text) => {
+  return String(text || '')
+    .replace(/([^=;\s]+)\s*=\s*\1\s*\+\s*([^;]+)/g, '$1+$2')
+    .replace(/([^=;\s]+)\s*=\s*\1\s*-\s*([^;]+)/g, '$1-$2');
+};
+
+const formatExpression = (text, varsMap) => {
+  return String(text || '')
+    .replace(/\$[A-Za-z0-9_]+/g, (match) => String(varsMap?.[match]?.name || match))
+    .replace(/\b(-?\d+)\.00\b/g, '$1')
+    .replace(/\s*&&\s*/g, ' 且 ')
+    .replace(/\s*\|\|\s*/g, ' 或 ')
+    .replace(/\s*!=\s*/g, ' ≠ ')
+    .replace(/\s*==\s*/g, ' = ')
+    .trim();
+};
+
+const formatActionExpression = (text, varsMap) => {
+  const chunks = String(text || '')
+    .split(';')
+    .map((item) => prettifyMathAssign(item).trim())
+    .filter(Boolean)
+    .map((item) => formatExpression(item, varsMap));
+  return chunks.join('；');
+};
+
+const formatEdgeTooltip = (params) => {
+  if (params?.dataType !== 'edge') return '';
+  const meta = params?.data?.meta;
+  if (!meta || typeof meta !== 'object') return '';
+  const action = formatActionExpression(meta?.action, varsMapRef.value);
+  const condition = formatExpression(meta?.condition, varsMapRef.value);
+  if (!action && !condition) return '';
+  const lines = [];
+  if (condition) lines.push(`条件：${condition}`);
+  if (action) lines.push(`行为：${action}`);
+  return lines.join('<br/>');
+};
 
 const handleGraphClick = (params) => {
   emit('graph-click', params?.data?.value);
@@ -76,11 +117,13 @@ const renderByGraphMap = async (graphMap) => {
     baseGap,
     baseSpan: baseSpan.value,
     removeBackEdges: removeBackEdges.value,
+    edgeMetaMap: edgeMetaMapRef.value,
   });
   currentScale.value = Number(graph?.meta?.scale) || 1;
   instance.setOption({
     tooltip: {
-      show: false,
+      show: true,
+      formatter: formatEdgeTooltip,
     },
     series: [
       {
@@ -136,8 +179,13 @@ const renderByGraphMap = async (graphMap) => {
 };
 
 const refresh = async () => {
-  const graphMap = await props.getGraph(dedupe.value) || {};
+  const payload = await props.getGraph(dedupe.value) || {};
+  const graphMap = payload.graphMap || {};
+  const edgeMetaMap = payload?.edgeMetaMap || {};
+  const varsMap = payload?.varsMap || {};
   graphMapRef.value = graphMap;
+  edgeMetaMapRef.value = edgeMetaMap;
+  varsMapRef.value = varsMap;
   await renderByGraphMap(graphMap);
 };
 
@@ -239,6 +287,7 @@ const captureGraph = async () => {
     baseSpan: baseSpan.value,
     maxArea: 100_000_000,
     removeBackEdges: removeBackEdges.value,
+    edgeMetaMap: edgeMetaMapRef.value,
   });
   const data = Array.isArray(graph.data) ? graph.data : [];
   const links = Array.isArray(graph.links) ? graph.links : [];
@@ -264,7 +313,8 @@ const captureGraph = async () => {
     exportChart.setOption({
       animation: false,
       tooltip: {
-        show: false,
+        show: true,
+        formatter: formatEdgeTooltip,
       },
       series: [
         {

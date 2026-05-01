@@ -35,6 +35,7 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
     baseSpan = 4,
     maxArea = 100_000_000,
     removeBackEdges = false,
+    edgeMetaMap = {},
     getNodeLabel,
     getNodeValue,
     getEdgeLabel,
@@ -263,14 +264,19 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
         ? sign * (baseCurve + idx * jitter)
         : (idx === 0 ? 0 : (idx % 2 === 1 ? 1 : -1) * Math.ceil(idx / 2) * jitter);
 
-      links.push({
+      const edgeMeta = edgeMetaMap?.[sourceKey]?.[targetKey];
+      const link = {
         source: sourceKey,
         target: targetKey,
         label: optionLabel,
         lineStyle: {
           curveness,
         },
-      });
+      };
+      if (edgeMeta && typeof edgeMeta === 'object') {
+        link.meta = edgeMeta;
+      }
+      links.push(link);
     }
   }
 
