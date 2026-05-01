@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站弹幕统计
 // @namespace    https://github.com/ZBpine/bili-data-statistic
-// @version      3.1.0
+// @version      3.1.1
 // @description  获取B站弹幕数据，并生成统计页面。
 // @icon         https://cdn.jsdmirror.com/gh/ZBpine/bili-data-statistic@main/docs/favicon.ico
 // @match        https://www.bilibili.com/video/*
@@ -7452,7 +7452,7 @@ ${percentages[params.dataIndex]}%`
         const targetPos = nodePosMap.get(targetKey) || { x: 0, y: 0 };
         let baseCurve = 0.1;
         if (flowDelta <= 0) baseCurve = 0.3;
-        const jitter = idx * 0.1;
+        const jitter = 0.1;
         const sourceCross = direction === "TB" ? sourcePos.x : sourcePos.y;
         const targetCross = direction === "TB" ? targetPos.x : targetPos.y;
         const axisSign = direction === "TB" ? -1 : 1;
@@ -7467,7 +7467,7 @@ ${percentages[params.dataIndex]}%`
         }
         if (flowDelta === 0) flowSign = axisSign * baseSign;
         const sign = flowSign * axisSign * baseSign;
-        const curveness = sign * (baseCurve + jitter);
+        const curveness = sign !== 0 ? sign * (baseCurve + idx * jitter) : idx === 0 ? 0 : (idx % 2 === 1 ? 1 : -1) * Math.ceil(idx / 2) * jitter;
         links.push({
           source: sourceKey,
           target: targetKey,
@@ -10996,7 +10996,7 @@ ${doc.documentElement.outerHTML}`;
             "onUpdate:show": _cache[11] || (_cache[11] = ($event) => vue.isRef(interactVideoModalVisible) ? interactVideoModalVisible.value = $event : null),
             preset: "card",
             title: "互动视频图谱",
-            style: { "width": "80vw" },
+            style: { "width": "75vw" },
             to: props2.to
           }, {
             default: vue.withCtx(() => [

@@ -1211,7 +1211,7 @@ onBeforeUnmount(() => {
       </n-flex>
     </n-modal>
 
-    <n-modal v-model:show="interactVideoModalVisible" preset="card" title="互动视频图谱" style="width: 80vw;" :to="props.to">
+    <n-modal v-model:show="interactVideoModalVisible" preset="card" title="互动视频图谱" style="width: 75vw;" :to="props.to">
       <interactive-graph-panel :get-graph="getInteractiveGraph" :get-echarts="getInteractiveEcharts" :aspect-ratio="2"
         @graph-capture="onInteractiveGraphCapture" />
     </n-modal>
