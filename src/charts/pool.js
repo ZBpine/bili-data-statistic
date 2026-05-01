@@ -1,4 +1,9 @@
-import { poolLabelMap } from './utils';
+const poolLabelMap = {
+  0: '普通池',
+  1: '字幕池',
+  2: '特殊池',
+  3: '互动池',
+};
 
 const poolChart = {
   key: 'pool',

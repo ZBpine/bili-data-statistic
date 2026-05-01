@@ -1,5 +1,3 @@
-import { toDateString } from './utils';
-
 const dateChart = {
   key: 'date',
   title: '发送日期分布',
@@ -7,7 +5,7 @@ const dateChart = {
     const data = this.ctx.items || [];
     const countMap = {};
     for (const item of data) {
-      const date = toDateString(Number(item?.ctime || 0) * 1000);
+      const date = this.ctx.utils.toDateString(Number(item?.ctime || 0) * 1000);
       countMap[date] = (countMap[date] || 0) + 1;
     }
 
@@ -48,7 +46,9 @@ const dateChart = {
     source: 'chart:date',
     template: '日期 {value}',
     getValue: (params) => params?.data?.__selectionValue ?? params?.name,
-    predicate: (item, value) => toDateString(Number(item?.ctime || 0) * 1000) === String(value || ''),
+    predicate: function predicate(item, value) {
+      return this.ctx.utils.toDateString(Number(item?.ctime || 0) * 1000) === String(value || '');
+    },
   },
 };
 

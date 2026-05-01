@@ -1,6 +1,6 @@
 <script setup>
 import { h, isVNode } from 'vue';
-import { Settings, Camera, FileDownload, TrashX, SquareCheck, ExternalLink } from '@vicons/tabler';
+import { Settings, Camera, FileDownload, TrashX, SquareCheck, ExternalLink, ZoomIn } from '@vicons/tabler';
 import {
   NbArchiveInfoCard,
   NbCommandDmTimeline,
@@ -11,6 +11,7 @@ import {
 import { useDialog, useMessage, useModal, useNotification, useThemeVars } from 'naive-ui';
 import DmDataLoaderPanel from '../components/DmDataLoaderPanel';
 import DmChartManager from '../components/DmChartManager';
+import InteractiveGraphPanel from '../components/InteractiveGraphPanel';
 import PanelSettings from '../components/PanelSettings';
 import ShareQrLinks from '../components/ShareQrLinks';
 import UserPanel from './UserPanel.vue';
@@ -18,6 +19,7 @@ import mountStyle from './DmPanel.style.cssr.js';
 import { segmentWords } from '../workers/segmentWordsWorker';
 import { downloadHtmlText, injectPanelData } from '../utils/panelExport';
 import storage from '../utils/storage';
+import * as utils from '../utils/utils';
 import { runtimeCdnUrls } from '../config/cdn';
 
 const ECHARTS_URL = runtimeCdnUrls.echarts;
@@ -163,7 +165,6 @@ const dividerRef = ref(null);
 const committedFilters = ref([]);
 const stagedFilter = ref(null);
 const regexText = ref('^(哈|呵|h|ha|H|HA|233+)+$');
-const regexExclude = ref(false);
 const chartMenus = ref([]);
 const panelSettingsVisible = ref(false);
 const midHashDialogVisible = ref(false);
@@ -175,9 +176,12 @@ const leftContentRef = ref(null);
 const sharingImage = ref(false);
 const exportingPanel = ref(false);
 const sharePreviewVisible = ref(false);
-const sharePreviewUrl = ref('');
-const shareImageBlob = shallowRef(null);
+const shareImageUrl = ref('');
 const openingExternalPanel = ref(false);
+const interactiveGraphLoading = ref(false);
+const interactVideoModalVisible = ref(false);
+const interactiveGraphPanelRef = ref(null);
+const dmDataLoaderPanelRef = ref(null);
 const qrLinkItems = [
   {
     url: 'https://greasyfork.org/zh-CN/scripts/534432',
@@ -220,6 +224,7 @@ const chartCtx = computed(() => ({
   stagedFilter: stagedFilter.value,
   committedFilters: committedFilters.value,
   segmentWords,
+  utils,
   feedback: {
     message,
     dialog,
@@ -230,6 +235,133 @@ const chartCtx = computed(() => ({
 }));
 
 const isListExpanded = computed(() => expandedNames.value.includes('list'));
+
+const isInteractiveVideo = computed(() => {
+  return Boolean(arcMgr.value?.data?.player_info?.interaction?.graph_version);
+});
+
+const viewPoints = computed(() => {
+  const list = arcMgr.value?.data?.player_info?.view_points;
+  return Array.isArray(list) ? list : [];
+});
+
+const formatViewPointRange = (item) => {
+  return `${utils.formatProgress(Number(item?.from || 0) * 1000)} - ${utils.formatProgress(Number(item?.to || 0) * 1000)}`;
+};
+
+const viewPointItemKey = (item, index) => {
+  const from = Number.isFinite(Number(item?.from)) ? Number(item.from) : index;
+  const to = Number.isFinite(Number(item?.to)) ? Number(item.to) : index;
+  const content = String(item?.content || '').trim();
+  return `${from}-${to}-${content || index}`;
+};
+
+const getInteractiveGraph = async (dedupe) => {
+  if (!arcMgr.value?.invoke) return {};
+  return arcMgr.value.invoke('buildInteractGraph', Boolean(dedupe)) || {};
+};
+
+const getInteractiveEcharts = async () => {
+  await ensurePageEcharts();
+  return runtimeWindow?.echarts || null;
+};
+
+const switchByInteractiveNode = async (value) => {
+  if (!value?.cid || !arcMgr.value?.invoke || !dmMgr.value) return false;
+
+  const nextInfo = await arcMgr.value.invoke('buildInfoByGraphNode', value);
+  if (!nextInfo || typeof nextInfo !== 'object') return false;
+  archiveInfo.value = nextInfo;
+
+  const hasDmList = Boolean(dmMgr.value.changeInfo?.(archiveInfo.value));
+  syncDanmakuState({
+    list: dmMgr.value?.data?.danmaku_list || [],
+    commandDms: dmMgr.value?.data?.danmaku_view?.commandDms || [],
+  });
+
+  if (!hasDmList) {
+    await dmDataLoaderPanelRef.value?.runAutoLoad?.();
+  }
+  return true;
+};
+
+const onInteractiveGraphClick = async (value) => {
+  if (interactiveGraphLoading.value) return;
+  const nextCid = value?.cid;
+  if (nextCid != null && String(nextCid) === String(archiveInfo.value?.cid ?? '')) return;
+  try {
+    interactiveGraphLoading.value = true;
+    await switchByInteractiveNode(value);
+  } catch (error) {
+    BDM?.logger?.error?.('[interactive graph] 切换节点失败', error);
+    message.error(String(error?.message || error || '互动节点切换失败'));
+  } finally {
+    interactiveGraphLoading.value = false;
+  }
+};
+
+const loadAllInteractiveDanmaku = async () => {
+  if (!arcMgr.value?.invoke || !dmMgr.value || interactiveGraphLoading.value) return;
+  try {
+    interactiveGraphLoading.value = true;
+    const graph = await arcMgr.value.invoke('buildInteractGraph', true) || {};
+    const currentCid = String(archiveInfo.value?.cid ?? '');
+    const seen = new Set();
+    for (const item of Object.values(graph)) {
+      const cid = item?.cid;
+      if (cid == null) continue;
+      const key = String(cid);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      if (key === currentCid) continue;
+      await switchByInteractiveNode(item);
+      await nextTick();
+    }
+    interactiveGraphLoading.value = false;
+  } catch (error) {
+    BDM?.logger?.error?.('[interactive graph] 载入全部弹幕失败', error);
+    message.error(String(error?.message || error || '载入所有弹幕失败'));
+    interactiveGraphLoading.value = false;
+  }
+};
+
+const refreshInteractiveGraphData = async () => {
+  await interactiveGraphPanelRef.value?.refresh?.();
+};
+
+const disposeInteractiveGraph = () => {
+  interactiveGraphPanelRef.value?.dispose?.();
+};
+
+const loadInteractiveGraph = async () => {
+  if (!arcMgr.value || interactiveGraphLoading.value) return;
+  interactiveGraphLoading.value = true;
+  try {
+    await arcMgr.value.invoke('getInteractEdgeInfo', async () => {
+      await refreshInteractiveGraphData();
+    });
+    await refreshInteractiveGraphData();
+  } catch (error) {
+    BDM?.logger?.error?.('[interactive graph] 加载失败', error);
+    message.error(String(error?.message || error || '互动图谱加载失败'));
+  } finally {
+    interactiveGraphLoading.value = false;
+  }
+};
+
+const clearInteractiveGraph = async () => {
+  if (!arcMgr.value || interactiveGraphLoading.value) return;
+  interactiveGraphLoading.value = true;
+  try {
+    await arcMgr.value.invoke('clearInteractEdgeInfo');
+    await refreshInteractiveGraphData();
+  } catch (error) {
+    BDM?.logger?.error?.('[interactive graph] 清除失败', error);
+    message.error(String(error?.message || error || '清除互动图谱失败'));
+  } finally {
+    interactiveGraphLoading.value = false;
+  }
+};
 
 const chartSettings = computed(() => chartManagerRef.value?.settings || null);
 
@@ -309,7 +441,6 @@ const rebuildFilterViews = () => {
 const clearAllFilters = () => {
   committedFilters.value = [];
   clearStage();
-  regexExclude.value = false;
   committedDmView.value = [...dmBase.value];
   stagedDmView.value = [...dmBase.value];
 };
@@ -317,6 +448,8 @@ const clearAllFilters = () => {
 const applyRegexFilter = () => {
   try {
     const regex = new RegExp(regexText.value, 'i');
+    const oldIdx = committedFilters.value.findIndex((item) => item.source === 'regex');
+    const nextExclude = oldIdx >= 0 ? Boolean(committedFilters.value[oldIdx]?.exclude) : false;
     const regexFilter = {
       id: `f-${filterIdSeed++}`,
       source: 'regex',
@@ -326,16 +459,15 @@ const applyRegexFilter = () => {
       predicate: (item) => regex.test(String(item?.content || '')),
       wrapTag: true,
       enabled: true,
-      exclude: regexExclude.value,
+      exclude: nextExclude,
     };
-    const oldIdx = committedFilters.value.findIndex((item) => item.source === 'regex');
     if (oldIdx >= 0) committedFilters.value.splice(oldIdx, 1, regexFilter);
     else committedFilters.value.push(regexFilter);
     clearStage();
-    setPanelError('');
     rebuildFilterViews();
   } catch (error) {
-    setPanelError('无效正则表达式');
+    BDM?.logger?.warn?.('[regex filter] 无效表达式', error);
+    message.error('无效正则表达式');
   }
 };
 
@@ -406,16 +538,13 @@ const toggleCommittedExclude = (id) => {
   const target = committedFilters.value.find((item) => item.id === id);
   if (!target) return;
   target.exclude = !target.exclude;
-  if (target.source === 'regex') regexExclude.value = target.exclude;
   rebuildFilterViews();
 };
 
 const removeCommittedFilter = (id) => {
   const idx = committedFilters.value.findIndex((item) => item.id === id);
   if (idx < 0) return;
-  const removed = committedFilters.value[idx];
   committedFilters.value.splice(idx, 1);
-  if (removed.source === 'regex') regexExclude.value = false;
   rebuildFilterViews();
 };
 
@@ -433,41 +562,41 @@ const syncDanmakuState = ({ list = [], commandDms: cmd = [] } = {}) => {
   clearAllFilters();
 };
 
-let ensureRunning = false;
-let ensurePending = false;
-let ensurePromise = null;
+let ensureManagerRunning = false;
+let ensureManagerPending = false;
+let ensureManagerPromise = null;
 
-const queueEnsureVideoBase = async () => {
-  if (ensureRunning) {
-    ensurePending = true;
-    return ensurePromise;
+const queueEnsureManager = async () => {
+  if (ensureManagerRunning) {
+    ensureManagerPending = true;
+    return ensureManagerPromise;
   }
 
-  ensureRunning = true;
-  ensurePromise = (async () => {
+  ensureManagerRunning = true;
+  ensureManagerPromise = (async () => {
     let lastError = null;
     do {
-      ensurePending = false;
+      ensureManagerPending = false;
       try {
-        await ensureVideoBase();
+        await ensureManager();
         lastError = null;
       } catch (error) {
         lastError = error;
       }
-    } while (ensurePending);
+    } while (ensureManagerPending);
 
     if (lastError) {
       throw lastError;
     }
   })().finally(() => {
-    ensureRunning = false;
-    ensurePromise = null;
+    ensureManagerRunning = false;
+    ensureManagerPromise = null;
   });
 
-  return ensurePromise;
+  return ensureManagerPromise;
 };
 
-const ensureVideoBase = async () => {
+const ensureManager = async () => {
   if (!BDM?.BiliArchive || !BDM?.BiliDanmaku) throw new Error('BDM 不可用');
   let sourceUrl = String(props.url || '').trim();
 
@@ -509,10 +638,13 @@ const ensureVideoBase = async () => {
   const parsedId = String(parsed?.id || '').trim();
   if (!parsedId) throw new Error('无法从URL中解析稿件 ID');
 
-  if (arcMgr.value && dmMgr.value && currentArchiveId.value === parsedId) return;
+  if (arcMgr.value && dmMgr.value && currentArchiveId.value === parsedId) {
+    return;
+  }
 
   const nextArcMgr = new BDM.BiliArchive();
   const info = await nextArcMgr.getData(sourceUrl);
+  await nextArcMgr.getPlayerInfo();
   const nextInfo = info || nextArcMgr.info || {};
   const nextId = String(nextInfo?.id || parsedId).trim();
   if (!nextId) throw new Error('稿件信息获取失败');
@@ -527,6 +659,7 @@ const ensureVideoBase = async () => {
     userTouchedCollapse.value = false;
   }
   currentArchiveId.value = nextId;
+
 };
 
 const danmakuTableMenus = computed(() => {
@@ -572,11 +705,18 @@ const openMidHashQuery = (midHash) => {
 };
 
 const revokeSharePreview = () => {
-  if (sharePreviewUrl.value) {
-    URL.revokeObjectURL(sharePreviewUrl.value);
-    sharePreviewUrl.value = '';
+  if (shareImageUrl.value && shareImageUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(shareImageUrl.value);
   }
-  shareImageBlob.value = null;
+  shareImageUrl.value = '';
+};
+
+const onInteractiveGraphCapture = (dataUrl) => {
+  const nextUrl = String(dataUrl || '');
+  if (!nextUrl) return;
+  revokeSharePreview();
+  shareImageUrl.value = nextUrl;
+  sharePreviewVisible.value = true;
 };
 
 const canvasToBlob = (canvas, type = 'image/png') => {
@@ -647,8 +787,7 @@ const shareImage = async () => {
     const finalBlob = await canvasToBlob(canvas, 'image/png');
 
     revokeSharePreview();
-    shareImageBlob.value = finalBlob;
-    sharePreviewUrl.value = URL.createObjectURL(finalBlob);
+    shareImageUrl.value = URL.createObjectURL(finalBlob);
     sharePreviewVisible.value = true;
   } catch (error) {
     BDM?.logger?.error?.('分享图片生成失败', error);
@@ -659,9 +798,8 @@ const shareImage = async () => {
 };
 
 const downloadShareImage = () => {
-  const blob = shareImageBlob.value;
-  if (!blob) return;
-  const url = URL.createObjectURL(blob);
+  const url = String(shareImageUrl.value || '');
+  if (!url) return;
   const link = document.createElement('a');
   const id = String(archiveInfo.value?.id || 'bili-data-statistic').trim() || 'bili-data-statistic';
   link.href = url;
@@ -669,7 +807,6 @@ const downloadShareImage = () => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  URL.revokeObjectURL(url);
 };
 
 const buildExportData = () => {
@@ -811,22 +948,15 @@ watch(
     }
     try {
       setPanelError('');
-      await queueEnsureVideoBase();
+      await queueEnsureManager();
       if (!echartsReady.value) {
-        ensurePageEcharts()
-          .then(() => {
-            echartsReady.value = true;
-            nextTick(() => {
-              chartManagerRef.value?.chartResize?.();
-            });
-          })
-          .catch((error) => {
-            setPanelError(error);
-          });
-      } else {
-        await nextTick();
-        chartManagerRef.value?.chartResize?.();
+        await ensurePageEcharts();
+        echartsReady.value = true;
       }
+      await nextTick();
+      await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+      chartManagerRef.value?.chartResize?.();
+      interactiveGraphPanelRef.value?.resize?.();
     } catch (error) {
       setPanelError(error);
     }
@@ -842,11 +972,24 @@ watch(
     if (payload === previous) return;
     try {
       setPanelError('');
-      await queueEnsureVideoBase();
+      await queueEnsureManager();
     } catch (error) {
       setPanelError(error);
     }
   },
+);
+
+watch(
+  [isInteractiveVideo, () => props.active, currentArchiveId, () => interactiveGraphPanelRef.value],
+  async ([nextIsInteractive, active, _archiveId, panelRef]) => {
+    if (!active || !nextIsInteractive) {
+      disposeInteractiveGraph();
+      return;
+    }
+    if (!panelRef) return;
+    await refreshInteractiveGraphData();
+  },
+  { flush: 'post' },
 );
 
 watch(hasAnyFilter, (next, prev) => {
@@ -857,6 +1000,7 @@ watch(hasAnyFilter, (next, prev) => {
 
 onBeforeUnmount(() => {
   revokeSharePreview();
+  disposeInteractiveGraph();
 });
 
 </script>
@@ -874,9 +1018,56 @@ onBeforeUnmount(() => {
 
           <n-collapse v-if="arcMgr && dmMgr" display-directive="show" :expanded-names="expandedNames"
             @update:expanded-names="onCollapseUpdate">
+            <n-collapse-item v-if="viewPoints.length" name="viewPoint" title="章节">
+              <n-timeline>
+                <n-timeline-item v-for="(item, index) in viewPoints" :key="viewPointItemKey(item, index)"
+                  :color="themeVars.primaryColor">
+                  <n-flex class="bds-dm-panel__viewpoint-row" :size="12" align="start">
+                    <nb-image v-if="item?.imgUrl" class="bds-dm-panel__viewpoint-image" :src="item.imgUrl" width="100%"
+                      object-fit="contain" />
+                    <n-flex class="bds-dm-panel__viewpoint-meta" vertical :size="6">
+                      <n-text strong>{{ String(item?.content || '').trim() || '未命名章节' }}</n-text>
+                      <n-text depth="3">{{ formatViewPointRange(item) }}</n-text>
+                    </n-flex>
+                  </n-flex>
+                </n-timeline-item>
+              </n-timeline>
+            </n-collapse-item>
+
+            <n-collapse-item v-if="isInteractiveVideo" name="interactive" title="互动视频">
+              <n-flex vertical :size="8">
+                <n-flex :size="8" wrap>
+                  <n-button v-if="!isReadonlyMode" size="small" type="primary" :loading="interactiveGraphLoading"
+                    :disabled="interactiveGraphLoading" @click="loadInteractiveGraph">
+                    加载互动图谱
+                  </n-button>
+                  <n-button size="small" type="error" :disabled="interactiveGraphLoading"
+                    @click="clearInteractiveGraph">
+                    清除互动图谱
+                  </n-button>
+                  <n-button v-if="!isReadonlyMode" size="small" type="warning" :loading="interactiveGraphLoading"
+                    :disabled="interactiveGraphLoading" @click="loadAllInteractiveDanmaku">
+                    载入所有弹幕
+                  </n-button>
+                  <n-button size="small" circle title="放大查看" style="margin-left: auto;"
+                    @click="interactVideoModalVisible = true">
+                    <template #icon>
+                      <n-icon>
+                        <zoom-in />
+                      </n-icon>
+                    </template>
+                  </n-button>
+                </n-flex>
+                <interactive-graph-panel ref="interactiveGraphPanelRef" :graph-loading="interactiveGraphLoading"
+                  :get-graph="getInteractiveGraph" :get-echarts="getInteractiveEcharts"
+                  @graph-click="onInteractiveGraphClick" @graph-capture="onInteractiveGraphCapture" />
+              </n-flex>
+            </n-collapse-item>
+
             <n-collapse-item name="load" :title="`载入弹幕 ${dmBase.length.toLocaleString()} 条`">
-              <dm-data-loader-panel v-if="!isReadonlyMode" :key="archiveInfo.id || currentArchiveId" :arc-mgr="arcMgr"
-                :dm-mgr="dmMgr" :to="props.to" @sync-data="syncDanmakuState" @set-error="setPanelError"
+              <dm-data-loader-panel v-if="!isReadonlyMode" ref="dmDataLoaderPanelRef"
+                :key="archiveInfo.id || currentArchiveId" :arc-mgr="arcMgr" :dm-mgr="dmMgr" :to="props.to"
+                @sync-data="syncDanmakuState" @set-error="setPanelError"
                 @initial-load-finished="handleInitialLoadFinished" />
             </n-collapse-item>
 
@@ -928,7 +1119,7 @@ onBeforeUnmount(() => {
           </n-collapse>
         </n-flex>
         <div v-show="isListExpanded" class="bds-dm-panel__table-block">
-          <nb-danmaku-table class="bds-dm-panel__table" :items="stagedDmView" :item-height="38"
+          <nb-danmaku-table class="bds-dm-panel__table" :items="stagedDmView" :item-height="40"
             :menu-items="danmakuTableMenus" :to="props.to" ref="danmakuTableRef" />
         </div>
         <n-divider style="padding: 16px 0;" ref="dividerRef" v-show="sharingImage" />
@@ -1011,13 +1202,18 @@ onBeforeUnmount(() => {
     <n-modal v-model:show="sharePreviewVisible" preset="card" title="截图预览" style="width: 50vw;" :to="props.to"
       @update:show="(show) => { if (!show) revokeSharePreview(); }">
       <n-flex vertical :size="12">
-        <nb-image v-if="sharePreviewUrl" :src="sharePreviewUrl" alt="截图预览" width="100%" object-fit="contain"
+        <nb-image v-if="shareImageUrl" :src="shareImageUrl" alt="截图预览" width="100%" object-fit="contain"
           style="max-height: 60vh;" />
         <n-flex justify="end" :size="8">
           <n-button @click="sharePreviewVisible = false">关闭</n-button>
           <n-button type="warning" @click="downloadShareImage">保存图片</n-button>
         </n-flex>
       </n-flex>
+    </n-modal>
+
+    <n-modal v-model:show="interactVideoModalVisible" preset="card" title="互动视频图谱" style="width: 80vw;" :to="props.to">
+      <interactive-graph-panel :get-graph="getInteractiveGraph" :get-echarts="getInteractiveEcharts" :aspect-ratio="2"
+        @graph-capture="onInteractiveGraphCapture" />
     </n-modal>
   </div>
 </template>

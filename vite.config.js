@@ -13,11 +13,26 @@ const cdnProfile = String(process.env.BDS_CDN_PROFILE || 'jsdelivr').trim();
 const cdnBase = resolveCdnBase(cdnProfile);
 const cdnUrls = createCdnUrls(cdnBase);
 const isCnProfile = cdnBase.includes('cdn.jsdmirror.com');
+const localBdmBaseUrl = 'http://localhost:8000/dist/bili-data-manager.min.js';
 
 const npmCdn = (path) => (version, name) => `${cdnBase}npm/${name}@${version}/${path}`;
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => {
+  const isLocalBdmEnabled = command === 'serve' && String(process.env.BDS_DEV_LOCAL_BDM || '').trim() === '1';
+  const localBdmUrl = `${localBdmBaseUrl}?t=${Date.now()}`;
+  const userscriptMatch = [
+    'https://www.bilibili.com/video/*',
+    'https://www.bilibili.com/list/watchlater*',
+    'https://www.bilibili.com/bangumi/play/*',
+    'https://space.bilibili.com/*',
+    'https://zbpine.github.io/bili-data-statistic/*',
+    'https://bili-data-statistic.pages.dev/*',
+    'https://bds.zbpine.abrdns.com/*',
+    ...(command === 'serve' ? ['http://localhost:4173/*'] : []),
+  ];
+
+  return {
   define: {
     __BDS_PROFILE_CDN_BASE__: JSON.stringify(cdnBase),
   },
@@ -40,22 +55,15 @@ export default defineConfig({
         namespace: 'https://github.com/ZBpine/bili-data-statistic',
         description: '获取B站弹幕数据，并生成统计页面。',
         icon: cdnUrls.favicon,
-        match: [
-          'https://www.bilibili.com/video/*',
-          'https://www.bilibili.com/list/watchlater*',
-          'https://www.bilibili.com/bangumi/play/*',
-          'https://space.bilibili.com/*',
-          'https://zbpine.github.io/bili-data-statistic/*',
-          'https://bili-data-statistic.pages.dev/*',
-          'https://bds.zbpine.abrdns.com/*',
-        ],
+        match: userscriptMatch,
         grant: ['GM_xmlhttpRequest', 'GM_getResourceText', 'unsafeWindow'],
         connect: ['api.bilibili.com'],
         resource: {
           staticHtml: isCnProfile ? cdnUrls.staticHtmlCn : cdnUrls.staticHtmlDefault,
         },
         require: [
-          cdnUrls.biliDataManagerPinned,
+          cdnUrls.biliDataManager,
+          ...(isLocalBdmEnabled ? [localBdmUrl] : []),
         ],
         'run-at': 'document-end',
       },
@@ -69,4 +77,5 @@ export default defineConfig({
       },
     }),
   ],
+};
 });

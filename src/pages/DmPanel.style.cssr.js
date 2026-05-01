@@ -58,6 +58,28 @@ const style = c([
                 `,
             ),
             cE(
+                "viewpoint-row",
+                css`
+                    width: 100%;
+                `,
+            ),
+            cE(
+                "viewpoint-image",
+                css`
+                    flex: 1;
+                    max-width: 128px;
+                    border-radius: 6px;
+                    overflow: hidden;
+                `,
+            ),
+            cE(
+                "viewpoint-meta",
+                css`
+                    flex: 1;
+                    min-width: 0;
+                `,
+            ),
+            cE(
                 "table-block",
                 css`
                     display: flex;

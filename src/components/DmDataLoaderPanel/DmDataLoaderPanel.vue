@@ -23,6 +23,7 @@ const emit = defineEmits([
   'sync-data',
   'set-error',
   'initial-load-finished',
+  'update:loading',
 ]);
 
 const styleMountTarget = inject('styleMountTarget', null);
@@ -183,6 +184,7 @@ const updateProgress = (finished, total, current, count) => {
 const withLoading = async (fn) => {
   if (!props.dmMgr) return;
   panelLoading.value = true;
+  emit('update:loading', true);
   emit('set-error', '');
   try {
     await fn();
@@ -194,6 +196,7 @@ const withLoading = async (fn) => {
     return false;
   } finally {
     panelLoading.value = false;
+    emit('update:loading', false);
   }
 };
 
@@ -231,6 +234,16 @@ const loadDmPb = async () => {
   if (!ok) return;
   const added = Math.max(0, rise);
   message.success(`ProtoBuf 载入完成，新增 ${added.toLocaleString()} 条`);
+};
+
+const runAutoLoad = async () => {
+  if (!props.dmMgr || panelLoading.value) return;
+  if (autoLoadXml.value) {
+    await loadDmXml();
+  }
+  if (autoLoadPb.value) {
+    await loadDmPb();
+  }
 };
 
 const loadDmHisRange = async () => {
@@ -335,16 +348,14 @@ onMounted(async () => {
 
   if (props.dmMgr && autoLoadMgr !== props.dmMgr) {
     autoLoadMgr = props.dmMgr;
-
-    if (autoLoadXml.value) {
-      await loadDmXml();
-    }
-    if (autoLoadPb.value) {
-      await loadDmPb();
-    }
+    await runAutoLoad();
   }
 
   emit('initial-load-finished');
+});
+
+defineExpose({
+  runAutoLoad,
 });
 
 watch(autoLoadXml, (value) => {
@@ -406,13 +417,13 @@ watch(() => props.dmMgr, () => {
     </n-flex>
 
     <n-flex :size="12" align="center" wrap class="bds-dm-loader-panel__action-row">
-      <n-date-picker :formatted-value="selectedDateRange" type="daterange" size="small" value-format="yyyy-MM-dd"
-        :is-date-disabled="isHistoryDateDisabled" :to="to" :clearable="false" class="bds-dm-loader-panel__range"
-        @update:formatted-value="onDateRangeUpdate" />
       <n-button class="bds-dm-loader-panel__btn" type="primary" size="small" :loading="panelLoading"
         @click="loadDmHisRange">
         载入区间历史弹幕
       </n-button>
+      <n-date-picker :formatted-value="selectedDateRange" type="daterange" size="small" value-format="yyyy-MM-dd"
+        :is-date-disabled="isHistoryDateDisabled" :to="to" :clearable="false" class="bds-dm-loader-panel__range"
+        @update:formatted-value="onDateRangeUpdate" />
     </n-flex>
 
     <n-flex :size="12" align="center" wrap>

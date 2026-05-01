@@ -1,6 +1,3 @@
-import { defineComponent, ref } from 'vue';
-import { formatProgress, parseProgressToSec, parseRangeValue } from './utils';
-
 const densityChart = {
   key: 'density',
   title: '弹幕密度分布',
@@ -32,7 +29,7 @@ const densityChart = {
       if (!row) continue;
       const matched = row.match(timeRegex);
       if (!matched) continue;
-      const sec = parseProgressToSec(matched[1]);
+      const sec = this.ctx.utils.parseProgressToSec(matched[1]);
       if (!Number.isFinite(sec)) continue;
       const label = row.replace(matched[1], '').trim() || row;
       labels.push({ name: label, xAxis: sec });
@@ -41,57 +38,90 @@ const densityChart = {
     this.ctx.rerender?.();
   },
   setLabel() {
+    const defineComponent = this.ctx.vue?.defineComponent;
+    const ref = this.ctx.vue?.ref;
     const NInput = this.ctx.ui?.NInput;
     const NText = this.ctx.ui?.NText;
     const NRadioGroup = this.ctx.ui?.NRadioGroup;
     const NRadioButton = this.ctx.ui?.NRadioButton;
+    const NButton = this.ctx.ui?.NButton;
     const feedback = this.ctx.feedback;
-    if (!NInput || !NText || !NRadioGroup || !NRadioButton || !feedback?.dialog) {
+    if (!NInput || !NText || !NRadioGroup || !NRadioButton || !feedback?.dialog || !defineComponent || !ref) {
       const text = window.prompt('请输入标记（每行一个，格式 mm:ss 文本）', this.labelText || '');
       if (text == null) return;
       this.applyLabelText(text);
       return;
     }
 
-    let inputText = String(this.labelText || '');
-    let labelPos = String(this.labelPosition || 'end');
+    const viewPoints = Array.isArray(this.ctx.arcMgr?.data?.player_info?.view_points)
+      ? this.ctx.arcMgr.data.player_info.view_points
+      : [];
+    const buildViewPointLines = () => {
+      return viewPoints
+        .map((item) => {
+          const from = this.ctx.utils.formatProgress(Number(item?.from || 0) * 1000);
+          const content = String(item?.content || '').trim() || '未命名章节';
+          return `${from} ${content}`;
+        })
+        .filter(Boolean)
+        .join('\n');
+    };
+
+    const inputTextRef = ref(String(this.labelText || ''));
+    const labelPosRef = ref(String(this.labelPosition || 'end'));
+    const Content = defineComponent({
+      name: 'DensityLabelDialogContent',
+      setup: () => {
+        return () => this.ctx.h('div', [
+          this.ctx.h(NText, { type: 'info' }, { default: () => '请输入标记时间和文本' }),
+          viewPoints.length && NButton
+            ? this.ctx.h(NButton, {
+              size: 'tiny',
+              style: 'margin-left: 8px;',
+              onClick: () => {
+                inputTextRef.value = buildViewPointLines();
+              },
+            }, { default: () => '填入章节' })
+            : null,
+          this.ctx.h(NInput, {
+            type: 'textarea',
+            rows: 8,
+            value: inputTextRef.value,
+            placeholder: '6:06 示例\n12:12 示例2',
+            autofocus: true,
+            style: 'margin: 12px 0px;',
+            onUpdateValue: (value) => {
+              inputTextRef.value = String(value || '');
+            },
+          }),
+          this.ctx.h('div', [
+            this.ctx.h(NText, { type: 'info' }, { default: () => '标记位置：' }),
+            this.ctx.h(NRadioGroup, {
+              value: labelPosRef.value,
+              size: 'small',
+              style: 'margin-left: 8px; vertical-align: top;',
+              onUpdateValue: (value) => {
+                labelPosRef.value = String(value || 'end');
+              },
+            }, {
+              default: () => [
+                this.ctx.h(NRadioButton, { value: 'end' }, { default: () => '顶端' }),
+                this.ctx.h(NRadioButton, { value: 'insideEnd' }, { default: () => '内部' }),
+              ],
+            }),
+          ]),
+        ]);
+      },
+    });
+
     feedback.dialog.create({
       title: '添加标记',
       positiveText: '应用',
       negativeText: '取消',
-      content: () => this.ctx.h('div', [
-        this.ctx.h(NText, { type: 'info' }, { default: () => '请输入标记时间和文本' }),
-        this.ctx.h(NInput, {
-          type: 'textarea',
-          rows: 8,
-          defaultValue: inputText,
-          placeholder: '6:06 示例\n12:12 示例2',
-          autofocus: true,
-          style: 'margin: 12px 0px;',
-          onUpdateValue: (value) => {
-            inputText = String(value || '');
-          },
-        }),
-        this.ctx.h('div', [
-          this.ctx.h(NText, { type: 'info' }, { default: () => '标记位置：' }),
-          this.ctx.h(NRadioGroup, {
-            value: labelPos,
-            size: 'small',
-            style: 'margin-left: 8px; vertical-align: top;',
-            onUpdateValue: (value) => {
-              labelPos = String(value || 'end');
-            },
-          }, {
-            default: () => [
-              this.ctx.h(NRadioButton, { value: 'end' }, { default: () => '顶端' }),
-              this.ctx.h(NRadioButton, { value: 'insideEnd' }, { default: () => '内部' }),
-            ],
-          }),
-        ]),
-      ]),
+      content: () => this.ctx.h(Content),
       onPositiveClick: () => {
-        this.labelPosition = labelPos === 'insideEnd' ? 'insideEnd' : 'end';
-        this.applyLabelText(inputText);
+        this.labelPosition = labelPosRef.value === 'insideEnd' ? 'insideEnd' : 'end';
+        this.applyLabelText(inputTextRef.value);
         return true;
       },
     });
@@ -99,9 +129,8 @@ const densityChart = {
   getDurationSec() {
     const data = this.ctx.items || [];
     const maxProgressMs = Math.max(0, ...data.map((item) => Number(item?.progress || 0)));
-    const fromArc = Number(this.ctx.arcMgr?.info?.duration || 0);
-    if (fromArc > 0) return Math.max(1, Math.ceil(fromArc));
-    return Math.max(1, Math.ceil(maxProgressMs / 1000));
+    const fromInfo = Number(this.ctx.dmMgr?.info?.duration || 0);
+    return Math.ceil(Math.max(1, fromInfo, maxProgressMs / 1000));
   },
   normalizeRangeSec(rangeSec, maxSec) {
     const fallback = [0, maxSec];
@@ -111,14 +140,16 @@ const densityChart = {
     return start <= end ? [start, end] : [end, start];
   },
   openRangeFilterDialog() {
+    const defineComponent = this.ctx.vue?.defineComponent;
+    const ref = this.ctx.vue?.ref;
     const NSlider = this.ctx.ui?.NSlider;
     const NInput = this.ctx.ui?.NInput;
     const feedback = this.ctx.feedback;
     const maxSec = this.getDurationSec();
     const initial = this.normalizeRangeSec(this.rangeSelectionSec, maxSec);
-    const secToText = (sec) => formatProgress(Number(sec || 0) * 1000);
+    const secToText = (sec) => this.ctx.utils.formatProgress(Number(sec || 0) * 1000);
 
-    if (!NSlider || !NInput || !feedback?.dialog) {
+    if (!NSlider || !NInput || !feedback?.dialog || !defineComponent || !ref) {
       const text = window.prompt('请输入范围（秒），格式：start,end', `${initial[0]},${initial[1]}`);
       if (!text) return;
       const parts = String(text).split(',').map((v) => Number(v.trim()));
@@ -146,7 +177,7 @@ const densityChart = {
     };
 
     const syncRangeByInput = (type, text) => {
-      const sec = parseProgressToSec(text);
+      const sec = this.ctx.utils.parseProgressToSec(text);
       if (!Number.isFinite(sec)) return;
       const next = type === 'start'
         ? [sec, rangeSecRef.value[1]]
@@ -159,7 +190,7 @@ const densityChart = {
       if (type === 'start') startEditingRef.value = false;
       else endEditingRef.value = false;
       const text = type === 'start' ? startTextRef.value : endTextRef.value;
-      const sec = parseProgressToSec(text);
+      const sec = this.ctx.utils.parseProgressToSec(text);
       if (!Number.isFinite(sec)) return;
       const next = type === 'start'
         ? [sec, rangeSecRef.value[1]]
@@ -227,8 +258,8 @@ const densityChart = {
       negativeText: '取消',
       content: () => this.ctx.h(Content),
       onPositiveClick: () => {
-        const startFromInput = parseProgressToSec(startTextRef.value);
-        const endFromInput = parseProgressToSec(endTextRef.value);
+        const startFromInput = this.ctx.utils.parseProgressToSec(startTextRef.value);
+        const endFromInput = this.ctx.utils.parseProgressToSec(endTextRef.value);
         if (!Number.isFinite(startFromInput) || !Number.isFinite(endFromInput)) {
           feedback.message?.error?.('请输入正确时间格式（mm:ss 或 hh:mm:ss）');
           return false;
@@ -250,12 +281,12 @@ const densityChart = {
       value,
       template: '时间段 {value}',
       formatValue: (raw) => {
-        const parsed = parseRangeValue(raw);
+        const parsed = this.ctx.utils.parseRangeValue(raw);
         if (!parsed) return String(raw || '');
-        return `${formatProgress(parsed.start)} ~ ${formatProgress(parsed.end)}`;
+        return `${this.ctx.utils.formatProgress(parsed.start)} ~ ${this.ctx.utils.formatProgress(parsed.end)}`;
       },
       predicate: (item, raw) => {
-        const parsed = parseRangeValue(raw);
+        const parsed = this.ctx.utils.parseRangeValue(raw);
         if (!parsed) return false;
         const progress = Number(item?.progress || 0);
         return progress >= parsed.start && progress <= parsed.end;
@@ -288,7 +319,7 @@ const densityChart = {
   render() {
     const data = this.ctx.items || [];
     const maxProgress = Math.max(60000, ...data.map((item) => Number(item?.progress || 0)));
-    const durationSec = Number(this.ctx.arcMgr?.info?.duration || 0);
+    const durationSec = this.getDurationSec();
     const durationMs = durationSec > 0 ? durationSec * 1000 : Math.max(60000, maxProgress);
 
     const allowedIntervals = [1, 2, 3, 4, 5, 6, 10, 15, 20, 30];
@@ -348,7 +379,7 @@ const densityChart = {
             if (!current) return '';
             const sec = Number(Array.isArray(current.value) ? current.value[0] : current.axisValue || 0);
             const count = Number(Array.isArray(current.value) ? current.value[1] : current.value || 0);
-            return `时间段：${formatProgress(sec * 1000)}<br/>弹幕数：${count}`;
+            return `时间段：${this.ctx.utils.formatProgress(sec * 1000)}<br/>弹幕数：${count}`;
           },
         },
       xAxis: {
@@ -357,7 +388,7 @@ const densityChart = {
         min: 0,
         max: Math.ceil(durationMs / 1000),
         axisLabel: {
-          formatter: (val) => formatProgress(Number(val) * 1000),
+          formatter: (val) => this.ctx.utils.formatProgress(Number(val) * 1000),
         },
       },
       yAxis: {

@@ -106,7 +106,25 @@ watch(applyToCharts, (value) => {
 
 const panelShellRef = ref(null);
 const panelEl = computed(() => panelShellRef.value?.panelEl || null);
-let keyboardBlockAttached = false;
+
+const KEYBOARD_EVENTS = ['keydown', 'keypress', 'keyup'];
+const POINTER_EVENTS = [
+  'pointerdown',
+  'pointerup',
+  'pointercancel',
+  'mousedown',
+  'mouseup',
+  'touchstart',
+  'touchend',
+  'touchcancel',
+];
+
+const bindWindowEvents = (eventList, handler, enable, options = true) => {
+  const method = enable ? 'addEventListener' : 'removeEventListener';
+  for (const type of eventList) {
+    window[method](type, handler, options);
+  }
+};
 
 const blockPanelKeyboardEvent = (event) => {
   if (!showPanel.value) return;
@@ -118,20 +136,18 @@ const blockPanelKeyboardEvent = (event) => {
   event.stopImmediatePropagation?.();
 };
 
-const attachKeyboardBlock = () => {
-  if (keyboardBlockAttached) return;
-  window.addEventListener('keydown', blockPanelKeyboardEvent, true);
-  window.addEventListener('keypress', blockPanelKeyboardEvent, true);
-  window.addEventListener('keyup', blockPanelKeyboardEvent, true);
-  keyboardBlockAttached = true;
-};
-
-const detachKeyboardBlock = () => {
-  if (!keyboardBlockAttached) return;
-  window.removeEventListener('keydown', blockPanelKeyboardEvent, true);
-  window.removeEventListener('keypress', blockPanelKeyboardEvent, true);
-  window.removeEventListener('keyup', blockPanelKeyboardEvent, true);
-  keyboardBlockAttached = false;
+const blockPanelPointerEvent = (event) => {
+  if (!showPanel.value) return;
+  const root = panelEl.value;
+  if (!root) return;
+  const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+  if (Array.isArray(path) && path.length && !path.includes(root)) return;
+  const hasButtonInPath = Array.isArray(path) && path.some((node) => {
+    return typeof node?.classList?.contains === 'function' && node.classList.contains('n-button');
+  });
+  if (!hasButtonInPath) return;
+  event.stopPropagation();
+  event.stopImmediatePropagation?.();
 };
 
 const activateWithData = async (nextData) => {
@@ -159,8 +175,8 @@ const handleTogglePanel = () => {
 };
 
 watch(showPanel, (open) => {
-  if (open) attachKeyboardBlock();
-  else detachKeyboardBlock();
+  bindWindowEvents(KEYBOARD_EVENTS, blockPanelKeyboardEvent, open, true);
+  bindWindowEvents(POINTER_EVENTS, blockPanelPointerEvent, open, true);
 });
 
 watch(
@@ -173,7 +189,8 @@ watch(
 );
 
 onBeforeUnmount(() => {
-  detachKeyboardBlock();
+  bindWindowEvents(KEYBOARD_EVENTS, blockPanelKeyboardEvent, false, true);
+  bindWindowEvents(POINTER_EVENTS, blockPanelPointerEvent, false, true);
 });
 </script>
 

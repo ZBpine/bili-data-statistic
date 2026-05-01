@@ -1,10 +1,12 @@
 <script setup>
-import { h, nextTick } from 'vue';
+import * as vue from 'vue';
 import * as naiveUi from 'naive-ui';
 import mountStyle from './style.cssr.js';
 import { defaultCharts } from '../../charts';
 import storage from '../../utils/storage.js';
 import { deltaE } from '../../utils/colorDistance.js';
+
+const { h, nextTick } = vue;
 
 const props = defineProps({
   items: {
@@ -162,6 +164,7 @@ const createChartContext = (chartKey) => {
       return props.items;
     },
     h,
+    vue,
     ui: naiveUi,
     stageFilter: (filterInput) => stageChartFilter(chartKey, filterInput),
     rerender: () => renderChart(chartKey),

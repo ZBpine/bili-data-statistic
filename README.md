@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="144px" src="https://github.com/ZBpine/bili-data-statistic/raw/main/assets/icon.svg" />
+  <img width="144px" src="https://cdn.jsdelivr.net/gh/ZBpine/bili-data-statistic@main/assets/icon.svg" />
 </p>
 
 <h1 align="center">B站弹幕统计</h1>
@@ -8,18 +8,18 @@
 
 ## 安装使用
 
-**UserScript**
+### UserScript
 - [GreasyFork](https://greasyfork.org/zh-CN/scripts/534432)
 - [ScriptCat](https://scriptcat.org/zh-CN/script-show-page/3750) 无法访问 `github`/`jsdelivr` 的可安装脚本猫版本
 
-**Page**
+安装油猴脚本后，在B站（视频、番剧）页面左下角悬浮按钮点击查看弹幕统计。
+
+### Page
 - [Github Page](https://zbpine.github.io/bili-data-statistic/) 国内较难访问
 - [Cloudflare Page](https://bili-data-statistic.pages.dev/cn/) 国内访问还行
 - [EdgeOne Page](https://bds.zbpine.abrdns.com/cn/) 腾讯的服务，理论上国内是不能访问的（省的买域名），实际上大概率能访问
 
-安装油猴脚本后，在B站（视频、番剧）页面左下角悬浮按钮点击查看弹幕统计。
-
-直接访问 Page 只能靠上传数据来查看统计面板，安装油猴脚本后打开则可以输入B站URL抓取数据。
+直接访问静态页面只能靠上传数据来查看统计面板，安装油猴脚本后访问则可以输入B站URL抓取数据。
 
 ## 主要特性
 
@@ -31,7 +31,7 @@
 - 支持生成截图（需打开外部页面才能生成截图）
 - 支持自定义图表
 
-![legend](https://github.com/ZBpine/bili-data-statistic/raw/main/assets/legend.png)
+![legend](https://cdn.jsdelivr.net/gh/ZBpine/bili-data-statistic@main/assets/legend.png)
 
 ## 3.0.0 版本更新说明
 
@@ -44,7 +44,15 @@
   - 词云改用jieba分词
   - 弹幕列表可排序
 
-## 项目依赖
+### 3.1.0 新增互动视频支持
 
+![legend01](https://cdn.jsdelivr.net/gh/ZBpine/bili-data-statistic@main/assets/legend01.png)
+
+
+## 项目地址
+
+[![B站弹幕统计](https://img.shields.io/badge/GitHub-B站弹幕统计-black?style=flat&logo=github)](https://github.com/ZBpine/bili-data-statistic)
+
+### 项目依赖
 - [BiliDataManager](https://github.com/ZBpine/bili-data-manager)
 - [nb-ui](https://github.com/ZBpine/bili-data-viewer)

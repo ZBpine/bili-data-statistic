@@ -1,4 +1,14 @@
-import { modeLabelMap } from './utils';
+const modeLabelMap = {
+  1: '普通弹幕',
+  2: '普通弹幕',
+  3: '普通弹幕',
+  4: '底部弹幕',
+  5: '顶部弹幕',
+  6: '逆向弹幕',
+  7: '高级弹幕',
+  8: '代码弹幕',
+  9: 'BAS弹幕',
+};
 
 const modeChart = {
   key: 'mode',

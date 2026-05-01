@@ -1,6 +1,6 @@
 import { runtimeCdnUrls } from '../config/cdn';
 
-const BILI_DATA_MANAGER_CDN = runtimeCdnUrls.biliDataManagerMain;
+const BILI_DATA_MANAGER_CDN = runtimeCdnUrls.biliDataManager;
 
 let hashWorker = null;
 let hashReqId = 0;

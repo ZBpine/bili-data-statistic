@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站弹幕统计
 // @namespace    https://github.com/ZBpine/bili-data-statistic
-// @version      3.0.2
+// @version      3.1.0
 // @description  获取B站弹幕数据，并生成统计页面。
 // @icon         https://cdn.jsdmirror.com/gh/ZBpine/bili-data-statistic@main/docs/favicon.ico
 // @match        https://www.bilibili.com/video/*
@@ -11,7 +11,7 @@
 // @match        https://zbpine.github.io/bili-data-statistic/*
 // @match        https://bili-data-statistic.pages.dev/*
 // @match        https://bds.zbpine.abrdns.com/*
-// @require      https://cdn.jsdmirror.com/gh/ZBpine/bili-data-manager@ed2aaf5f8fedf7e157a22d10e995df2f61eeb917/dist/bili-data-manager.min.js
+// @require      https://cdn.jsdmirror.com/gh/ZBpine/bili-data-manager@642ebb7daba43bca7ac75b700aa12f9bd1935251/dist/bili-data-manager.min.js
 // @require      https://cdn.jsdmirror.com/npm/vue@3.5.31/dist/vue.global.prod.js
 // @require      data:application/javascript,%3Bwindow.Vue%3DVue%3BglobalThis.Vue%3DVue%3B
 // @require      https://cdn.jsdmirror.com/npm/naive-ui@2.44.1/dist/index.prod.js
@@ -43,6 +43,7 @@
     return Object.freeze(n);
   }
 
+  const vue__namespace = _interopNamespaceDefault(vue);
   const naiveUi__namespace = _interopNamespaceDefault(naiveUi);
 
   function ampCount(selector) {
@@ -1112,8 +1113,8 @@ ${style2}
   function mountStyle$b(mountTarget) {
     useTheme$1("bds-entry-launcher-style", style$b, mountTarget);
   }
-  const _hoisted_1$o = { class: "bds-entry-launcher__text" };
-  const _sfc_main$d = {
+  const _hoisted_1$r = { class: "bds-entry-launcher__text" };
+  const _sfc_main$e = {
     __name: "EntryLauncher",
     props: {
       label: { type: String, default: "弹幕统计" }
@@ -1156,7 +1157,7 @@ ${style2}
           onClick: _cache[0] || (_cache[0] = ($event) => emit2("toggle"))
         }, {
           default: vue.withCtx(() => [
-            vue.createElementVNode("span", _hoisted_1$o, vue.toDisplayString(props2.label), 1),
+            vue.createElementVNode("span", _hoisted_1$r, vue.toDisplayString(props2.label), 1),
             _cache[1] || (_cache[1] = vue.createElementVNode("span", {
               class: "bds-entry-launcher__icon",
               "aria-hidden": "true"
@@ -1210,8 +1211,8 @@ ${style2}
   function mountStyle$a(mountTarget) {
     useTheme$1("bds-panel-shell-style", style$a, mountTarget);
   }
-  const _hoisted_1$n = { class: "bds-panel-shell" };
-  const _sfc_main$c = {
+  const _hoisted_1$q = { class: "bds-panel-shell" };
+  const _sfc_main$d = {
     __name: "PanelShell",
     props: {
       show: {
@@ -1262,7 +1263,7 @@ ${style2}
       });
       return (_ctx, _cache) => {
         const _component_n_alert = naiveUi.NAlert;
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$n, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$q, [
           vue.withDirectives(vue.createElementVNode("div", {
             class: "bds-panel-shell__overlay",
             style: vue.normalizeStyle(vue.unref(overlayStyle)),
@@ -1352,7 +1353,7 @@ ${style2}
   function mountStyle$9(mountTarget) {
     useTheme$1("bds-upload-screen-style", style$9, mountTarget);
   }
-  const _sfc_main$b = {
+  const _sfc_main$c = {
     __name: "UploadScreen",
     props: {
       hasData: {
@@ -1529,7 +1530,7 @@ ${style2}
       };
     }
   };
-  const _hoisted_1$m = {
+  const _hoisted_1$p = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
@@ -1539,7 +1540,7 @@ ${style2}
     render: function render2(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$m,
+        _hoisted_1$p,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1566,7 +1567,7 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$l = {
+  const _hoisted_1$o = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
@@ -1576,7 +1577,7 @@ ${style2}
     render: function render3(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$l,
+        _hoisted_1$o,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1604,7 +1605,7 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$k = {
+  const _hoisted_1$n = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
@@ -1612,20 +1613,31 @@ ${style2}
   const FileDownload = vue.defineComponent({
     name: "FileDownload",
     render: function render4(_ctx, _cache) {
-      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$k, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path><path d="M12 11v6"></path><path d="M9 14l3 3l3-3"></path></g>', 1)]));
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$n, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path><path d="M12 11v6"></path><path d="M9 14l3 3l3-3"></path></g>', 1)]));
     }
   });
-  const _hoisted_1$j = {
+  const _hoisted_1$m = {
+    xmlns: "http://www.w3.org/2000/svg",
+    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+    viewBox: "0 0 24 24"
+  };
+  const GridDots = vue.defineComponent({
+    name: "GridDots",
+    render: function render5(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$m, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="19" cy="5" r="1"></circle><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="19" r="1"></circle><circle cx="12" cy="19" r="1"></circle><circle cx="19" cy="19" r="1"></circle></g>', 1)]));
+    }
+  });
+  const _hoisted_1$l = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const InfoCircle = vue.defineComponent({
     name: "InfoCircle",
-    render: function render5(_ctx, _cache) {
+    render: function render6(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$j,
+        _hoisted_1$l,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1655,17 +1667,57 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$i = {
+  const _hoisted_1$k = {
+    xmlns: "http://www.w3.org/2000/svg",
+    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+    viewBox: "0 0 24 24"
+  };
+  const RefreshDot = vue.defineComponent({
+    name: "RefreshDot",
+    render: function render7(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock(
+        "svg",
+        _hoisted_1$k,
+        _cache[0] || (_cache[0] = [
+          vue.createElementVNode(
+            "g",
+            {
+              fill: "none",
+              stroke: "currentColor",
+              "stroke-width": "2",
+              "stroke-linecap": "round",
+              "stroke-linejoin": "round"
+            },
+            [
+              vue.createElementVNode("path", {
+                d: "M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4"
+              }),
+              vue.createElementVNode("path", {
+                d: "M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"
+              }),
+              vue.createElementVNode("circle", {
+                cx: "12",
+                cy: "12",
+                r: "1"
+              })
+            ],
+            -1
+)
+        ])
+      );
+    }
+  });
+  const _hoisted_1$j = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const Settings = vue.defineComponent({
     name: "Settings",
-    render: function render6(_ctx, _cache) {
+    render: function render8(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$i,
+        _hoisted_1$j,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1692,17 +1744,17 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$h = {
+  const _hoisted_1$i = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const SquareCheck = vue.defineComponent({
     name: "SquareCheck",
-    render: function render7(_ctx, _cache) {
+    render: function render9(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$h,
+        _hoisted_1$i,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1731,15 +1783,26 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$g = {
+  const _hoisted_1$h = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const Trash = vue.defineComponent({
     name: "Trash",
-    render: function render8(_ctx, _cache) {
-      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$g, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path></g>', 1)]));
+    render: function render10(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$h, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path></g>', 1)]));
+    }
+  });
+  const _hoisted_1$g = {
+    xmlns: "http://www.w3.org/2000/svg",
+    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+    viewBox: "0 0 24 24"
+  };
+  const TrashX = vue.defineComponent({
+    name: "TrashX",
+    render: function render11(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$g, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path><path d="M10 12l4 4m0-4l-4 4"></path></g>', 1)]));
     }
   });
   const _hoisted_1$f = {
@@ -1747,10 +1810,10 @@ ${style2}
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
-  const TrashX = vue.defineComponent({
-    name: "TrashX",
-    render: function render9(_ctx, _cache) {
-      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$f, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path><path d="M10 12l4 4m0-4l-4 4"></path></g>', 1)]));
+  const ZoomIn = vue.defineComponent({
+    name: "ZoomIn",
+    render: function render12(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$f, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"></circle><path d="M7 10h6"></path><path d="M10 7v6"></path><path d="M21 21l-6-6"></path></g>', 1)]));
     }
   });
   const cssrAnchorMetaName$2 = "naive-ui-style";
@@ -2488,7 +2551,7 @@ ${style2}
   };
   vue.defineComponent({
     name: "ChevronDown",
-    render: function render10(_ctx, _cache) {
+    render: function render13(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$c,
@@ -4099,7 +4162,7 @@ ${style2}
   }
   const _hoisted_1$e = ["href"];
   const _hoisted_2$6 = ["href"];
-  const _sfc_main$a = Object.assign({ name: "UserCard" }, {
+  const _sfc_main$b = Object.assign({ name: "UserCard" }, {
     __name: "UserCard",
     props: {
       userCard: { type: Object, default: () => ({}) },
@@ -4585,7 +4648,7 @@ ${style2}
     useTheme$1("bds-dm-loader-panel-style", style$7, mountTarget);
   }
   const _hoisted_1$6 = { class: "bds-dm-loader-panel" };
-  const _sfc_main$9 = {
+  const _sfc_main$a = {
     __name: "DmDataLoaderPanel",
     props: {
       arcMgr: {
@@ -4604,9 +4667,10 @@ ${style2}
     emits: [
       "sync-data",
       "set-error",
-      "initial-load-finished"
+      "initial-load-finished",
+      "update:loading"
     ],
-    setup(__props2, { emit: __emit2 }) {
+    setup(__props2, { expose: __expose2, emit: __emit2 }) {
       const props2 = __props2;
       const emit2 = __emit2;
       const styleMountTarget2 = vue.inject("styleMountTarget", null);
@@ -4743,6 +4807,7 @@ ${style2}
       const withLoading = async (fn) => {
         if (!props2.dmMgr) return;
         panelLoading.value = true;
+        emit2("update:loading", true);
         emit2("set-error", "");
         try {
           await fn();
@@ -4754,6 +4819,7 @@ ${style2}
           return false;
         } finally {
           panelLoading.value = false;
+          emit2("update:loading", false);
         }
       };
       const emitSyncData = () => {
@@ -4788,6 +4854,15 @@ ${style2}
         if (!ok) return;
         const added = Math.max(0, rise);
         message.success(`ProtoBuf 载入完成，新增 ${added.toLocaleString()} 条`);
+      };
+      const runAutoLoad = async () => {
+        if (!props2.dmMgr || panelLoading.value) return;
+        if (autoLoadXml.value) {
+          await loadDmXml();
+        }
+        if (autoLoadPb.value) {
+          await loadDmPb();
+        }
       };
       const loadDmHisRange = async () => {
         if (!props2.dmMgr) return;
@@ -4883,14 +4958,12 @@ ${style2}
         emitSyncData();
         if (props2.dmMgr && autoLoadMgr !== props2.dmMgr) {
           autoLoadMgr = props2.dmMgr;
-          if (autoLoadXml.value) {
-            await loadDmXml();
-          }
-          if (autoLoadPb.value) {
-            await loadDmPb();
-          }
+          await runAutoLoad();
         }
         emit2("initial-load-finished");
+      });
+      __expose2({
+        runAutoLoad
       });
       vue.watch(autoLoadXml, (value) => {
         storage.set("dmLoader.autoLoadXml", Boolean(value));
@@ -5047,17 +5120,6 @@ ${style2}
             class: "bds-dm-loader-panel__action-row"
           }, {
             default: vue.withCtx(() => [
-              vue.createVNode(_component_n_date_picker, {
-                "formatted-value": vue.unref(selectedDateRange),
-                type: "daterange",
-                size: "small",
-                "value-format": "yyyy-MM-dd",
-                "is-date-disabled": isHistoryDateDisabled,
-                to: __props2.to,
-                clearable: false,
-                class: "bds-dm-loader-panel__range",
-                "onUpdate:formattedValue": onDateRangeUpdate
-              }, null, 8, ["formatted-value", "to"]),
               vue.createVNode(_component_n_button, {
                 class: "bds-dm-loader-panel__btn",
                 type: "primary",
@@ -5069,7 +5131,18 @@ ${style2}
                   vue.createTextVNode(" 载入区间历史弹幕 ", -1)
                 ])]),
                 _: 1
-              }, 8, ["loading"])
+              }, 8, ["loading"]),
+              vue.createVNode(_component_n_date_picker, {
+                "formatted-value": vue.unref(selectedDateRange),
+                type: "daterange",
+                size: "small",
+                "value-format": "yyyy-MM-dd",
+                "is-date-disabled": isHistoryDateDisabled,
+                to: __props2.to,
+                clearable: false,
+                class: "bds-dm-loader-panel__range",
+                "onUpdate:formattedValue": onDateRangeUpdate
+              }, null, 8, ["formatted-value", "to"])
             ]),
             _: 1
           }),
@@ -5529,57 +5602,6 @@ ${style2}
       });
     }
   };
-  const toDateString = (value) => {
-    const d = new Date(value);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
-  const formatProgress = (ms) => {
-    const sec = Math.max(0, Math.floor(Number(ms || 0) / 1e3));
-    const h2 = Math.floor(sec / 3600);
-    const m = String(Math.floor(sec % 3600 / 60)).padStart(2, "0");
-    const s = String(sec % 60).padStart(2, "0");
-    return h2 > 0 ? `${h2}:${m}:${s}` : `${m}:${s}`;
-  };
-  const parseProgressToSec = (value) => {
-    const text = String(value || "").trim();
-    if (!text) return null;
-    const matched = text.match(/^(\d{1,2})[:：](\d{2})(?:[:：](\d{2}))?$/);
-    if (!matched) return null;
-    const p1 = Number(matched[1]);
-    const p2 = Number(matched[2]);
-    const p3 = matched[3] == null ? null : Number(matched[3]);
-    if (!Number.isInteger(p1) || !Number.isInteger(p2) || p3 != null && !Number.isInteger(p3)) return null;
-    if (p2 > 59 || p3 != null && p3 > 59) return null;
-    return p3 == null ? p1 * 60 + p2 : p1 * 3600 + p2 * 60 + p3;
-  };
-  const parseRangeValue = (value) => {
-    const match = /^(\d+)-(\d+)$/.exec(String(value || ""));
-    if (!match) return null;
-    const start = Number(match[1]);
-    const end = Number(match[2]);
-    if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
-    return { start, end };
-  };
-  const modeLabelMap = {
-    1: "普通弹幕",
-    2: "普通弹幕",
-    3: "普通弹幕",
-    4: "底部弹幕",
-    5: "顶部弹幕",
-    6: "逆向弹幕",
-    7: "高级弹幕",
-    8: "代码弹幕",
-    9: "BAS弹幕"
-  };
-  const poolLabelMap = {
-    0: "普通池",
-    1: "字幕池",
-    2: "特殊池",
-    3: "互动池"
-  };
   const densityChart = {
     key: "density",
     title: "弹幕密度分布",
@@ -5611,7 +5633,7 @@ ${style2}
         if (!row) continue;
         const matched = row.match(timeRegex);
         if (!matched) continue;
-        const sec = parseProgressToSec(matched[1]);
+        const sec = this.ctx.utils.parseProgressToSec(matched[1]);
         if (!Number.isFinite(sec)) continue;
         const label = row.replace(matched[1], "").trim() || row;
         labels.push({ name: label, xAxis: sec });
@@ -5620,56 +5642,80 @@ ${style2}
       this.ctx.rerender?.();
     },
     setLabel() {
+      const defineComponent2 = this.ctx.vue?.defineComponent;
+      const ref2 = this.ctx.vue?.ref;
       const NInput2 = this.ctx.ui?.NInput;
       const NText2 = this.ctx.ui?.NText;
       const NRadioGroup2 = this.ctx.ui?.NRadioGroup;
       const NRadioButton2 = this.ctx.ui?.NRadioButton;
+      const NButton2 = this.ctx.ui?.NButton;
       const feedback = this.ctx.feedback;
-      if (!NInput2 || !NText2 || !NRadioGroup2 || !NRadioButton2 || !feedback?.dialog) {
+      if (!NInput2 || !NText2 || !NRadioGroup2 || !NRadioButton2 || !feedback?.dialog || !defineComponent2 || !ref2) {
         const text = window.prompt("请输入标记（每行一个，格式 mm:ss 文本）", this.labelText || "");
         if (text == null) return;
         this.applyLabelText(text);
         return;
       }
-      let inputText = String(this.labelText || "");
-      let labelPos = String(this.labelPosition || "end");
+      const viewPoints = Array.isArray(this.ctx.arcMgr?.data?.player_info?.view_points) ? this.ctx.arcMgr.data.player_info.view_points : [];
+      const buildViewPointLines = () => {
+        return viewPoints.map((item) => {
+          const from = this.ctx.utils.formatProgress(Number(item?.from || 0) * 1e3);
+          const content = String(item?.content || "").trim() || "未命名章节";
+          return `${from} ${content}`;
+        }).filter(Boolean).join("\n");
+      };
+      const inputTextRef = ref2(String(this.labelText || ""));
+      const labelPosRef = ref2(String(this.labelPosition || "end"));
+      const Content = defineComponent2({
+        name: "DensityLabelDialogContent",
+        setup: () => {
+          return () => this.ctx.h("div", [
+            this.ctx.h(NText2, { type: "info" }, { default: () => "请输入标记时间和文本" }),
+            viewPoints.length && NButton2 ? this.ctx.h(NButton2, {
+              size: "tiny",
+              style: "margin-left: 8px;",
+              onClick: () => {
+                inputTextRef.value = buildViewPointLines();
+              }
+            }, { default: () => "填入章节" }) : null,
+            this.ctx.h(NInput2, {
+              type: "textarea",
+              rows: 8,
+              value: inputTextRef.value,
+              placeholder: "6:06 示例\n12:12 示例2",
+              autofocus: true,
+              style: "margin: 12px 0px;",
+              onUpdateValue: (value) => {
+                inputTextRef.value = String(value || "");
+              }
+            }),
+            this.ctx.h("div", [
+              this.ctx.h(NText2, { type: "info" }, { default: () => "标记位置：" }),
+              this.ctx.h(NRadioGroup2, {
+                value: labelPosRef.value,
+                size: "small",
+                style: "margin-left: 8px; vertical-align: top;",
+                onUpdateValue: (value) => {
+                  labelPosRef.value = String(value || "end");
+                }
+              }, {
+                default: () => [
+                  this.ctx.h(NRadioButton2, { value: "end" }, { default: () => "顶端" }),
+                  this.ctx.h(NRadioButton2, { value: "insideEnd" }, { default: () => "内部" })
+                ]
+              })
+            ])
+          ]);
+        }
+      });
       feedback.dialog.create({
         title: "添加标记",
         positiveText: "应用",
         negativeText: "取消",
-        content: () => this.ctx.h("div", [
-          this.ctx.h(NText2, { type: "info" }, { default: () => "请输入标记时间和文本" }),
-          this.ctx.h(NInput2, {
-            type: "textarea",
-            rows: 8,
-            defaultValue: inputText,
-            placeholder: "6:06 示例\n12:12 示例2",
-            autofocus: true,
-            style: "margin: 12px 0px;",
-            onUpdateValue: (value) => {
-              inputText = String(value || "");
-            }
-          }),
-          this.ctx.h("div", [
-            this.ctx.h(NText2, { type: "info" }, { default: () => "标记位置：" }),
-            this.ctx.h(NRadioGroup2, {
-              value: labelPos,
-              size: "small",
-              style: "margin-left: 8px; vertical-align: top;",
-              onUpdateValue: (value) => {
-                labelPos = String(value || "end");
-              }
-            }, {
-              default: () => [
-                this.ctx.h(NRadioButton2, { value: "end" }, { default: () => "顶端" }),
-                this.ctx.h(NRadioButton2, { value: "insideEnd" }, { default: () => "内部" })
-              ]
-            })
-          ])
-        ]),
+        content: () => this.ctx.h(Content),
         onPositiveClick: () => {
-          this.labelPosition = labelPos === "insideEnd" ? "insideEnd" : "end";
-          this.applyLabelText(inputText);
+          this.labelPosition = labelPosRef.value === "insideEnd" ? "insideEnd" : "end";
+          this.applyLabelText(inputTextRef.value);
           return true;
         }
       });
@@ -5677,9 +5723,8 @@ ${style2}
     getDurationSec() {
       const data = this.ctx.items || [];
       const maxProgressMs = Math.max(0, ...data.map((item) => Number(item?.progress || 0)));
-      const fromArc = Number(this.ctx.arcMgr?.info?.duration || 0);
-      if (fromArc > 0) return Math.max(1, Math.ceil(fromArc));
-      return Math.max(1, Math.ceil(maxProgressMs / 1e3));
+      const fromInfo = Number(this.ctx.dmMgr?.info?.duration || 0);
+      return Math.ceil(Math.max(1, fromInfo, maxProgressMs / 1e3));
     },
     normalizeRangeSec(rangeSec, maxSec) {
       const fallback = [0, maxSec];
@@ -5689,13 +5734,15 @@ ${style2}
       return start <= end ? [start, end] : [end, start];
     },
     openRangeFilterDialog() {
+      const defineComponent2 = this.ctx.vue?.defineComponent;
+      const ref2 = this.ctx.vue?.ref;
       const NSlider = this.ctx.ui?.NSlider;
       const NInput2 = this.ctx.ui?.NInput;
       const feedback = this.ctx.feedback;
       const maxSec = this.getDurationSec();
       const initial = this.normalizeRangeSec(this.rangeSelectionSec, maxSec);
-      const secToText = (sec) => formatProgress(Number(sec || 0) * 1e3);
-      if (!NSlider || !NInput2 || !feedback?.dialog) {
+      const secToText = (sec) => this.ctx.utils.formatProgress(Number(sec || 0) * 1e3);
+      if (!NSlider || !NInput2 || !feedback?.dialog || !defineComponent2 || !ref2) {
         const text = window.prompt("请输入范围（秒），格式：start,end", `${initial[0]},${initial[1]}`);
         if (!text) return;
         const parts = String(text).split(",").map((v) => Number(v.trim()));
@@ -5706,11 +5753,11 @@ ${style2}
         this.ctx.rerender?.();
         return;
       }
-      const rangeSecRef = vue.ref([...initial]);
-      const startTextRef = vue.ref(secToText(initial[0]));
-      const endTextRef = vue.ref(secToText(initial[1]));
-      const startEditingRef = vue.ref(false);
-      const endEditingRef = vue.ref(false);
+      const rangeSecRef = ref2([...initial]);
+      const startTextRef = ref2(secToText(initial[0]));
+      const endTextRef = ref2(secToText(initial[1]));
+      const startEditingRef = ref2(false);
+      const endEditingRef = ref2(false);
       const syncTextByRange = (force = false) => {
         if (force || !startEditingRef.value) {
           startTextRef.value = secToText(rangeSecRef.value[0]);
@@ -5720,7 +5767,7 @@ ${style2}
         }
       };
       const syncRangeByInput = (type, text) => {
-        const sec = parseProgressToSec(text);
+        const sec = this.ctx.utils.parseProgressToSec(text);
         if (!Number.isFinite(sec)) return;
         const next = type === "start" ? [sec, rangeSecRef.value[1]] : [rangeSecRef.value[0], sec];
         rangeSecRef.value = this.normalizeRangeSec(next, maxSec);
@@ -5730,13 +5777,13 @@ ${style2}
         if (type === "start") startEditingRef.value = false;
         else endEditingRef.value = false;
         const text = type === "start" ? startTextRef.value : endTextRef.value;
-        const sec = parseProgressToSec(text);
+        const sec = this.ctx.utils.parseProgressToSec(text);
         if (!Number.isFinite(sec)) return;
         const next = type === "start" ? [sec, rangeSecRef.value[1]] : [rangeSecRef.value[0], sec];
         rangeSecRef.value = this.normalizeRangeSec(next, maxSec);
         syncTextByRange(true);
       };
-      const Content = vue.defineComponent({
+      const Content = defineComponent2({
         name: "DensityRangeFilterDialogContent",
         setup: () => {
           return () => this.ctx.h("div", [
@@ -5794,8 +5841,8 @@ ${style2}
         negativeText: "取消",
         content: () => this.ctx.h(Content),
         onPositiveClick: () => {
-          const startFromInput = parseProgressToSec(startTextRef.value);
-          const endFromInput = parseProgressToSec(endTextRef.value);
+          const startFromInput = this.ctx.utils.parseProgressToSec(startTextRef.value);
+          const endFromInput = this.ctx.utils.parseProgressToSec(endTextRef.value);
           if (!Number.isFinite(startFromInput) || !Number.isFinite(endFromInput)) {
             feedback.message?.error?.("请输入正确时间格式（mm:ss 或 hh:mm:ss）");
             return false;
@@ -5817,12 +5864,12 @@ ${style2}
         value,
         template: "时间段 {value}",
         formatValue: (raw) => {
-          const parsed = parseRangeValue(raw);
+          const parsed = this.ctx.utils.parseRangeValue(raw);
           if (!parsed) return String(raw || "");
-          return `${formatProgress(parsed.start)} ~ ${formatProgress(parsed.end)}`;
+          return `${this.ctx.utils.formatProgress(parsed.start)} ~ ${this.ctx.utils.formatProgress(parsed.end)}`;
         },
         predicate: (item, raw) => {
-          const parsed = parseRangeValue(raw);
+          const parsed = this.ctx.utils.parseRangeValue(raw);
           if (!parsed) return false;
           const progress = Number(item?.progress || 0);
           return progress >= parsed.start && progress <= parsed.end;
@@ -5852,7 +5899,7 @@ ${style2}
     render() {
       const data = this.ctx.items || [];
       const maxProgress = Math.max(6e4, ...data.map((item) => Number(item?.progress || 0)));
-      const durationSec = Number(this.ctx.arcMgr?.info?.duration || 0);
+      const durationSec = this.getDurationSec();
       const durationMs = durationSec > 0 ? durationSec * 1e3 : Math.max(6e4, maxProgress);
       const allowedIntervals = [1, 2, 3, 4, 5, 6, 10, 15, 20, 30];
       let intervalMs;
@@ -5899,7 +5946,7 @@ ${style2}
             if (!current) return "";
             const sec = Number(Array.isArray(current.value) ? current.value[0] : current.axisValue || 0);
             const count = Number(Array.isArray(current.value) ? current.value[1] : current.value || 0);
-            return `时间段：${formatProgress(sec * 1e3)}<br/>弹幕数：${count}`;
+            return `时间段：${this.ctx.utils.formatProgress(sec * 1e3)}<br/>弹幕数：${count}`;
           }
         },
         xAxis: {
@@ -5908,7 +5955,7 @@ ${style2}
           min: 0,
           max: Math.ceil(durationMs / 1e3),
           axisLabel: {
-            formatter: (val) => formatProgress(Number(val) * 1e3)
+            formatter: (val) => this.ctx.utils.formatProgress(Number(val) * 1e3)
           }
         },
         yAxis: {
@@ -5950,7 +5997,7 @@ ${style2}
       const data = this.ctx.items || [];
       const countMap = {};
       for (const item of data) {
-        const date = toDateString(Number(item?.ctime || 0) * 1e3);
+        const date = this.ctx.utils.toDateString(Number(item?.ctime || 0) * 1e3);
         countMap[date] = (countMap[date] || 0) + 1;
       }
       const sorted = Object.entries(countMap).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
@@ -5986,7 +6033,9 @@ ${style2}
       source: "chart:date",
       template: "日期 {value}",
       getValue: (params) => params?.data?.__selectionValue ?? params?.name,
-      predicate: (item, value) => toDateString(Number(item?.ctime || 0) * 1e3) === String(value || "")
+      predicate: function predicate(item, value) {
+        return this.ctx.utils.toDateString(Number(item?.ctime || 0) * 1e3) === String(value || "");
+      }
     }
   };
   const hourChart = {
@@ -6019,6 +6068,12 @@ ${style2}
       getValue: (params) => params?.data?.__selectionValue ?? Number.parseInt(params?.name, 10),
       predicate: (item, value) => new Date(Number(item?.ctime || 0) * 1e3).getHours() === Number(value)
     }
+  };
+  const poolLabelMap = {
+    0: "普通池",
+    1: "字幕池",
+    2: "特殊池",
+    3: "互动池"
   };
   const poolChart = {
     key: "pool",
@@ -6107,6 +6162,17 @@ ${style2}
         ]
       });
     }
+  };
+  const modeLabelMap = {
+    1: "普通弹幕",
+    2: "普通弹幕",
+    3: "普通弹幕",
+    4: "底部弹幕",
+    5: "顶部弹幕",
+    6: "逆向弹幕",
+    7: "高级弹幕",
+    8: "代码弹幕",
+    9: "BAS弹幕"
   };
   const modeChart = {
     key: "mode",
@@ -6458,7 +6524,7 @@ ${percentages[params.dataIndex]}%`
     class: "bds-dm-chart-manager__actions"
   };
   const _hoisted_4$2 = ["title", "disabled", "onClick"];
-  const _sfc_main$8 = {
+  const _sfc_main$9 = {
     __name: "DmChartManager",
     props: {
       items: {
@@ -6476,6 +6542,7 @@ ${percentages[params.dataIndex]}%`
     },
     emits: ["select-filter", "update:chartMenus"],
     setup(__props, { expose: __expose, emit: __emit }) {
+      const { h, nextTick } = vue__namespace;
       const props = __props;
       const emit = __emit;
       const styleMountTarget = vue.inject("styleMountTarget", null);
@@ -6591,7 +6658,8 @@ ${percentages[params.dataIndex]}%`
           get items() {
             return props.items;
           },
-          h: vue.h,
+          h,
+          vue: vue__namespace,
           ui: naiveUi__namespace,
           stageFilter: (filterInput) => stageChartFilter(chartKey2, filterInput),
           rerender: () => renderChart(chartKey2),
@@ -6775,7 +6843,7 @@ ${percentages[params.dataIndex]}%`
           };
           storage.set("charts.visible", visibleChartKeys.value);
           emitChartMenus();
-          vue.nextTick(() => renderChart(def.key));
+          nextTick(() => renderChart(def.key));
           return def.key;
         } catch (error) {
           const message = String(error?.message || error || "未知错误");
@@ -6834,20 +6902,20 @@ ${percentages[params.dataIndex]}%`
           const value = getValue(params);
           if (value == null || value === "") return;
           const formatValue = typeof selection.formatValue === "function" ? (v) => selection.formatValue.call(runtime, v) : (v) => String(v);
-          const predicate = (item, v) => selection.predicate.call(runtime, item, v);
+          const predicate2 = (item, v) => selection.predicate.call(runtime, item, v);
           emit("select-filter", {
             source: selection.source || `chart:${chartKey2}`,
             template: selection.template || "{value}",
             value,
             formatValue,
-            predicate,
+            predicate: predicate2,
             wrapTag: selection.wrapTag !== false
           });
         }
       };
       const renderChart = async (chartKey2) => {
         const pending = chartRenderTaskMap.get(chartKey2);
-        await vue.nextTick();
+        await nextTick();
         if (pending) {
           await pending;
         }
@@ -6892,7 +6960,7 @@ ${percentages[params.dataIndex]}%`
         })();
         chartRenderTaskMap.set(chartKey2, task);
         try {
-          await vue.nextTick();
+          await nextTick();
           await task;
         } finally {
           if (chartRenderTaskMap.get(chartKey2) === task) {
@@ -6907,7 +6975,7 @@ ${percentages[params.dataIndex]}%`
         return renderQueue;
       };
       const renderAllCharts = async () => {
-        await vue.nextTick();
+        await nextTick();
         for (const key of visibleChartKeys.value) {
           try {
             await renderChart(key);
@@ -6925,7 +6993,7 @@ ${percentages[params.dataIndex]}%`
         visibleChartKeys.value = next;
         storage.set("charts.visible", visibleChartKeys.value);
         emitChartMenus();
-        await vue.nextTick();
+        await nextTick();
         const el = chartDomMap[chartKey2];
         if (el?.scrollIntoView) {
           el.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -6940,7 +7008,7 @@ ${percentages[params.dataIndex]}%`
         visibleChartKeys.value = next;
         storage.set("charts.visible", visibleChartKeys.value);
         emitChartMenus();
-        await vue.nextTick();
+        await nextTick();
         const el = chartDomMap[chartKey2];
         if (el?.scrollIntoView) {
           el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -6959,7 +7027,7 @@ ${percentages[params.dataIndex]}%`
         if (!runtime || !("expandedH" in runtime)) return;
         expandedByKey[chartKey2] = !Boolean(expandedByKey[chartKey2]);
         runtime.expandedH = Boolean(expandedByKey[chartKey2]);
-        await vue.nextTick();
+        await nextTick();
         const nextSize = getChartSizeKey(chartKey2);
         if (nextSize) chartSizeMap.set(chartKey2, nextSize);
         resizeChart(chartKey2);
@@ -6982,7 +7050,7 @@ ${percentages[params.dataIndex]}%`
       };
       const refreshChart = async (chartKey2) => {
         disposeChart(chartKey2);
-        await vue.nextTick();
+        await nextTick();
         await renderChart(chartKey2);
       };
       const getActionList = (chartKey2, index) => {
@@ -7072,7 +7140,7 @@ ${percentages[params.dataIndex]}%`
           enqueueRender(async () => {
             const prevSet = new Set(prev);
             const currentSet = new Set(current);
-            await vue.nextTick();
+            await nextTick();
             for (const key of prev) {
               if (!currentSet.has(key)) disposeChart(key);
             }
@@ -7174,6 +7242,706 @@ ${percentages[params.dataIndex]}%`
             }), 128))
           ], 512)
         ]);
+      };
+    }
+  };
+  const compareNodeKey = (a, b) => {
+    const an = Number(a);
+    const bn = Number(b);
+    const aNum = Number.isFinite(an);
+    const bNum = Number.isFinite(bn);
+    if (aNum && bNum) return an - bn;
+    if (aNum) return -1;
+    if (bNum) return 1;
+    return String(a).localeCompare(String(b));
+  };
+  const pickRootKey = (keys, indegreeMap) => {
+    if (!keys.length) return null;
+    const zeroIn = keys.filter((key) => Number(indegreeMap.get(key) || 0) <= 0);
+    const pool = zeroIn.length ? zeroIn : keys;
+    return [...pool].sort(compareNodeKey)[0] || null;
+  };
+  const toIdList = (list) => {
+    return (Array.isArray(list) ? list : []).map((edge) => edge?.id).filter((id) => id != null).map((id) => String(id));
+  };
+  const EPSILON = 1e-6;
+  const layoutFlowGraph = (graphMap, options = {}) => {
+    const {
+      rootId,
+      direction = "LR",
+      mode = "compact",
+      layoutRatio = 2,
+      baseGap: baseGap2 = 100,
+      baseSpan = 4,
+      maxArea = 1e8,
+      removeBackEdges = false,
+      getNodeLabel,
+      getNodeValue,
+      getEdgeLabel
+    } = options;
+    const ratioInput = Number(layoutRatio);
+    const baseInput = Number(baseGap2);
+    const ratio = Number.isFinite(ratioInput) ? ratioInput : 2;
+    const base = Number.isFinite(baseInput) ? baseInput : 100;
+    const map = graphMap && typeof graphMap === "object" ? graphMap : {};
+    const keys = Object.keys(map).sort(compareNodeKey);
+    if (!keys.length) return {
+      data: [],
+      links: [],
+      meta: {
+        levelMap: new Map(),
+        scale: 1,
+        viewport: { width: 0, height: 0, area: 0 }
+      }
+    };
+    const indegreeMap = new Map();
+    const adjacency = new Map();
+    const reverseAdjacency = new Map();
+    for (const key of keys) {
+      const node = map[key] || {};
+      const inList = Array.isArray(node.in) ? node.in : [];
+      const outList = Array.isArray(node.out) ? node.out : [];
+      indegreeMap.set(key, inList.length);
+      adjacency.set(key, toIdList(outList));
+      reverseAdjacency.set(key, toIdList(inList));
+    }
+    const levelMap = new Map();
+    const bfsFrom = (startKey) => {
+      const queue = [startKey];
+      if (!levelMap.has(startKey)) levelMap.set(startKey, 0);
+      while (queue.length) {
+        const current = queue.shift();
+        const currentLevel = Number(levelMap.get(current) || 0);
+        const nextList = adjacency.get(current) || [];
+        for (const target of nextList) {
+          if (!levelMap.has(target)) {
+            levelMap.set(target, currentLevel + 1);
+            queue.push(target);
+          }
+        }
+      }
+    };
+    const preferredRoot = rootId == null ? null : String(rootId);
+    if (preferredRoot && map[preferredRoot]) {
+      bfsFrom(preferredRoot);
+    }
+    while (levelMap.size < keys.length) {
+      const unvisited = keys.filter((key) => !levelMap.has(key));
+      const nextRoot = pickRootKey(unvisited, indegreeMap);
+      if (!nextRoot) break;
+      bfsFrom(nextRoot);
+    }
+    const levelGroups = new Map();
+    for (const key of keys) {
+      const level = Number(levelMap.get(key) || 0);
+      if (!levelGroups.has(level)) levelGroups.set(level, []);
+      levelGroups.get(level).push(key);
+    }
+    for (const [level, group] of levelGroups.entries()) {
+      group.sort(compareNodeKey);
+      levelGroups.set(level, group);
+    }
+    const orderedLevels = [...levelGroups.keys()].sort((a, b) => a - b);
+    const reorderByBarycenter = (sourceLevel, targetLevel, getRefs) => {
+      const sourceGroup = levelGroups.get(sourceLevel) || [];
+      const sourceIndexMap = new Map(sourceGroup.map((key, index) => [key, index]));
+      const group = levelGroups.get(targetLevel) || [];
+      const groupCenter = (group.length - 1) / 2;
+      const nextGroup = [...group].map((key, index) => {
+        const indexes = getRefs(key).filter((refKey) => Number(levelMap.get(refKey) || 0) === sourceLevel).map((refKey) => sourceIndexMap.get(refKey)).filter((value) => Number.isFinite(value));
+        let barycenter;
+        if (indexes.length) {
+          barycenter = indexes.reduce((sum, value) => sum + value, 0) / indexes.length;
+        } else {
+          barycenter = index <= groupCenter ? -1 : sourceGroup.length + 1;
+        }
+        return { key, index, barycenter };
+      }).sort((a, b) => {
+        if (a.barycenter !== b.barycenter) return a.barycenter - b.barycenter;
+        return a.index - b.index;
+      }).map((item) => item.key);
+      levelGroups.set(targetLevel, nextGroup);
+    };
+    for (let i = 1; i < orderedLevels.length; i += 1) {
+      const level = orderedLevels[i];
+      const prevLevel = orderedLevels[i - 1];
+      reorderByBarycenter(prevLevel, level, (key) => reverseAdjacency.get(key) || []);
+    }
+    for (let i = orderedLevels.length - 2; i >= 0; i -= 1) {
+      const level = orderedLevels[i];
+      const nextLevel = orderedLevels[i + 1];
+      reorderByBarycenter(nextLevel, level, (key) => adjacency.get(key) || []);
+    }
+    for (let i = 1; i < orderedLevels.length; i += 1) {
+      const level = orderedLevels[i];
+      const prevLevel = orderedLevels[i - 1];
+      reorderByBarycenter(prevLevel, level, (key) => reverseAdjacency.get(key) || []);
+    }
+    const levelCount = levelGroups.size;
+    let maxLevelWidth = 0;
+    for (const group of levelGroups.values()) {
+      if (group.length > maxLevelWidth) maxLevelWidth = group.length;
+    }
+    const spaceScale = Math.max(1, levelCount, maxLevelWidth) / Number(baseSpan);
+    let xGap = base * ratio;
+    let yGap = base;
+    let symbolSize = base * 0.5;
+    if (mode === "compact") {
+      symbolSize /= spaceScale;
+    } else {
+      xGap *= spaceScale;
+      yGap *= spaceScale;
+    }
+    const estimateViewport = () => {
+      const cols = direction === "TB" ? Math.max(1, maxLevelWidth) : Math.max(1, levelCount);
+      const rows = direction === "TB" ? Math.max(1, levelCount) : Math.max(1, maxLevelWidth);
+      const width = Math.ceil(cols > 1 ? (cols - 1) * xGap + symbolSize : symbolSize);
+      const height = Math.ceil(rows > 1 ? (rows - 1) * yGap + symbolSize : symbolSize);
+      return { width, height, area: width * height };
+    };
+    const maxAreaValue = Number(maxArea);
+    if (Number.isFinite(maxAreaValue) && maxAreaValue > 0) {
+      const estimated = estimateViewport();
+      if (estimated.area > maxAreaValue) {
+        const shrinkScale = Math.sqrt(estimated.area / maxAreaValue);
+        xGap /= shrinkScale;
+        yGap /= shrinkScale;
+        symbolSize /= shrinkScale;
+      }
+    }
+    const data = [];
+    const nodePosMap = new Map();
+    for (const [level, group] of [...levelGroups.entries()].sort((a, b) => a[0] - b[0])) {
+      const offset = (group.length - 1) / 2;
+      for (let i = 0; i < group.length; i += 1) {
+        const key = group[i];
+        const node = map[key] || {};
+        const x = direction === "TB" ? -(i - offset) * xGap : level * xGap;
+        const y = direction === "TB" ? level * yGap : (i - offset) * yGap;
+        const name = typeof getNodeLabel === "function" ? String(getNodeLabel(node, key) || "") : String(node?.title || `#${key}`);
+        const value = typeof getNodeValue === "function" ? getNodeValue(node, key) : node;
+        data.push({
+          id: key,
+          name,
+          x,
+          y,
+          symbolSize,
+          value
+        });
+        nodePosMap.set(key, { x, y });
+      }
+    }
+    const edgePairCount = new Map();
+    const links = [];
+    for (const sourceKey of keys) {
+      const node = map[sourceKey] || {};
+      const outList = Array.isArray(node.out) ? node.out : [];
+      for (const edge of outList) {
+        if (edge?.id == null) continue;
+        const targetKey = String(edge.id);
+        if (!map[targetKey]) continue;
+        const optionLabel = typeof getEdgeLabel === "function" ? String(getEdgeLabel(edge, sourceKey, targetKey) || "") : String(edge?.option || "");
+        const pairKey = sourceKey < targetKey ? `${sourceKey}<->${targetKey}` : `${targetKey}<->${sourceKey}`;
+        const idx = Number(edgePairCount.get(pairKey) || 0);
+        edgePairCount.set(pairKey, idx + 1);
+        const sourceLevel = Number(levelMap.get(sourceKey) || 0);
+        const targetLevel = Number(levelMap.get(targetKey) || 0);
+        if (removeBackEdges && targetLevel < sourceLevel) continue;
+        const flowDelta = targetLevel - sourceLevel;
+        const sourcePos = nodePosMap.get(sourceKey) || { x: 0, y: 0 };
+        const targetPos = nodePosMap.get(targetKey) || { x: 0, y: 0 };
+        let baseCurve = 0.1;
+        if (flowDelta <= 0) baseCurve = 0.3;
+        const jitter = idx * 0.1;
+        const sourceCross = direction === "TB" ? sourcePos.x : sourcePos.y;
+        const targetCross = direction === "TB" ? targetPos.x : targetPos.y;
+        const axisSign = direction === "TB" ? -1 : 1;
+        let flowSign = flowDelta >= 0 ? 1 : -1;
+        let baseSign = 0;
+        if (sourceCross < -EPSILON) baseSign = 1;
+        else if (sourceCross > EPSILON) baseSign = -1;
+        else {
+          if (targetCross < -EPSILON) baseSign = 1;
+          else if (targetCross > EPSILON) baseSign = -1;
+          else baseSign = 0;
+        }
+        if (flowDelta === 0) flowSign = axisSign * baseSign;
+        const sign = flowSign * axisSign * baseSign;
+        const curveness = sign * (baseCurve + jitter);
+        links.push({
+          source: sourceKey,
+          target: targetKey,
+          label: optionLabel,
+          lineStyle: {
+            curveness
+          }
+        });
+      }
+    }
+    const viewport = estimateViewport();
+    return { data, links, meta: { levelMap, scale: spaceScale, viewport } };
+  };
+  const baseGap = 60;
+  const _sfc_main$8 = {
+    __name: "InteractiveGraphPanel",
+    props: {
+      graphLoading: {
+        type: Boolean,
+        default: false
+      },
+      getGraph: {
+        type: Function,
+        required: true
+      },
+      getEcharts: {
+        type: Function,
+        required: true
+      },
+      aspectRatio: {
+        type: Number,
+        default: 2
+      }
+    },
+    emits: ["graph-click", "graph-capture"],
+    setup(__props2, { expose: __expose2, emit: __emit2 }) {
+      const props2 = __props2;
+      const emit2 = __emit2;
+      const themeVars = naiveUi.useThemeVars();
+      const baseSpan = vue.ref(4);
+      const normalizedAspectRatio = vue.computed(() => {
+        const ratio = Number(props2.aspectRatio);
+        return Number.isFinite(ratio) && ratio > 0 ? ratio : 3;
+      });
+      const graphElStyle = vue.computed(() => {
+        return {
+          width: "100%",
+          aspectRatio: `${normalizedAspectRatio.value} / 1`
+        };
+      });
+      const direction = vue.ref("LR");
+      const dedupe = vue.ref(false);
+      const showOptions = vue.ref(false);
+      const removeBackEdges = vue.ref(false);
+      const capturing = vue.ref(false);
+      const currentScale = vue.ref(1);
+      const graphElRef = vue.ref(null);
+      const graphMapRef = vue.shallowRef({});
+      let graphInstance = null;
+      const handleGraphClick = (params) => {
+        emit2("graph-click", params?.data?.value);
+      };
+      const ensureGraphInstance = async () => {
+        if (graphInstance) return graphInstance;
+        await vue.nextTick();
+        const el = graphElRef.value;
+        const echarts = await props2.getEcharts();
+        if (!el || !echarts?.init) return null;
+        graphInstance = echarts.init(el);
+        graphInstance.on("click", handleGraphClick);
+        return graphInstance;
+      };
+      const renderByGraphMap = async (graphMap) => {
+        const instance = await ensureGraphInstance();
+        if (!instance) return;
+        const graph = layoutFlowGraph(graphMap || {}, {
+          rootId: 1,
+          direction: direction.value,
+          mode: "compact",
+          layoutRatio: normalizedAspectRatio.value,
+          baseGap,
+          baseSpan: baseSpan.value,
+          removeBackEdges: removeBackEdges.value
+        });
+        currentScale.value = Number(graph?.meta?.scale) || 1;
+        instance.setOption({
+          tooltip: {
+            show: false
+          },
+          series: [
+            {
+              type: "graph",
+              layout: "none",
+              roam: true,
+              edgeSymbol: ["none", "arrow"],
+              edgeSymbolSize: [4, 10],
+              label: {
+                show: true,
+                formatter: (params) => params?.data?.name || params?.data?.id || ""
+              },
+              itemStyle: {
+                color: themeVars.value.primaryColor,
+                borderRadius: 8
+              },
+              lineStyle: {
+                width: 1.5,
+                opacity: 0.85
+              },
+              emphasis: {
+                focus: "adjacency",
+                itemStyle: {
+                  opacity: 1
+                },
+                lineStyle: {
+                  width: 2,
+                  opacity: 1
+                },
+                edgeLabel: {
+                  show: true,
+                  formatter: (params) => params?.data?.label || ""
+                }
+              },
+              blur: {
+                itemStyle: {
+                  opacity: 0.25
+                },
+                lineStyle: {
+                  opacity: 0.18
+                }
+              },
+              edgeLabel: {
+                show: showOptions.value,
+                formatter: (params) => params?.data?.label || ""
+              },
+              data: Array.isArray(graph.data) ? graph.data : [],
+              links: Array.isArray(graph.links) ? graph.links : []
+            }
+          ]
+        });
+        instance.resize();
+      };
+      const refresh = async () => {
+        const graphMap = await props2.getGraph(dedupe.value) || {};
+        graphMapRef.value = graphMap;
+        await renderByGraphMap(graphMap);
+      };
+      const updateBaseSpan = () => {
+        const height = Number(graphElRef.value?.clientHeight || 0);
+        const nextSpan = Math.max(1, Math.round(height / baseGap));
+        if (baseSpan.value === nextSpan) return false;
+        baseSpan.value = nextSpan;
+        return true;
+      };
+      const setBaseSpan = async (value) => {
+        const next = Number(value);
+        if (!Number.isFinite(next) || next < 1) return;
+        if (baseSpan.value === next) return;
+        baseSpan.value = next;
+        await refresh();
+      };
+      const handleWindowResize = () => {
+        if (!updateBaseSpan()) return;
+        refresh().catch(() => {
+        });
+      };
+      const dispose = () => {
+        if (graphInstance?.off) {
+          graphInstance.off("click", handleGraphClick);
+        }
+        if (graphInstance?.dispose) {
+          graphInstance.dispose();
+        }
+        graphInstance = null;
+      };
+      const setDirection = async (next) => {
+        const value = next === "TB" ? "TB" : "LR";
+        if (direction.value === value) return;
+        direction.value = value;
+        await refresh();
+      };
+      const setDedupe = async (checked) => {
+        const value = Boolean(checked);
+        if (dedupe.value === value) return;
+        dedupe.value = value;
+        await refresh();
+      };
+      const setShowOptions = async (checked) => {
+        const value = Boolean(checked);
+        if (showOptions.value === value) return;
+        showOptions.value = value;
+        const instance = await ensureGraphInstance();
+        if (!instance) return;
+        instance.setOption({
+          series: [
+            {
+              edgeLabel: {
+                show: showOptions.value
+              }
+            }
+          ]
+        });
+        instance.resize();
+      };
+      const setRemoveBackEdges = async (checked) => {
+        const value = Boolean(checked);
+        if (removeBackEdges.value === value) return;
+        removeBackEdges.value = value;
+        await refresh();
+      };
+      const resetView = async () => {
+        const instance = await ensureGraphInstance();
+        if (!instance) return;
+        const center = direction.value === "TB" ? ["50%", "0"] : ["0", "50%"];
+        instance.setOption({
+          series: [
+            {
+              center,
+              zoom: currentScale.value
+            }
+          ]
+        });
+        instance.resize();
+      };
+      const captureGraph = async () => {
+        if (capturing.value) return;
+        const echarts = await props2.getEcharts();
+        if (!echarts?.init) return;
+        const graph = layoutFlowGraph(graphMapRef.value || {}, {
+          rootId: 1,
+          direction: direction.value,
+          mode: "layout",
+          layoutRatio: normalizedAspectRatio.value,
+          baseGap,
+          baseSpan: baseSpan.value,
+          maxArea: 1e8,
+          removeBackEdges: removeBackEdges.value
+        });
+        const data = Array.isArray(graph.data) ? graph.data : [];
+        const links = Array.isArray(graph.links) ? graph.links : [];
+        if (!data.length) return;
+        const width = Number(graph?.meta?.viewport?.width || 0);
+        const height = Number(graph?.meta?.viewport?.height || 0);
+        if (!width || !height) return;
+        const el = document.createElement("div");
+        el.style.position = "fixed";
+        el.style.left = "120vw";
+        el.style.top = "120vh";
+        el.style.width = `${width}px`;
+        el.style.height = `${height}px`;
+        document.body.appendChild(el);
+        let exportChart = null;
+        try {
+          capturing.value = true;
+          await vue.nextTick();
+          await new Promise(requestAnimationFrame);
+          exportChart = echarts.init(el);
+          exportChart.setOption({
+            animation: false,
+            tooltip: {
+              show: false
+            },
+            series: [
+              {
+                type: "graph",
+                layout: "none",
+                roam: false,
+                edgeSymbol: ["none", "arrow"],
+                edgeSymbolSize: [4, 10],
+                label: {
+                  show: true,
+                  formatter: (params) => params?.data?.name || params?.data?.id || ""
+                },
+                itemStyle: {
+                  color: themeVars.value.primaryColor,
+                  borderRadius: 8
+                },
+                lineStyle: {
+                  width: 1.5,
+                  opacity: 0.85
+                },
+                edgeLabel: {
+                  show: showOptions.value,
+                  formatter: (params) => params?.data?.label || ""
+                },
+                data,
+                links
+              }
+            ]
+          });
+          const pixelRatio = Math.max(1, Number(window.devicePixelRatio) || 1);
+          const dataUrl = exportChart.getDataURL({
+            type: "png",
+            pixelRatio,
+            backgroundColor: themeVars.value.cardColor
+          });
+          emit2("graph-capture", dataUrl);
+        } finally {
+          capturing.value = false;
+          exportChart?.dispose?.();
+          document.body.removeChild(el);
+        }
+      };
+      __expose2({
+        refresh,
+        dispose,
+        resize: () => graphInstance?.resize?.()
+      });
+      vue.onBeforeUnmount(() => {
+        window.removeEventListener("resize", handleWindowResize);
+        dispose();
+      });
+      vue.onMounted(() => {
+        vue.nextTick(() => {
+          updateBaseSpan();
+          refresh().catch(() => {
+          });
+        });
+        window.addEventListener("resize", handleWindowResize);
+      });
+      return (_ctx, _cache) => {
+        const _component_n_icon = naiveUi.NIcon;
+        const _component_n_button = naiveUi.NButton;
+        const _component_n_radio_button = naiveUi.NRadioButton;
+        const _component_n_radio_group = naiveUi.NRadioGroup;
+        const _component_n_input_number = naiveUi.NInputNumber;
+        const _component_n_flex = naiveUi.NFlex;
+        const _component_n_checkbox = naiveUi.NCheckbox;
+        return vue.openBlock(), vue.createBlock(_component_n_flex, {
+          vertical: "",
+          size: 8,
+          style: { "height": "100%", "min-height": "0" }
+        }, {
+          default: vue.withCtx(() => [
+            vue.createVNode(_component_n_flex, {
+              size: 8,
+              align: "center",
+              wrap: ""
+            }, {
+              default: vue.withCtx(() => [
+                vue.createVNode(_component_n_flex, {
+                  size: 8,
+                  align: "center",
+                  wrap: ""
+                }, {
+                  default: vue.withCtx(() => [
+                    vue.createVNode(_component_n_button, {
+                      size: "small",
+                      circle: "",
+                      title: "回到开头",
+                      disabled: __props2.graphLoading,
+                      onClick: resetView
+                    }, {
+                      icon: vue.withCtx(() => [
+                        vue.createVNode(_component_n_icon, null, {
+                          default: vue.withCtx(() => [
+                            vue.createVNode(vue.unref(RefreshDot))
+                          ]),
+                          _: 1
+                        })
+                      ]),
+                      _: 1
+                    }, 8, ["disabled"]),
+                    vue.createVNode(_component_n_radio_group, {
+                      value: vue.unref(direction),
+                      size: "small",
+                      disabled: __props2.graphLoading,
+                      "onUpdate:value": setDirection
+                    }, {
+                      default: vue.withCtx(() => [
+                        vue.createVNode(_component_n_radio_button, { value: "LR" }, {
+                          default: vue.withCtx(() => [..._cache[0] || (_cache[0] = [
+                            vue.createTextVNode("水平", -1)
+                          ])]),
+                          _: 1
+                        }),
+                        vue.createVNode(_component_n_radio_button, { value: "TB" }, {
+                          default: vue.withCtx(() => [..._cache[1] || (_cache[1] = [
+                            vue.createTextVNode("垂直", -1)
+                          ])]),
+                          _: 1
+                        })
+                      ]),
+                      _: 1
+                    }, 8, ["value", "disabled"]),
+                    vue.createVNode(_component_n_input_number, {
+                      value: vue.unref(baseSpan),
+                      size: "small",
+                      min: 1,
+                      style: { "width": "110px" },
+                      disabled: __props2.graphLoading,
+                      "onUpdate:value": setBaseSpan,
+                      title: "密度"
+                    }, {
+                      prefix: vue.withCtx(() => [
+                        vue.createVNode(_component_n_icon, null, {
+                          default: vue.withCtx(() => [
+                            vue.createVNode(vue.unref(GridDots))
+                          ]),
+                          _: 1
+                        })
+                      ]),
+                      _: 1
+                    }, 8, ["value", "disabled"])
+                  ]),
+                  _: 1
+                }),
+                vue.createVNode(_component_n_flex, {
+                  size: 8,
+                  align: "center",
+                  wrap: ""
+                }, {
+                  default: vue.withCtx(() => [
+                    vue.createVNode(_component_n_checkbox, {
+                      checked: vue.unref(dedupe),
+                      disabled: __props2.graphLoading,
+                      "onUpdate:checked": setDedupe
+                    }, {
+                      default: vue.withCtx(() => [..._cache[2] || (_cache[2] = [
+                        vue.createTextVNode(" 去重 ", -1)
+                      ])]),
+                      _: 1
+                    }, 8, ["checked", "disabled"]),
+                    vue.createVNode(_component_n_checkbox, {
+                      checked: vue.unref(showOptions),
+                      "onUpdate:checked": setShowOptions
+                    }, {
+                      default: vue.withCtx(() => [..._cache[3] || (_cache[3] = [
+                        vue.createTextVNode(" 显示选项 ", -1)
+                      ])]),
+                      _: 1
+                    }, 8, ["checked"]),
+                    vue.createVNode(_component_n_checkbox, {
+                      checked: vue.unref(removeBackEdges),
+                      disabled: __props2.graphLoading,
+                      "onUpdate:checked": setRemoveBackEdges
+                    }, {
+                      default: vue.withCtx(() => [..._cache[4] || (_cache[4] = [
+                        vue.createTextVNode(" 隐藏回边 ", -1)
+                      ])]),
+                      _: 1
+                    }, 8, ["checked", "disabled"])
+                  ]),
+                  _: 1
+                }),
+                vue.createVNode(_component_n_button, {
+                  size: "small",
+                  circle: "",
+                  style: { "margin-left": "auto" },
+                  loading: vue.unref(capturing),
+                  disabled: __props2.graphLoading || vue.unref(capturing),
+                  onClick: captureGraph,
+                  title: "密度越小截图越大"
+                }, {
+                  icon: vue.withCtx(() => [
+                    vue.createVNode(_component_n_icon, null, {
+                      default: vue.withCtx(() => [
+                        vue.createVNode(vue.unref(Camera))
+                      ]),
+                      _: 1
+                    })
+                  ]),
+                  _: 1
+                }, 8, ["loading", "disabled"])
+              ]),
+              _: 1
+            }),
+            vue.createElementVNode("div", {
+              ref_key: "graphElRef",
+              ref: graphElRef,
+              style: vue.normalizeStyle(vue.unref(graphElStyle))
+            }, null, 4)
+          ]),
+          _: 1
+        });
       };
     }
   };
@@ -8071,8 +8839,7 @@ ${percentages[params.dataIndex]}%`
       base,
       vueGlobalProd: buildNpmUrl(base, "vue@3/dist/vue.global.prod.js"),
       naiveUiProd: buildNpmUrl(base, "naive-ui@2/dist/index.prod.js"),
-      biliDataManagerMain: buildGhUrl(base, "ZBpine/bili-data-manager@main/dist/bili-data-manager.min.js"),
-      biliDataManagerPinned: buildGhUrl(base, "ZBpine/bili-data-manager@ed2aaf5f8fedf7e157a22d10e995df2f61eeb917/dist/bili-data-manager.min.js"),
+      biliDataManager: buildGhUrl(base, "ZBpine/bili-data-manager@642ebb7daba43bca7ac75b700aa12f9bd1935251/dist/bili-data-manager.min.js"),
       staticHtmlDefault: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/index.html"),
       staticHtmlCn: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/cn/index.html"),
       favicon: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/favicon.ico"),
@@ -8095,7 +8862,7 @@ ${percentages[params.dataIndex]}%`
   };
   const runtimeCdnBase = resolveRuntimeCdnBase();
   const runtimeCdnUrls = createCdnUrls(runtimeCdnBase);
-  const BILI_DATA_MANAGER_CDN = runtimeCdnUrls.biliDataManagerMain;
+  const BILI_DATA_MANAGER_CDN = runtimeCdnUrls.biliDataManager;
   let hashWorker = null;
   let hashReqId = 0;
   const pendingHashTasks = new Map();
@@ -8297,7 +9064,7 @@ self.onmessage = (event) => {
                   }, null, 8, ["title"])) : vue.createCommentVNode("", true),
                   vue.createVNode(_component_n_spin, { show: vue.unref(loading) }, {
                     default: vue.withCtx(() => [
-                      vue.createVNode(vue.unref(_sfc_main$a), {
+                      vue.createVNode(vue.unref(_sfc_main$b), {
                         "user-card": vue.unref(userCard),
                         "mid-hash": vue.unref(userMidHash)
                       }, null, 8, ["user-card", "mid-hash"])
@@ -8369,6 +9136,28 @@ self.onmessage = (event) => {
           css$1`
                     padding: 0 8px;
                     border-left: 2px solid var(--dm-border-color);
+                `
+        ),
+        cE$2(
+          "viewpoint-row",
+          css$1`
+                    width: 100%;
+                `
+        ),
+        cE$2(
+          "viewpoint-image",
+          css$1`
+                    flex: 1;
+                    max-width: 128px;
+                    border-radius: 6px;
+                    overflow: hidden;
+                `
+        ),
+        cE$2(
+          "viewpoint-meta",
+          css$1`
+                    flex: 1;
+                    min-width: 0;
                 `
         ),
         cE$2(
@@ -8610,6 +9399,47 @@ ${doc.documentElement.outerHTML}`;
     link.remove();
     URL.revokeObjectURL(url);
   };
+  const toDateString = (value) => {
+    const d = new Date(value);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+  const formatProgress = (ms) => {
+    const sec = Math.max(0, Math.floor(Number(ms || 0) / 1e3));
+    const h2 = Math.floor(sec / 3600);
+    const m = String(Math.floor(sec % 3600 / 60)).padStart(2, "0");
+    const s = String(sec % 60).padStart(2, "0");
+    return h2 > 0 ? `${h2}:${m}:${s}` : `${m}:${s}`;
+  };
+  const parseProgressToSec = (value) => {
+    const text = String(value || "").trim();
+    if (!text) return null;
+    const matched = text.match(/^(\d{1,2})[:：](\d{2})(?:[:：](\d{2}))?$/);
+    if (!matched) return null;
+    const p1 = Number(matched[1]);
+    const p2 = Number(matched[2]);
+    const p3 = matched[3] == null ? null : Number(matched[3]);
+    if (!Number.isInteger(p1) || !Number.isInteger(p2) || p3 != null && !Number.isInteger(p3)) return null;
+    if (p2 > 59 || p3 != null && p3 > 59) return null;
+    return p3 == null ? p1 * 60 + p2 : p1 * 3600 + p2 * 60 + p3;
+  };
+  const parseRangeValue = (value) => {
+    const match = /^(\d+)-(\d+)$/.exec(String(value || ""));
+    if (!match) return null;
+    const start = Number(match[1]);
+    const end = Number(match[2]);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+    return { start, end };
+  };
+  const utils = Object.freeze( Object.defineProperty({
+    __proto__: null,
+    formatProgress,
+    parseProgressToSec,
+    parseRangeValue,
+    toDateString
+  }, Symbol.toStringTag, { value: "Module" }));
   const _hoisted_1 = { class: "bds-dm-panel__main" };
   const _hoisted_2 = { class: "bds-dm-panel__left" };
   const _hoisted_3 = { class: "bds-dm-panel__table-block" };
@@ -8746,7 +9576,6 @@ ${doc.documentElement.outerHTML}`;
       const committedFilters = vue.ref([]);
       const stagedFilter = vue.ref(null);
       const regexText = vue.ref("^(哈|呵|h|ha|H|HA|233+)+$");
-      const regexExclude = vue.ref(false);
       const chartMenus = vue.ref([]);
       const panelSettingsVisible = vue.ref(false);
       const midHashDialogVisible = vue.ref(false);
@@ -8758,9 +9587,12 @@ ${doc.documentElement.outerHTML}`;
       const sharingImage = vue.ref(false);
       const exportingPanel = vue.ref(false);
       const sharePreviewVisible = vue.ref(false);
-      const sharePreviewUrl = vue.ref("");
-      const shareImageBlob = vue.shallowRef(null);
+      const shareImageUrl = vue.ref("");
       const openingExternalPanel = vue.ref(false);
+      const interactiveGraphLoading = vue.ref(false);
+      const interactVideoModalVisible = vue.ref(false);
+      const interactiveGraphPanelRef = vue.ref(null);
+      const dmDataLoaderPanelRef = vue.ref(null);
       const qrLinkItems = [
         {
           url: "https://greasyfork.org/zh-CN/scripts/534432",
@@ -8798,6 +9630,7 @@ ${doc.documentElement.outerHTML}`;
         stagedFilter: stagedFilter.value,
         committedFilters: committedFilters.value,
         segmentWords,
+        utils,
         feedback: {
           message,
           dialog,
@@ -8807,6 +9640,117 @@ ${doc.documentElement.outerHTML}`;
         queryMidHash: openMidHashQuery
       }));
       const isListExpanded = vue.computed(() => expandedNames.value.includes("list"));
+      const isInteractiveVideo = vue.computed(() => {
+        return Boolean(arcMgr.value?.data?.player_info?.interaction?.graph_version);
+      });
+      const viewPoints = vue.computed(() => {
+        const list = arcMgr.value?.data?.player_info?.view_points;
+        return Array.isArray(list) ? list : [];
+      });
+      const formatViewPointRange = (item) => {
+        return `${formatProgress(Number(item?.from || 0) * 1e3)} - ${formatProgress(Number(item?.to || 0) * 1e3)}`;
+      };
+      const viewPointItemKey = (item, index) => {
+        const from = Number.isFinite(Number(item?.from)) ? Number(item.from) : index;
+        const to = Number.isFinite(Number(item?.to)) ? Number(item.to) : index;
+        const content = String(item?.content || "").trim();
+        return `${from}-${to}-${content || index}`;
+      };
+      const getInteractiveGraph = async (dedupe) => {
+        if (!arcMgr.value?.invoke) return {};
+        return arcMgr.value.invoke("buildInteractGraph", Boolean(dedupe)) || {};
+      };
+      const getInteractiveEcharts = async () => {
+        await ensurePageEcharts();
+        return runtimeWindow2?.echarts || null;
+      };
+      const switchByInteractiveNode = async (value) => {
+        if (!value?.cid || !arcMgr.value?.invoke || !dmMgr.value) return false;
+        const nextInfo = await arcMgr.value.invoke("buildInfoByGraphNode", value);
+        if (!nextInfo || typeof nextInfo !== "object") return false;
+        archiveInfo.value = nextInfo;
+        const hasDmList = Boolean(dmMgr.value.changeInfo?.(archiveInfo.value));
+        syncDanmakuState({
+          list: dmMgr.value?.data?.danmaku_list || [],
+          commandDms: dmMgr.value?.data?.danmaku_view?.commandDms || []
+        });
+        if (!hasDmList) {
+          await dmDataLoaderPanelRef.value?.runAutoLoad?.();
+        }
+        return true;
+      };
+      const onInteractiveGraphClick = async (value) => {
+        if (interactiveGraphLoading.value) return;
+        const nextCid = value?.cid;
+        if (nextCid != null && String(nextCid) === String(archiveInfo.value?.cid ?? "")) return;
+        try {
+          interactiveGraphLoading.value = true;
+          await switchByInteractiveNode(value);
+        } catch (error) {
+          BDM?.logger?.error?.("[interactive graph] 切换节点失败", error);
+          message.error(String(error?.message || error || "互动节点切换失败"));
+        } finally {
+          interactiveGraphLoading.value = false;
+        }
+      };
+      const loadAllInteractiveDanmaku = async () => {
+        if (!arcMgr.value?.invoke || !dmMgr.value || interactiveGraphLoading.value) return;
+        try {
+          interactiveGraphLoading.value = true;
+          const graph = await arcMgr.value.invoke("buildInteractGraph", true) || {};
+          const currentCid = String(archiveInfo.value?.cid ?? "");
+          const seen = new Set();
+          for (const item of Object.values(graph)) {
+            const cid = item?.cid;
+            if (cid == null) continue;
+            const key = String(cid);
+            if (!key || seen.has(key)) continue;
+            seen.add(key);
+            if (key === currentCid) continue;
+            await switchByInteractiveNode(item);
+            await vue.nextTick();
+          }
+          interactiveGraphLoading.value = false;
+        } catch (error) {
+          BDM?.logger?.error?.("[interactive graph] 载入全部弹幕失败", error);
+          message.error(String(error?.message || error || "载入所有弹幕失败"));
+          interactiveGraphLoading.value = false;
+        }
+      };
+      const refreshInteractiveGraphData = async () => {
+        await interactiveGraphPanelRef.value?.refresh?.();
+      };
+      const disposeInteractiveGraph = () => {
+        interactiveGraphPanelRef.value?.dispose?.();
+      };
+      const loadInteractiveGraph = async () => {
+        if (!arcMgr.value || interactiveGraphLoading.value) return;
+        interactiveGraphLoading.value = true;
+        try {
+          await arcMgr.value.invoke("getInteractEdgeInfo", async () => {
+            await refreshInteractiveGraphData();
+          });
+          await refreshInteractiveGraphData();
+        } catch (error) {
+          BDM?.logger?.error?.("[interactive graph] 加载失败", error);
+          message.error(String(error?.message || error || "互动图谱加载失败"));
+        } finally {
+          interactiveGraphLoading.value = false;
+        }
+      };
+      const clearInteractiveGraph = async () => {
+        if (!arcMgr.value || interactiveGraphLoading.value) return;
+        interactiveGraphLoading.value = true;
+        try {
+          await arcMgr.value.invoke("clearInteractEdgeInfo");
+          await refreshInteractiveGraphData();
+        } catch (error) {
+          BDM?.logger?.error?.("[interactive graph] 清除失败", error);
+          message.error(String(error?.message || error || "清除互动图谱失败"));
+        } finally {
+          interactiveGraphLoading.value = false;
+        }
+      };
       const chartSettings = vue.computed(() => chartManagerRef.value?.settings || null);
       const setPanelError = (error) => {
         panelError.value = error ? String(error?.message || error) : "";
@@ -8875,13 +9819,14 @@ ${doc.documentElement.outerHTML}`;
       const clearAllFilters = () => {
         committedFilters.value = [];
         clearStage();
-        regexExclude.value = false;
         committedDmView.value = [...dmBase.value];
         stagedDmView.value = [...dmBase.value];
       };
       const applyRegexFilter = () => {
         try {
           const regex = new RegExp(regexText.value, "i");
+          const oldIdx = committedFilters.value.findIndex((item) => item.source === "regex");
+          const nextExclude = oldIdx >= 0 ? Boolean(committedFilters.value[oldIdx]?.exclude) : false;
           const regexFilter = {
             id: `f-${filterIdSeed++}`,
             source: "regex",
@@ -8891,16 +9836,15 @@ ${doc.documentElement.outerHTML}`;
             predicate: (item) => regex.test(String(item?.content || "")),
             wrapTag: true,
             enabled: true,
-            exclude: regexExclude.value
+            exclude: nextExclude
           };
-          const oldIdx = committedFilters.value.findIndex((item) => item.source === "regex");
           if (oldIdx >= 0) committedFilters.value.splice(oldIdx, 1, regexFilter);
           else committedFilters.value.push(regexFilter);
           clearStage();
-          setPanelError("");
           rebuildFilterViews();
         } catch (error) {
-          setPanelError("无效正则表达式");
+          BDM?.logger?.warn?.("[regex filter] 无效表达式", error);
+          message.error("无效正则表达式");
         }
       };
       const stageFilter = (payload) => {
@@ -8962,15 +9906,12 @@ ${doc.documentElement.outerHTML}`;
         const target = committedFilters.value.find((item) => item.id === id);
         if (!target) return;
         target.exclude = !target.exclude;
-        if (target.source === "regex") regexExclude.value = target.exclude;
         rebuildFilterViews();
       };
       const removeCommittedFilter = (id) => {
         const idx = committedFilters.value.findIndex((item) => item.id === id);
         if (idx < 0) return;
-        const removed = committedFilters.value[idx];
         committedFilters.value.splice(idx, 1);
-        if (removed.source === "regex") regexExclude.value = false;
         rebuildFilterViews();
       };
       const hasStagedFilter = vue.computed(() => {
@@ -8984,36 +9925,36 @@ ${doc.documentElement.outerHTML}`;
         commandDms.value = Array.isArray(cmd) ? cmd : [];
         clearAllFilters();
       };
-      let ensureRunning = false;
-      let ensurePending = false;
-      let ensurePromise = null;
-      const queueEnsureVideoBase = async () => {
-        if (ensureRunning) {
-          ensurePending = true;
-          return ensurePromise;
+      let ensureManagerRunning = false;
+      let ensureManagerPending = false;
+      let ensureManagerPromise = null;
+      const queueEnsureManager = async () => {
+        if (ensureManagerRunning) {
+          ensureManagerPending = true;
+          return ensureManagerPromise;
         }
-        ensureRunning = true;
-        ensurePromise = (async () => {
+        ensureManagerRunning = true;
+        ensureManagerPromise = (async () => {
           let lastError = null;
           do {
-            ensurePending = false;
+            ensureManagerPending = false;
             try {
-              await ensureVideoBase();
+              await ensureManager();
               lastError = null;
             } catch (error) {
               lastError = error;
             }
-          } while (ensurePending);
+          } while (ensureManagerPending);
           if (lastError) {
             throw lastError;
           }
         })().finally(() => {
-          ensureRunning = false;
-          ensurePromise = null;
+          ensureManagerRunning = false;
+          ensureManagerPromise = null;
         });
-        return ensurePromise;
+        return ensureManagerPromise;
       };
-      const ensureVideoBase = async () => {
+      const ensureManager = async () => {
         if (!BDM?.BiliArchive || !BDM?.BiliDanmaku) throw new Error("BDM 不可用");
         let sourceUrl = String(props2.url || "").trim();
         const payload = data?.value;
@@ -9048,9 +9989,12 @@ ${doc.documentElement.outerHTML}`;
         const parsed = typeof BDM.BiliArchive.parseUrl === "function" ? BDM.BiliArchive.parseUrl(sourceUrl) : {};
         const parsedId = String(parsed?.id || "").trim();
         if (!parsedId) throw new Error("无法从URL中解析稿件 ID");
-        if (arcMgr.value && dmMgr.value && currentArchiveId2.value === parsedId) return;
+        if (arcMgr.value && dmMgr.value && currentArchiveId2.value === parsedId) {
+          return;
+        }
         const nextArcMgr = new BDM.BiliArchive();
         const info = await nextArcMgr.getData(sourceUrl);
+        await nextArcMgr.getPlayerInfo();
         const nextInfo = info || nextArcMgr.info || {};
         const nextId = String(nextInfo?.id || parsedId).trim();
         if (!nextId) throw new Error("稿件信息获取失败");
@@ -9104,11 +10048,17 @@ ${doc.documentElement.outerHTML}`;
         midHashDialogVisible.value = true;
       };
       const revokeSharePreview = () => {
-        if (sharePreviewUrl.value) {
-          URL.revokeObjectURL(sharePreviewUrl.value);
-          sharePreviewUrl.value = "";
+        if (shareImageUrl.value && shareImageUrl.value.startsWith("blob:")) {
+          URL.revokeObjectURL(shareImageUrl.value);
         }
-        shareImageBlob.value = null;
+        shareImageUrl.value = "";
+      };
+      const onInteractiveGraphCapture = (dataUrl) => {
+        const nextUrl = String(dataUrl || "");
+        if (!nextUrl) return;
+        revokeSharePreview();
+        shareImageUrl.value = nextUrl;
+        sharePreviewVisible.value = true;
       };
       const canvasToBlob = (canvas, type = "image/png") => {
         return new Promise((resolve, reject) => {
@@ -9168,8 +10118,7 @@ ${doc.documentElement.outerHTML}`;
           }
           const finalBlob = await canvasToBlob(canvas, "image/png");
           revokeSharePreview();
-          shareImageBlob.value = finalBlob;
-          sharePreviewUrl.value = URL.createObjectURL(finalBlob);
+          shareImageUrl.value = URL.createObjectURL(finalBlob);
           sharePreviewVisible.value = true;
         } catch (error) {
           BDM?.logger?.error?.("分享图片生成失败", error);
@@ -9179,9 +10128,8 @@ ${doc.documentElement.outerHTML}`;
         }
       };
       const downloadShareImage = () => {
-        const blob = shareImageBlob.value;
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
+        const url = String(shareImageUrl.value || "");
+        if (!url) return;
         const link = document.createElement("a");
         const id = String(archiveInfo.value?.id || "bili-data-statistic").trim() || "bili-data-statistic";
         link.href = url;
@@ -9189,7 +10137,6 @@ ${doc.documentElement.outerHTML}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(url);
       };
       const buildExportData = () => {
         const merged = {
@@ -9312,20 +10259,15 @@ ${doc.documentElement.outerHTML}`;
           }
           try {
             setPanelError("");
-            await queueEnsureVideoBase();
+            await queueEnsureManager();
             if (!echartsReady.value) {
-              ensurePageEcharts().then(() => {
-                echartsReady.value = true;
-                vue.nextTick(() => {
-                  chartManagerRef.value?.chartResize?.();
-                });
-              }).catch((error) => {
-                setPanelError(error);
-              });
-            } else {
-              await vue.nextTick();
-              chartManagerRef.value?.chartResize?.();
+              await ensurePageEcharts();
+              echartsReady.value = true;
             }
+            await vue.nextTick();
+            await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+            chartManagerRef.value?.chartResize?.();
+            interactiveGraphPanelRef.value?.resize?.();
           } catch (error) {
             setPanelError(error);
           }
@@ -9340,11 +10282,23 @@ ${doc.documentElement.outerHTML}`;
           if (payload === previous) return;
           try {
             setPanelError("");
-            await queueEnsureVideoBase();
+            await queueEnsureManager();
           } catch (error) {
             setPanelError(error);
           }
         }
+      );
+      vue.watch(
+        [isInteractiveVideo, () => props2.active, currentArchiveId2, () => interactiveGraphPanelRef.value],
+        async ([nextIsInteractive, active, _archiveId, panelRef]) => {
+          if (!active || !nextIsInteractive) {
+            disposeInteractiveGraph();
+            return;
+          }
+          if (!panelRef) return;
+          await refreshInteractiveGraphData();
+        },
+        { flush: "post" }
       );
       vue.watch(hasAnyFilter, (next, prev) => {
         if (!next || prev) return;
@@ -9353,16 +10307,19 @@ ${doc.documentElement.outerHTML}`;
       });
       vue.onBeforeUnmount(() => {
         revokeSharePreview();
+        disposeInteractiveGraph();
       });
       return (_ctx, _cache) => {
         const _component_n_alert = naiveUi.NAlert;
         const _component_n_divider = naiveUi.NDivider;
-        const _component_n_collapse_item = naiveUi.NCollapseItem;
-        const _component_n_checkbox = naiveUi.NCheckbox;
-        const _component_n_icon = naiveUi.NIcon;
-        const _component_n_button = naiveUi.NButton;
-        const _component_n_flex = naiveUi.NFlex;
         const _component_n_text = naiveUi.NText;
+        const _component_n_flex = naiveUi.NFlex;
+        const _component_n_timeline_item = naiveUi.NTimelineItem;
+        const _component_n_timeline = naiveUi.NTimeline;
+        const _component_n_collapse_item = naiveUi.NCollapseItem;
+        const _component_n_button = naiveUi.NButton;
+        const _component_n_icon = naiveUi.NIcon;
+        const _component_n_checkbox = naiveUi.NCheckbox;
         const _component_n_collapse = naiveUi.NCollapse;
         const _component_n_input = naiveUi.NInput;
         const _component_n_popover = naiveUi.NPopover;
@@ -9395,12 +10352,163 @@ ${doc.documentElement.outerHTML}`;
                     "onUpdate:expandedNames": onCollapseUpdate
                   }, {
                     default: vue.withCtx(() => [
+                      vue.unref(viewPoints).length ? (vue.openBlock(), vue.createBlock(_component_n_collapse_item, {
+                        key: 0,
+                        name: "viewPoint",
+                        title: "章节"
+                      }, {
+                        default: vue.withCtx(() => [
+                          vue.createVNode(_component_n_timeline, null, {
+                            default: vue.withCtx(() => [
+                              (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(vue.unref(viewPoints), (item, index) => {
+                                return vue.openBlock(), vue.createBlock(_component_n_timeline_item, {
+                                  key: viewPointItemKey(item, index),
+                                  color: vue.unref(themeVars).primaryColor
+                                }, {
+                                  default: vue.withCtx(() => [
+                                    vue.createVNode(_component_n_flex, {
+                                      class: "bds-dm-panel__viewpoint-row",
+                                      size: 12,
+                                      align: "start"
+                                    }, {
+                                      default: vue.withCtx(() => [
+                                        item?.imgUrl ? (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$7$1), {
+                                          key: 0,
+                                          class: "bds-dm-panel__viewpoint-image",
+                                          src: item.imgUrl,
+                                          width: "100%",
+                                          "object-fit": "contain"
+                                        }, null, 8, ["src"])) : vue.createCommentVNode("", true),
+                                        vue.createVNode(_component_n_flex, {
+                                          class: "bds-dm-panel__viewpoint-meta",
+                                          vertical: "",
+                                          size: 6
+                                        }, {
+                                          default: vue.withCtx(() => [
+                                            vue.createVNode(_component_n_text, { strong: "" }, {
+                                              default: vue.withCtx(() => [
+                                                vue.createTextVNode(vue.toDisplayString(String(item?.content || "").trim() || "未命名章节"), 1)
+                                              ]),
+                                              _: 2
+                                            }, 1024),
+                                            vue.createVNode(_component_n_text, { depth: "3" }, {
+                                              default: vue.withCtx(() => [
+                                                vue.createTextVNode(vue.toDisplayString(formatViewPointRange(item)), 1)
+                                              ]),
+                                              _: 2
+                                            }, 1024)
+                                          ]),
+                                          _: 2
+                                        }, 1024)
+                                      ]),
+                                      _: 2
+                                    }, 1024)
+                                  ]),
+                                  _: 2
+                                }, 1032, ["color"]);
+                              }), 128))
+                            ]),
+                            _: 1
+                          })
+                        ]),
+                        _: 1
+                      })) : vue.createCommentVNode("", true),
+                      vue.unref(isInteractiveVideo) ? (vue.openBlock(), vue.createBlock(_component_n_collapse_item, {
+                        key: 1,
+                        name: "interactive",
+                        title: "互动视频"
+                      }, {
+                        default: vue.withCtx(() => [
+                          vue.createVNode(_component_n_flex, {
+                            vertical: "",
+                            size: 8
+                          }, {
+                            default: vue.withCtx(() => [
+                              vue.createVNode(_component_n_flex, {
+                                size: 8,
+                                wrap: ""
+                              }, {
+                                default: vue.withCtx(() => [
+                                  !vue.unref(isReadonlyMode) ? (vue.openBlock(), vue.createBlock(_component_n_button, {
+                                    key: 0,
+                                    size: "small",
+                                    type: "primary",
+                                    loading: vue.unref(interactiveGraphLoading),
+                                    disabled: vue.unref(interactiveGraphLoading),
+                                    onClick: loadInteractiveGraph
+                                  }, {
+                                    default: vue.withCtx(() => [..._cache[12] || (_cache[12] = [
+                                      vue.createTextVNode(" 加载互动图谱 ", -1)
+                                    ])]),
+                                    _: 1
+                                  }, 8, ["loading", "disabled"])) : vue.createCommentVNode("", true),
+                                  vue.createVNode(_component_n_button, {
+                                    size: "small",
+                                    type: "error",
+                                    disabled: vue.unref(interactiveGraphLoading),
+                                    onClick: clearInteractiveGraph
+                                  }, {
+                                    default: vue.withCtx(() => [..._cache[13] || (_cache[13] = [
+                                      vue.createTextVNode(" 清除互动图谱 ", -1)
+                                    ])]),
+                                    _: 1
+                                  }, 8, ["disabled"]),
+                                  !vue.unref(isReadonlyMode) ? (vue.openBlock(), vue.createBlock(_component_n_button, {
+                                    key: 1,
+                                    size: "small",
+                                    type: "warning",
+                                    loading: vue.unref(interactiveGraphLoading),
+                                    disabled: vue.unref(interactiveGraphLoading),
+                                    onClick: loadAllInteractiveDanmaku
+                                  }, {
+                                    default: vue.withCtx(() => [..._cache[14] || (_cache[14] = [
+                                      vue.createTextVNode(" 载入所有弹幕 ", -1)
+                                    ])]),
+                                    _: 1
+                                  }, 8, ["loading", "disabled"])) : vue.createCommentVNode("", true),
+                                  vue.createVNode(_component_n_button, {
+                                    size: "small",
+                                    circle: "",
+                                    title: "放大查看",
+                                    style: { "margin-left": "auto" },
+                                    onClick: _cache[0] || (_cache[0] = ($event) => interactVideoModalVisible.value = true)
+                                  }, {
+                                    icon: vue.withCtx(() => [
+                                      vue.createVNode(_component_n_icon, null, {
+                                        default: vue.withCtx(() => [
+                                          vue.createVNode(vue.unref(ZoomIn))
+                                        ]),
+                                        _: 1
+                                      })
+                                    ]),
+                                    _: 1
+                                  })
+                                ]),
+                                _: 1
+                              }),
+                              vue.createVNode(vue.unref(_sfc_main$8), {
+                                ref_key: "interactiveGraphPanelRef",
+                                ref: interactiveGraphPanelRef,
+                                "graph-loading": vue.unref(interactiveGraphLoading),
+                                "get-graph": getInteractiveGraph,
+                                "get-echarts": getInteractiveEcharts,
+                                onGraphClick: onInteractiveGraphClick,
+                                onGraphCapture: onInteractiveGraphCapture
+                              }, null, 8, ["graph-loading"])
+                            ]),
+                            _: 1
+                          })
+                        ]),
+                        _: 1
+                      })) : vue.createCommentVNode("", true),
                       vue.createVNode(_component_n_collapse_item, {
                         name: "load",
                         title: `载入弹幕 ${vue.unref(dmBase).length.toLocaleString()} 条`
                       }, {
                         default: vue.withCtx(() => [
-                          !vue.unref(isReadonlyMode) ? (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$9), {
+                          !vue.unref(isReadonlyMode) ? (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$a), {
+                            ref_key: "dmDataLoaderPanelRef",
+                            ref: dmDataLoaderPanelRef,
                             key: vue.unref(archiveInfo).id || vue.unref(currentArchiveId2),
                             "arc-mgr": vue.unref(arcMgr),
                             "dm-mgr": vue.unref(dmMgr),
@@ -9413,7 +10521,7 @@ ${doc.documentElement.outerHTML}`;
                         _: 1
                       }, 8, ["title"]),
                       vue.unref(commandDms).length ? (vue.openBlock(), vue.createBlock(_component_n_collapse_item, {
-                        key: 0,
+                        key: 2,
                         name: "command",
                         title: `互动弹幕 ${vue.unref(commandDms).length.toLocaleString()} 条`
                       }, {
@@ -9457,7 +10565,7 @@ ${doc.documentElement.outerHTML}`;
                                           style: { "margin-left": "auto" },
                                           "onUpdate:checked": () => toggleCommittedExclude(item.id)
                                         }, {
-                                          default: vue.withCtx(() => [..._cache[10] || (_cache[10] = [
+                                          default: vue.withCtx(() => [..._cache[15] || (_cache[15] = [
                                             vue.createTextVNode(" 排除 ", -1)
                                           ])]),
                                           _: 1
@@ -9566,7 +10674,7 @@ ${doc.documentElement.outerHTML}`;
                 vue.createVNode(vue.unref(_sfc_main$1$1), {
                   class: "bds-dm-panel__table",
                   items: vue.unref(stagedDmView),
-                  "item-height": 38,
+                  "item-height": 40,
                   "menu-items": vue.unref(danmakuTableMenus),
                   to: props2.to,
                   ref_key: "danmakuTableRef",
@@ -9593,7 +10701,7 @@ ${doc.documentElement.outerHTML}`;
                 default: vue.withCtx(() => [
                   vue.createVNode(_component_n_input, {
                     value: vue.unref(regexText),
-                    "onUpdate:value": _cache[0] || (_cache[0] = ($event) => vue.isRef(regexText) ? regexText.value = $event : null),
+                    "onUpdate:value": _cache[1] || (_cache[1] = ($event) => vue.isRef(regexText) ? regexText.value = $event : null),
                     placeholder: "请输入正则表达式",
                     size: "small",
                     style: { "flex": "1", "min-width": "200px" }
@@ -9603,7 +10711,7 @@ ${doc.documentElement.outerHTML}`;
                     type: vue.unref(committedFilters).length ? void 0 : "warning",
                     onClick: applyRegexFilter
                   }, {
-                    default: vue.withCtx(() => [..._cache[11] || (_cache[11] = [
+                    default: vue.withCtx(() => [..._cache[16] || (_cache[16] = [
                       vue.createTextVNode("筛选", -1)
                     ])]),
                     _: 1
@@ -9613,7 +10721,7 @@ ${doc.documentElement.outerHTML}`;
                     type: vue.unref(committedFilters).length ? "warning" : void 0,
                     onClick: clearAllFilters
                   }, {
-                    default: vue.withCtx(() => [..._cache[12] || (_cache[12] = [
+                    default: vue.withCtx(() => [..._cache[17] || (_cache[17] = [
                       vue.createTextVNode("取消筛选", -1)
                     ])]),
                     _: 1
@@ -9680,7 +10788,7 @@ ${doc.documentElement.outerHTML}`;
                         size: "small",
                         circle: "",
                         title: "设置",
-                        onClick: _cache[1] || (_cache[1] = ($event) => panelSettingsVisible.value = true)
+                        onClick: _cache[2] || (_cache[2] = ($event) => panelSettingsVisible.value = true)
                       }, {
                         icon: vue.withCtx(() => [
                           vue.createVNode(_component_n_icon, null, {
@@ -9705,7 +10813,7 @@ ${doc.documentElement.outerHTML}`;
                 key: 0,
                 type: "info",
                 title: "图表库加载中..."
-              })) : (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$8), {
+              })) : (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$9), {
                 key: 1,
                 ref_key: "chartManagerRef",
                 ref: chartManagerRef,
@@ -9719,7 +10827,7 @@ ${doc.documentElement.outerHTML}`;
           ]),
           vue.createVNode(_component_n_modal, {
             show: vue.unref(panelSettingsVisible),
-            "onUpdate:show": _cache[2] || (_cache[2] = ($event) => vue.isRef(panelSettingsVisible) ? panelSettingsVisible.value = $event : null),
+            "onUpdate:show": _cache[3] || (_cache[3] = ($event) => vue.isRef(panelSettingsVisible) ? panelSettingsVisible.value = $event : null),
             preset: "card",
             title: "设置",
             style: { "width": "max(600px, 50vw)", "max-height": "60vh" },
@@ -9736,7 +10844,7 @@ ${doc.documentElement.outerHTML}`;
           }, 8, ["show", "to"]),
           vue.createVNode(_component_n_modal, {
             show: vue.unref(midHashDialogVisible),
-            "onUpdate:show": _cache[5] || (_cache[5] = ($event) => vue.isRef(midHashDialogVisible) ? midHashDialogVisible.value = $event : null),
+            "onUpdate:show": _cache[6] || (_cache[6] = ($event) => vue.isRef(midHashDialogVisible) ? midHashDialogVisible.value = $event : null),
             preset: "card",
             title: "提示",
             style: { "width": "450px" },
@@ -9749,7 +10857,7 @@ ${doc.documentElement.outerHTML}`;
               }, {
                 default: vue.withCtx(() => [
                   vue.createVNode(_component_n_text, null, {
-                    default: vue.withCtx(() => [..._cache[13] || (_cache[13] = [
+                    default: vue.withCtx(() => [..._cache[18] || (_cache[18] = [
                       vue.createTextVNode("是否尝试反查用户ID？", -1)
                     ])]),
                     _: 1
@@ -9759,7 +10867,7 @@ ${doc.documentElement.outerHTML}`;
                     type: "info",
                     style: { "cursor": "pointer", "align-self": "flex-start" },
                     title: "点击复制 midHash",
-                    onClick: _cache[3] || (_cache[3] = ($event) => copyMidHash(vue.unref(pendingMidHash)))
+                    onClick: _cache[4] || (_cache[4] = ($event) => copyMidHash(vue.unref(pendingMidHash)))
                   }, {
                     default: vue.withCtx(() => [
                       vue.createTextVNode(vue.toDisplayString(vue.unref(pendingMidHash)), 1)
@@ -9767,7 +10875,7 @@ ${doc.documentElement.outerHTML}`;
                     _: 1
                   }),
                   vue.createVNode(_component_n_text, { depth: "3" }, {
-                    default: vue.withCtx(() => [..._cache[14] || (_cache[14] = [
+                    default: vue.withCtx(() => [..._cache[19] || (_cache[19] = [
                       vue.createTextVNode("可能需要一段时间，且10位数以上ID容易查错", -1)
                     ])]),
                     _: 1
@@ -9779,9 +10887,9 @@ ${doc.documentElement.outerHTML}`;
                     default: vue.withCtx(() => [
                       vue.createVNode(_component_n_button, {
                         size: "small",
-                        onClick: _cache[4] || (_cache[4] = ($event) => midHashDialogVisible.value = false)
+                        onClick: _cache[5] || (_cache[5] = ($event) => midHashDialogVisible.value = false)
                       }, {
-                        default: vue.withCtx(() => [..._cache[15] || (_cache[15] = [
+                        default: vue.withCtx(() => [..._cache[20] || (_cache[20] = [
                           vue.createTextVNode("否", -1)
                         ])]),
                         _: 1
@@ -9791,7 +10899,7 @@ ${doc.documentElement.outerHTML}`;
                         type: "warning",
                         onClick: confirmMidHashQuery
                       }, {
-                        default: vue.withCtx(() => [..._cache[16] || (_cache[16] = [
+                        default: vue.withCtx(() => [..._cache[21] || (_cache[21] = [
                           vue.createTextVNode("是", -1)
                         ])]),
                         _: 1
@@ -9812,7 +10920,7 @@ ${doc.documentElement.outerHTML}`;
             title: "用户信息",
             style: { "width": "60vw" },
             to: props2.to,
-            "onUpdate:show": _cache[6] || (_cache[6] = (show) => {
+            "onUpdate:show": _cache[7] || (_cache[7] = (show) => {
               if (!show) userPanelModalVisible.value = false;
             })
           }, {
@@ -9828,8 +10936,8 @@ ${doc.documentElement.outerHTML}`;
           vue.createVNode(_component_n_modal, {
             show: vue.unref(sharePreviewVisible),
             "onUpdate:show": [
-              _cache[8] || (_cache[8] = ($event) => vue.isRef(sharePreviewVisible) ? sharePreviewVisible.value = $event : null),
-              _cache[9] || (_cache[9] = (show) => {
+              _cache[9] || (_cache[9] = ($event) => vue.isRef(sharePreviewVisible) ? sharePreviewVisible.value = $event : null),
+              _cache[10] || (_cache[10] = (show) => {
                 if (!show) revokeSharePreview();
               })
             ],
@@ -9844,9 +10952,9 @@ ${doc.documentElement.outerHTML}`;
                 size: 12
               }, {
                 default: vue.withCtx(() => [
-                  vue.unref(sharePreviewUrl) ? (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$7$1), {
+                  vue.unref(shareImageUrl) ? (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$7$1), {
                     key: 0,
-                    src: vue.unref(sharePreviewUrl),
+                    src: vue.unref(shareImageUrl),
                     alt: "截图预览",
                     width: "100%",
                     "object-fit": "contain",
@@ -9858,9 +10966,9 @@ ${doc.documentElement.outerHTML}`;
                   }, {
                     default: vue.withCtx(() => [
                       vue.createVNode(_component_n_button, {
-                        onClick: _cache[7] || (_cache[7] = ($event) => sharePreviewVisible.value = false)
+                        onClick: _cache[8] || (_cache[8] = ($event) => sharePreviewVisible.value = false)
                       }, {
-                        default: vue.withCtx(() => [..._cache[17] || (_cache[17] = [
+                        default: vue.withCtx(() => [..._cache[22] || (_cache[22] = [
                           vue.createTextVNode("关闭", -1)
                         ])]),
                         _: 1
@@ -9869,7 +10977,7 @@ ${doc.documentElement.outerHTML}`;
                         type: "warning",
                         onClick: downloadShareImage
                       }, {
-                        default: vue.withCtx(() => [..._cache[18] || (_cache[18] = [
+                        default: vue.withCtx(() => [..._cache[23] || (_cache[23] = [
                           vue.createTextVNode("保存图片", -1)
                         ])]),
                         _: 1
@@ -9879,6 +10987,24 @@ ${doc.documentElement.outerHTML}`;
                   })
                 ]),
                 _: 1
+              })
+            ]),
+            _: 1
+          }, 8, ["show", "to"]),
+          vue.createVNode(_component_n_modal, {
+            show: vue.unref(interactVideoModalVisible),
+            "onUpdate:show": _cache[11] || (_cache[11] = ($event) => vue.isRef(interactVideoModalVisible) ? interactVideoModalVisible.value = $event : null),
+            preset: "card",
+            title: "互动视频图谱",
+            style: { "width": "80vw" },
+            to: props2.to
+          }, {
+            default: vue.withCtx(() => [
+              vue.createVNode(vue.unref(_sfc_main$8), {
+                "get-graph": getInteractiveGraph,
+                "get-echarts": getInteractiveEcharts,
+                "aspect-ratio": 2,
+                onGraphCapture: onInteractiveGraphCapture
               })
             ]),
             _: 1
@@ -9970,7 +11096,23 @@ ${doc.documentElement.outerHTML}`;
       });
       const panelShellRef = vue.ref(null);
       const panelEl = vue.computed(() => panelShellRef.value?.panelEl || null);
-      let keyboardBlockAttached = false;
+      const KEYBOARD_EVENTS = ["keydown", "keypress", "keyup"];
+      const POINTER_EVENTS = [
+        "pointerdown",
+        "pointerup",
+        "pointercancel",
+        "mousedown",
+        "mouseup",
+        "touchstart",
+        "touchend",
+        "touchcancel"
+      ];
+      const bindWindowEvents = (eventList, handler, enable, options = true) => {
+        const method = enable ? "addEventListener" : "removeEventListener";
+        for (const type of eventList) {
+          window[method](type, handler, options);
+        }
+      };
       const blockPanelKeyboardEvent = (event) => {
         if (!showPanel.value) return;
         const root = panelEl.value;
@@ -9980,19 +11122,18 @@ ${doc.documentElement.outerHTML}`;
         event.stopPropagation();
         event.stopImmediatePropagation?.();
       };
-      const attachKeyboardBlock = () => {
-        if (keyboardBlockAttached) return;
-        window.addEventListener("keydown", blockPanelKeyboardEvent, true);
-        window.addEventListener("keypress", blockPanelKeyboardEvent, true);
-        window.addEventListener("keyup", blockPanelKeyboardEvent, true);
-        keyboardBlockAttached = true;
-      };
-      const detachKeyboardBlock = () => {
-        if (!keyboardBlockAttached) return;
-        window.removeEventListener("keydown", blockPanelKeyboardEvent, true);
-        window.removeEventListener("keypress", blockPanelKeyboardEvent, true);
-        window.removeEventListener("keyup", blockPanelKeyboardEvent, true);
-        keyboardBlockAttached = false;
+      const blockPanelPointerEvent = (event) => {
+        if (!showPanel.value) return;
+        const root = panelEl.value;
+        if (!root) return;
+        const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+        if (Array.isArray(path) && path.length && !path.includes(root)) return;
+        const hasButtonInPath = Array.isArray(path) && path.some((node) => {
+          return typeof node?.classList?.contains === "function" && node.classList.contains("n-button");
+        });
+        if (!hasButtonInPath) return;
+        event.stopPropagation();
+        event.stopImmediatePropagation?.();
       };
       const activateWithData = async (nextData) => {
         showPanel.value = false;
@@ -10015,8 +11156,8 @@ ${doc.documentElement.outerHTML}`;
         showPanel.value = nextShow;
       };
       vue.watch(showPanel, (open) => {
-        if (open) attachKeyboardBlock();
-        else detachKeyboardBlock();
+        bindWindowEvents(KEYBOARD_EVENTS, blockPanelKeyboardEvent, open, true);
+        bindWindowEvents(POINTER_EVENTS, blockPanelPointerEvent, open, true);
       });
       vue.watch(
         hasProvidedData,
@@ -10027,7 +11168,8 @@ ${doc.documentElement.outerHTML}`;
         { immediate: true }
       );
       vue.onBeforeUnmount(() => {
-        detachKeyboardBlock();
+        bindWindowEvents(KEYBOARD_EVENTS, blockPanelKeyboardEvent, false, true);
+        bindWindowEvents(POINTER_EVENTS, blockPanelPointerEvent, false, true);
       });
       return (_ctx, _cache) => {
         const _component_n_loading_bar_provider = naiveUi.NLoadingBarProvider;
@@ -10068,11 +11210,11 @@ ${doc.documentElement.outerHTML}`;
                                   class: vue.normalizeClass(["bds-shell", { "bds-shell--static": !vue.unref(isScriptApp) }]),
                                   style: vue.normalizeStyle(vue.unref(shellStyle))
                                 }, [
-                                  vue.unref(isScriptApp) ? (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$d), {
+                                  vue.unref(isScriptApp) ? (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$e), {
                                     key: 0,
                                     label: vue.unref(entryLabel),
                                     onToggle: handleTogglePanel
-                                  }, null, 8, ["label"])) : (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$b), {
+                                  }, null, 8, ["label"])) : (vue.openBlock(), vue.createBlock(vue.unref(_sfc_main$c), {
                                     key: 1,
                                     "source-url": vue.unref(sourceUrl),
                                     "onUpdate:sourceUrl": _cache[0] || (_cache[0] = ($event) => vue.isRef(sourceUrl) ? sourceUrl.value = $event : null),
@@ -10081,7 +11223,7 @@ ${doc.documentElement.outerHTML}`;
                                     onOpenPanel: handleOpenPanel,
                                     onParsedData: handleParsedUploadData
                                   }, null, 8, ["source-url", "has-data", "mode"])),
-                                  vue.createVNode(vue.unref(_sfc_main$c), {
+                                  vue.createVNode(vue.unref(_sfc_main$d), {
                                     ref_key: "panelShellRef",
                                     ref: panelShellRef,
                                     show: vue.unref(showPanel),
@@ -10136,10 +11278,10 @@ ${doc.documentElement.outerHTML}`;
   const MOUNT_ID = "bds-root";
   const BRIDGE_EVENT = "BDS_HTTP_BRIDGE_READY";
   const isStaticSite = !location.hostname.endsWith(".bilibili.com");
+  const runtimeWindow = _unsafeWindow || _monkeyWindow || window;
   if (isStaticSite) {
     if (typeof _GM_xmlhttpRequest === "function") {
-      const bridgeTarget = _unsafeWindow || _monkeyWindow || window;
-      bridgeTarget.__BDS_HTTP_REQUEST__ = (details) => _GM_xmlhttpRequest(details);
+      runtimeWindow.__BDS_HTTP_REQUEST__ = (details) => _GM_xmlhttpRequest(details);
       window.dispatchEvent(new CustomEvent(BRIDGE_EVENT));
     }
   }
@@ -10163,7 +11305,6 @@ ${doc.documentElement.outerHTML}`;
     };
     const { styleMountTarget: styleMountTarget2, mount: mount2 } = ensureShadowMount();
     const data = vue.shallowRef(null);
-    const runtimeWindow2 = _unsafeWindow || _monkeyWindow;
     const getStaticHtmlText = async () => {
       if (typeof _GM_getResourceText !== "function") {
         throw new Error("GM_getResourceText 不可用");
@@ -10182,7 +11323,7 @@ ${doc.documentElement.outerHTML}`;
       name: "BDS",
       isLog: true
     });
-    vue.createApp(_sfc_main).provide("styleMountTarget", styleMountTarget2).provide("BDM", BDM).provide("APP_MODE", vue.ref("script")).provide("data", data).provide("sourceUrl", sourceUrl).provide("runtimeWindow", runtimeWindow2).provide("getStaticHtmlText", getStaticHtmlText).mount(mount2);
+    vue.createApp(_sfc_main).provide("styleMountTarget", styleMountTarget2).provide("BDM", BDM).provide("APP_MODE", vue.ref("script")).provide("data", data).provide("sourceUrl", sourceUrl).provide("runtimeWindow", runtimeWindow).provide("getStaticHtmlText", getStaticHtmlText).mount(mount2);
   }
 
 })(Vue, naive);
