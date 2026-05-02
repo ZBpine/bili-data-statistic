@@ -35,10 +35,9 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
     baseSpan = 4,
     maxArea = 100_000_000,
     removeBackEdges = false,
-    edgeMetaMap = {},
     getNodeLabel,
     getNodeValue,
-    getEdgeLabel,
+    getEdgeValue,
   } = options;
 
   const ratioInput = Number(layoutRatio);
@@ -227,9 +226,9 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
       if (edge?.id == null) continue;
       const targetKey = String(edge.id);
       if (!map[targetKey]) continue;
-      const optionLabel = typeof getEdgeLabel === 'function'
-        ? String(getEdgeLabel(edge, sourceKey, targetKey) || '')
-        : String(edge?.option || '');
+      const value = typeof getEdgeValue === 'function'
+        ? getEdgeValue(edge, sourceKey, targetKey)
+        : edge;
 
       const pairKey = sourceKey < targetKey
         ? `${sourceKey}<->${targetKey}`
@@ -264,18 +263,14 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
         ? sign * (baseCurve + idx * jitter)
         : (idx === 0 ? 0 : (idx % 2 === 1 ? 1 : -1) * Math.ceil(idx / 2) * jitter);
 
-      const edgeMeta = edgeMetaMap?.[sourceKey]?.[targetKey];
       const link = {
         source: sourceKey,
         target: targetKey,
-        label: optionLabel,
+        value,
         lineStyle: {
           curveness,
         },
       };
-      if (edgeMeta && typeof edgeMeta === 'object') {
-        link.meta = edgeMeta;
-      }
       links.push(link);
     }
   }

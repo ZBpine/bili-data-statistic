@@ -1,8 +1,12 @@
 <script setup>
+import mountStyle from './style.cssr.js';
 import { nextTick } from 'vue';
-import { Camera, RefreshDot, GridDots } from '@vicons/tabler';
+import { Camera, RefreshDot, GridDots, Viewfinder, CircleX } from '@vicons/tabler';
 import { useThemeVars } from 'naive-ui';
 import { layoutFlowGraph } from '../../utils/graphLayout';
+
+const styleMountTarget = inject('styleMountTarget', null);
+mountStyle(styleMountTarget);
 
 const props = defineProps({
   graphLoading: {
@@ -33,24 +37,32 @@ const normalizedAspectRatio = computed(() => {
   return Number.isFinite(ratio) && ratio > 0 ? ratio : 3;
 });
 
-const graphElStyle = computed(() => {
-  return {
-    width: '100%',
-    aspectRatio: `${normalizedAspectRatio.value} / 1`,
-  };
-});
+const cssVars = computed(() => ({
+  '--bds-interactive-graph-aspect': `${normalizedAspectRatio.value} / 1`,
+}));
 
 const direction = ref('LR');
 const dedupe = ref(false);
 const showOptions = ref(false);
 const removeBackEdges = ref(false);
 const capturing = ref(false);
+const focusMode = ref(false);
 const currentScale = ref(1);
 const graphElRef = ref(null);
 const graphMapRef = shallowRef({});
-const edgeMetaMapRef = shallowRef({});
 const varsMapRef = shallowRef({});
+const currentGraphRef = shallowRef({ data: [], links: [] });
 let graphInstance = null;
+
+const FOCUS_OPACITY = 0.95;
+const DIM_OPACITY = 0.14;
+const FOCUS_NODE_OPACITY = 1;
+const DIM_NODE_OPACITY = 0.2;
+const VAR_TOKEN_REGEXP = /\$[A-Za-z0-9_]+/g;
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const getSelectedNodeShadowBlur = () => clamp(2.4 * Number(baseSpan.value || 1), 4, 24);
+const getSelectedEdgeShadowBlur = () => clamp(1.8 * Number(baseSpan.value || 1), 3, 18);
 
 const prettifyMathAssign = (text) => {
   return String(text || '')
@@ -80,10 +92,10 @@ const formatActionExpression = (text, varsMap) => {
 
 const formatEdgeTooltip = (params) => {
   if (params?.dataType !== 'edge') return '';
-  const meta = params?.data?.meta;
-  if (!meta || typeof meta !== 'object') return '';
-  const action = formatActionExpression(meta?.action, varsMapRef.value);
-  const condition = formatExpression(meta?.condition, varsMapRef.value);
+  const value = params?.data?.value;
+  if (!value || typeof value !== 'object') return '';
+  const action = formatActionExpression(value?.action, varsMapRef.value);
+  const condition = formatExpression(value?.condition, varsMapRef.value);
   if (!action && !condition) return '';
   const lines = [];
   if (condition) lines.push(`条件：${condition}`);
@@ -91,7 +103,118 @@ const formatEdgeTooltip = (params) => {
   return lines.join('<br/>');
 };
 
+const escapeRegExp = (text) => String(text || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const extractVars = (text) => {
+  const matches = String(text || '').match(VAR_TOKEN_REGEXP) || [];
+  return new Set(matches.filter(Boolean));
+};
+
+const getLinkKey = (linkLike) => {
+  const source = String(linkLike?.source || '');
+  const target = String(linkLike?.target || '');
+  const value = linkLike?.value || {};
+  const option = String(value?.option || '');
+  const action = String(value?.action || '');
+  const condition = String(value?.condition || '');
+  return `${source}|${target}|${option}|${action}|${condition}`;
+};
+
+const clearEdgeHighlight = async () => {
+  const instance = await ensureGraphInstance();
+  if (!instance) return;
+  const data = Array.isArray(currentGraphRef.value?.data) ? currentGraphRef.value.data : [];
+  const links = Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : [];
+  instance.setOption({
+    series: [
+      {
+        data,
+        links,
+      },
+    ],
+  });
+};
+
+const applyEdgeHighlightByVars = async (varSet, selected = {}) => {
+  const instance = await ensureGraphInstance();
+  if (!instance) return;
+  const vars = [...(varSet || [])].filter(Boolean);
+  const patterns = vars.map((token) => new RegExp(`(^|[^A-Za-z0-9_])${escapeRegExp(token)}([^A-Za-z0-9_]|$)`));
+  const selectedNodeId = selected?.nodeId == null ? '' : String(selected.nodeId);
+  const selectedEdgeKey = String(selected?.edgeKey || '');
+  const highlightedSourceIds = new Set();
+  const selectedNodeShadowBlur = getSelectedNodeShadowBlur();
+  const selectedEdgeShadowBlur = getSelectedEdgeShadowBlur();
+  const links = (Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : []).map((link) => {
+    const action = String(link?.value?.action || '');
+    const matched = patterns.some((pattern) => pattern.test(action));
+    const isSelected = selectedEdgeKey && getLinkKey(link) === selectedEdgeKey;
+    if (matched) highlightedSourceIds.add(String(link?.source || ''));
+    return {
+      ...link,
+      lineStyle: {
+        ...(link?.lineStyle || {}),
+        opacity: (matched || isSelected) ? FOCUS_OPACITY : DIM_OPACITY,
+        shadowBlur: isSelected ? selectedEdgeShadowBlur : 0,
+        shadowColor: isSelected ? themeVars.value.primaryColor : 'transparent',
+        shadowOffsetX: 0,
+        shadowOffsetY: 0,
+      },
+    };
+  });
+  const data = (Array.isArray(currentGraphRef.value?.data) ? currentGraphRef.value.data : []).map((node) => {
+    const nodeId = String(node?.id || '');
+    const matched = highlightedSourceIds.has(nodeId);
+    const isSelected = selectedNodeId && nodeId === selectedNodeId;
+    return {
+      ...node,
+      itemStyle: {
+        ...(node?.itemStyle || {}),
+        opacity: (matched || isSelected) ? FOCUS_NODE_OPACITY : DIM_NODE_OPACITY,
+        shadowBlur: isSelected ? selectedNodeShadowBlur : 0,
+        shadowColor: isSelected ? themeVars.value.primaryColor : 'transparent',
+        shadowOffsetX: 0,
+        shadowOffsetY: 0,
+      },
+    };
+  });
+  instance.setOption({
+    series: [
+      {
+        data,
+        links,
+      },
+    ],
+  });
+};
+
+const analyzeNodeInFocusMode = async (nodeValue) => {
+  const inEdges = Array.isArray(nodeValue?.in) ? nodeValue.in : [];
+  const vars = new Set();
+  for (const edge of inEdges) {
+    const edgeVars = extractVars(edge?.condition);
+    for (const token of edgeVars) vars.add(token);
+  }
+  await applyEdgeHighlightByVars(vars, { nodeId: nodeValue?.id });
+};
+
+const analyzeEdgeInFocusMode = async (edgeValue, linkData = {}) => {
+  const vars = extractVars(edgeValue?.condition);
+  await applyEdgeHighlightByVars(vars, { edgeKey: getLinkKey(linkData) });
+};
+
 const handleGraphClick = (params) => {
+  if (focusMode.value) {
+    if (params?.dataType === 'node') {
+      analyzeNodeInFocusMode(params?.data?.value).catch(() => { });
+      return;
+    }
+    if (params?.dataType === 'edge') {
+      analyzeEdgeInFocusMode(params?.data?.value, params?.data || {}).catch(() => { });
+      return;
+    }
+    return;
+  }
   emit('graph-click', params?.data?.value);
 };
 
@@ -117,9 +240,9 @@ const renderByGraphMap = async (graphMap) => {
     baseGap,
     baseSpan: baseSpan.value,
     removeBackEdges: removeBackEdges.value,
-    edgeMetaMap: edgeMetaMapRef.value,
   });
   currentScale.value = Number(graph?.meta?.scale) || 1;
+  currentGraphRef.value = graph;
   instance.setOption({
     tooltip: {
       show: true,
@@ -155,7 +278,7 @@ const renderByGraphMap = async (graphMap) => {
           },
           edgeLabel: {
             show: true,
-            formatter: (params) => params?.data?.label || '',
+            formatter: (params) => params?.data?.value?.option || '',
           },
         },
         blur: {
@@ -168,7 +291,7 @@ const renderByGraphMap = async (graphMap) => {
         },
         edgeLabel: {
           show: showOptions.value,
-          formatter: (params) => params?.data?.label || '',
+          formatter: (params) => params?.data?.value?.option || '',
         },
         data: Array.isArray(graph.data) ? graph.data : [],
         links: Array.isArray(graph.links) ? graph.links : [],
@@ -181,10 +304,8 @@ const renderByGraphMap = async (graphMap) => {
 const refresh = async () => {
   const payload = await props.getGraph(dedupe.value) || {};
   const graphMap = payload.graphMap || {};
-  const edgeMetaMap = payload?.edgeMetaMap || {};
   const varsMap = payload?.varsMap || {};
   graphMapRef.value = graphMap;
-  edgeMetaMapRef.value = edgeMetaMap;
   varsMapRef.value = varsMap;
   await renderByGraphMap(graphMap);
 };
@@ -218,6 +339,16 @@ const dispose = () => {
     graphInstance.dispose();
   }
   graphInstance = null;
+};
+
+const enableFocusMode = async () => {
+  focusMode.value = true;
+  await clearEdgeHighlight();
+};
+
+const disableFocusMode = async () => {
+  focusMode.value = false;
+  await clearEdgeHighlight();
 };
 
 const setDirection = async (next) => {
@@ -287,7 +418,6 @@ const captureGraph = async () => {
     baseSpan: baseSpan.value,
     maxArea: 100_000_000,
     removeBackEdges: removeBackEdges.value,
-    edgeMetaMap: edgeMetaMapRef.value,
   });
   const data = Array.isArray(graph.data) ? graph.data : [];
   const links = Array.isArray(graph.links) ? graph.links : [];
@@ -337,7 +467,7 @@ const captureGraph = async () => {
           },
           edgeLabel: {
             show: showOptions.value,
-            formatter: (params) => params?.data?.label || '',
+            formatter: (params) => params?.data?.value?.option || '',
           },
           data,
           links,
@@ -380,7 +510,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <n-flex vertical :size="8" style="height: 100%; min-height: 0;">
+  <n-flex vertical :size="8" class="bds-interactive-graph-panel" :style="cssVars">
     <n-flex :size="8" align="center" wrap>
       <n-flex :size="8" align="center" wrap>
         <n-button size="small" circle title="回到开头" :disabled="graphLoading" @click="resetView">
@@ -394,7 +524,8 @@ onMounted(() => {
           <n-radio-button value="LR">水平</n-radio-button>
           <n-radio-button value="TB">垂直</n-radio-button>
         </n-radio-group>
-        <n-input-number :value="baseSpan" size="small" :min="1" style="width: 110px;" :disabled="graphLoading"
+        <n-input-number :value="baseSpan" size="small" :min="1" class="bds-interactive-graph-panel__span-input"
+          :disabled="graphLoading"
           @update:value="setBaseSpan" title="密度">
           <template #prefix>
             <n-icon>
@@ -414,8 +545,18 @@ onMounted(() => {
           隐藏回边
         </n-checkbox>
       </n-flex>
-      <n-button size="small" circle style="margin-left: auto;" :loading="capturing"
-        :disabled="graphLoading || capturing" @click="captureGraph" title="密度越小截图越大">
+      <n-button size="small" circle class="bds-interactive-graph-panel__focus-btn" :loading="capturing"
+        :disabled="graphLoading" @click="focusMode ? disableFocusMode() : enableFocusMode()"
+        :title="focusMode ? '退出分析模式' : '进入分析模式'">
+        <template #icon>
+          <n-icon>
+            <viewfinder v-if="!focusMode" />
+            <circle-x v-else />
+          </n-icon>
+        </template>
+      </n-button>
+      <n-button size="small" circle :loading="capturing" :disabled="graphLoading || capturing" @click="captureGraph"
+        title="密度越小截图越大">
         <template #icon>
           <n-icon>
             <camera />
@@ -423,6 +564,7 @@ onMounted(() => {
         </template>
       </n-button>
     </n-flex>
-    <div ref="graphElRef" :style="graphElStyle"></div>
+    <div ref="graphElRef" class="bds-interactive-graph-panel__graph"
+      :class="{ 'is-focus-mode': focusMode }"></div>
   </n-flex>
 </template>

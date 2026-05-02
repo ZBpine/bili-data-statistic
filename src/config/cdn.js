@@ -28,7 +28,7 @@ export const createCdnUrls = (profileOrBase) => {
     base,
     vueGlobalProd: buildNpmUrl(base, 'vue@3/dist/vue.global.prod.js'),
     naiveUiProd: buildNpmUrl(base, 'naive-ui@2/dist/index.prod.js'),
-    biliDataManager: buildGhUrl(base, 'ZBpine/bili-data-manager@5ee8f7d9697428a8646b591a98141ffa07c42c9e/dist/bili-data-manager.min.js'),
+    biliDataManager: buildGhUrl(base, 'ZBpine/bili-data-manager@26c45a54a832157dcdc623487102e16f5e043f56/dist/bili-data-manager.min.js'),
     staticHtmlDefault: buildGhUrl(base, 'ZBpine/bili-data-statistic@main/docs/index.html'),
     staticHtmlCn: buildGhUrl(base, 'ZBpine/bili-data-statistic@main/docs/cn/index.html'),
     favicon: buildGhUrl(base, 'ZBpine/bili-data-statistic@main/docs/favicon.ico'),

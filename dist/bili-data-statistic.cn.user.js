@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站弹幕统计
 // @namespace    https://github.com/ZBpine/bili-data-statistic
-// @version      3.1.2
+// @version      3.1.3
 // @description  获取B站弹幕数据，并生成统计页面。
 // @icon         https://cdn.jsdmirror.com/gh/ZBpine/bili-data-statistic@main/docs/favicon.ico
 // @match        https://www.bilibili.com/video/*
@@ -11,7 +11,7 @@
 // @match        https://zbpine.github.io/bili-data-statistic/*
 // @match        https://bili-data-statistic.pages.dev/*
 // @match        https://bds.zbpine.abrdns.com/*
-// @require      https://cdn.jsdmirror.com/gh/ZBpine/bili-data-manager@5ee8f7d9697428a8646b591a98141ffa07c42c9e/dist/bili-data-manager.min.js
+// @require      https://cdn.jsdmirror.com/gh/ZBpine/bili-data-manager@26c45a54a832157dcdc623487102e16f5e043f56/dist/bili-data-manager.min.js
 // @require      https://cdn.jsdmirror.com/npm/vue@3.5.31/dist/vue.global.prod.js
 // @require      data:application/javascript,%3Bwindow.Vue%3DVue%3BglobalThis.Vue%3DVue%3B
 // @require      https://cdn.jsdmirror.com/npm/naive-ui@2.44.1/dist/index.prod.js
@@ -569,7 +569,7 @@ ${style2}
       vue.onBeforeMount(mountStyle2);
     }
   }
-  const style$c = c$3([
+  const style$d = c$3([
     cB$2(
       "bds-shell",
       css$1`
@@ -585,8 +585,8 @@ ${style2}
       ]
     )
   ]);
-  function mountStyle$c(mountTarget) {
-    useTheme$1("bds-app-style", style$c, mountTarget);
+  function mountStyle$d(mountTarget) {
+    useTheme$1("bds-app-style", style$d, mountTarget);
   }
   const ROOT_KEY = "bds-storage";
   const toSegments = (path) => String(path || "").split(".").filter(Boolean);
@@ -1054,7 +1054,7 @@ ${style2}
     },
     Statistic
   });
-  const style$b = c$3([
+  const style$c = c$3([
     cB$2(
       "bds-entry-launcher",
       css$1`
@@ -1110,10 +1110,10 @@ ${style2}
       ]
     )
   ]);
-  function mountStyle$b(mountTarget) {
-    useTheme$1("bds-entry-launcher-style", style$b, mountTarget);
+  function mountStyle$c(mountTarget) {
+    useTheme$1("bds-entry-launcher-style", style$c, mountTarget);
   }
-  const _hoisted_1$r = { class: "bds-entry-launcher__text" };
+  const _hoisted_1$t = { class: "bds-entry-launcher__text" };
   const _sfc_main$e = {
     __name: "EntryLauncher",
     props: {
@@ -1124,7 +1124,7 @@ ${style2}
       const props2 = __props2;
       const emit2 = __emit2;
       const styleMountTarget2 = vue.inject("styleMountTarget", null);
-      mountStyle$b(styleMountTarget2);
+      mountStyle$c(styleMountTarget2);
       const themeVars = naiveUi.useThemeVars();
       const cssVars = vue.computed(() => {
         const primary = themeVars.value.primaryColor;
@@ -1157,7 +1157,7 @@ ${style2}
           onClick: _cache[0] || (_cache[0] = ($event) => emit2("toggle"))
         }, {
           default: vue.withCtx(() => [
-            vue.createElementVNode("span", _hoisted_1$r, vue.toDisplayString(props2.label), 1),
+            vue.createElementVNode("span", _hoisted_1$t, vue.toDisplayString(props2.label), 1),
             _cache[1] || (_cache[1] = vue.createElementVNode("span", {
               class: "bds-entry-launcher__icon",
               "aria-hidden": "true"
@@ -1176,7 +1176,7 @@ ${style2}
       };
     }
   };
-  const style$a = cB$2(
+  const style$b = cB$2(
     "bds-panel-shell",
     [
       cE$2(
@@ -1208,10 +1208,10 @@ ${style2}
       )
     ]
   );
-  function mountStyle$a(mountTarget) {
-    useTheme$1("bds-panel-shell-style", style$a, mountTarget);
+  function mountStyle$b(mountTarget) {
+    useTheme$1("bds-panel-shell-style", style$b, mountTarget);
   }
-  const _hoisted_1$q = { class: "bds-panel-shell" };
+  const _hoisted_1$s = { class: "bds-panel-shell" };
   const _sfc_main$d = {
     __name: "PanelShell",
     props: {
@@ -1237,7 +1237,7 @@ ${style2}
       const props2 = __props2;
       const emit2 = __emit2;
       const styleMountTarget2 = vue.inject("styleMountTarget", null);
-      mountStyle$a(styleMountTarget2);
+      mountStyle$b(styleMountTarget2);
       const themeVars = naiveUi.useThemeVars();
       const panelEl = vue.ref(null);
       const panelStyle = vue.computed(() => {
@@ -1263,7 +1263,7 @@ ${style2}
       });
       return (_ctx, _cache) => {
         const _component_n_alert = naiveUi.NAlert;
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$q, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$s, [
           vue.withDirectives(vue.createElementVNode("div", {
             class: "bds-panel-shell__overlay",
             style: vue.normalizeStyle(vue.unref(overlayStyle)),
@@ -1295,7 +1295,7 @@ ${style2}
       };
     }
   };
-  const style$9 = cB$2(
+  const style$a = cB$2(
     "bds-upload-screen",
     css$1`
     min-height: 100vh;
@@ -1350,8 +1350,8 @@ ${style2}
       )
     ]
   );
-  function mountStyle$9(mountTarget) {
-    useTheme$1("bds-upload-screen-style", style$9, mountTarget);
+  function mountStyle$a(mountTarget) {
+    useTheme$1("bds-upload-screen-style", style$a, mountTarget);
   }
   const _sfc_main$c = {
     __name: "UploadScreen",
@@ -1374,7 +1374,7 @@ ${style2}
       const props2 = __props2;
       const emit2 = __emit2;
       const styleMountTarget2 = vue.inject("styleMountTarget", null);
-      mountStyle$9(styleMountTarget2);
+      mountStyle$a(styleMountTarget2);
       const themeVars = naiveUi.useThemeVars();
       const uploadError = vue.ref("");
       const fileList = vue.ref([]);
@@ -1530,7 +1530,7 @@ ${style2}
       };
     }
   };
-  const _hoisted_1$p = {
+  const _hoisted_1$r = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
@@ -1540,7 +1540,7 @@ ${style2}
     render: function render2(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$p,
+        _hoisted_1$r,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1567,17 +1567,54 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$o = {
+  const _hoisted_1$q = {
+    xmlns: "http://www.w3.org/2000/svg",
+    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+    viewBox: "0 0 24 24"
+  };
+  const CircleX = vue.defineComponent({
+    name: "CircleX",
+    render: function render3(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock(
+        "svg",
+        _hoisted_1$q,
+        _cache[0] || (_cache[0] = [
+          vue.createElementVNode(
+            "g",
+            {
+              fill: "none",
+              stroke: "currentColor",
+              "stroke-width": "2",
+              "stroke-linecap": "round",
+              "stroke-linejoin": "round"
+            },
+            [
+              vue.createElementVNode("circle", {
+                cx: "12",
+                cy: "12",
+                r: "9"
+              }),
+              vue.createElementVNode("path", {
+                d: "M10 10l4 4m0-4l-4 4"
+              })
+            ],
+            -1
+)
+        ])
+      );
+    }
+  });
+  const _hoisted_1$p = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const ExternalLink = vue.defineComponent({
     name: "ExternalLink",
-    render: function render3(_ctx, _cache) {
+    render: function render4(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$o,
+        _hoisted_1$p,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1605,15 +1642,26 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$n = {
+  const _hoisted_1$o = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const FileDownload = vue.defineComponent({
     name: "FileDownload",
-    render: function render4(_ctx, _cache) {
-      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$n, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path><path d="M12 11v6"></path><path d="M9 14l3 3l3-3"></path></g>', 1)]));
+    render: function render5(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$o, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path><path d="M12 11v6"></path><path d="M9 14l3 3l3-3"></path></g>', 1)]));
+    }
+  });
+  const _hoisted_1$n = {
+    xmlns: "http://www.w3.org/2000/svg",
+    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+    viewBox: "0 0 24 24"
+  };
+  const GridDots = vue.defineComponent({
+    name: "GridDots",
+    render: function render6(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$n, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="19" cy="5" r="1"></circle><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="19" r="1"></circle><circle cx="12" cy="19" r="1"></circle><circle cx="19" cy="19" r="1"></circle></g>', 1)]));
     }
   });
   const _hoisted_1$m = {
@@ -1621,23 +1669,12 @@ ${style2}
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
-  const GridDots = vue.defineComponent({
-    name: "GridDots",
-    render: function render5(_ctx, _cache) {
-      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$m, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="19" cy="5" r="1"></circle><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="19" r="1"></circle><circle cx="12" cy="19" r="1"></circle><circle cx="19" cy="19" r="1"></circle></g>', 1)]));
-    }
-  });
-  const _hoisted_1$l = {
-    xmlns: "http://www.w3.org/2000/svg",
-    "xmlns:xlink": "http://www.w3.org/1999/xlink",
-    viewBox: "0 0 24 24"
-  };
   const InfoCircle = vue.defineComponent({
     name: "InfoCircle",
-    render: function render6(_ctx, _cache) {
+    render: function render7(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$l,
+        _hoisted_1$m,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1667,17 +1704,17 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$k = {
+  const _hoisted_1$l = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const RefreshDot = vue.defineComponent({
     name: "RefreshDot",
-    render: function render7(_ctx, _cache) {
+    render: function render8(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$k,
+        _hoisted_1$l,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1707,17 +1744,17 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$j = {
+  const _hoisted_1$k = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const Settings = vue.defineComponent({
     name: "Settings",
-    render: function render8(_ctx, _cache) {
+    render: function render9(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$j,
+        _hoisted_1$k,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1744,17 +1781,17 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$i = {
+  const _hoisted_1$j = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const SquareCheck = vue.defineComponent({
     name: "SquareCheck",
-    render: function render9(_ctx, _cache) {
+    render: function render10(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
-        _hoisted_1$i,
+        _hoisted_1$j,
         _cache[0] || (_cache[0] = [
           vue.createElementVNode(
             "g",
@@ -1783,15 +1820,26 @@ ${style2}
       );
     }
   });
-  const _hoisted_1$h = {
+  const _hoisted_1$i = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
   const Trash = vue.defineComponent({
     name: "Trash",
-    render: function render10(_ctx, _cache) {
-      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$h, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path></g>', 1)]));
+    render: function render11(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$i, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path></g>', 1)]));
+    }
+  });
+  const _hoisted_1$h = {
+    xmlns: "http://www.w3.org/2000/svg",
+    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+    viewBox: "0 0 24 24"
+  };
+  const TrashX = vue.defineComponent({
+    name: "TrashX",
+    render: function render12(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$h, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path><path d="M10 12l4 4m0-4l-4 4"></path></g>', 1)]));
     }
   });
   const _hoisted_1$g = {
@@ -1799,10 +1847,10 @@ ${style2}
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
     viewBox: "0 0 24 24"
   };
-  const TrashX = vue.defineComponent({
-    name: "TrashX",
-    render: function render11(_ctx, _cache) {
-      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$g, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path><path d="M10 12l4 4m0-4l-4 4"></path></g>', 1)]));
+  const Viewfinder = vue.defineComponent({
+    name: "Viewfinder",
+    render: function render13(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$g, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v4"></path><path d="M12 21v-3"></path><path d="M3 12h4"></path><path d="M21 12h-3"></path><path d="M12 12v.01"></path></g>', 1)]));
     }
   });
   const _hoisted_1$f = {
@@ -1812,7 +1860,7 @@ ${style2}
   };
   const ZoomIn = vue.defineComponent({
     name: "ZoomIn",
-    render: function render12(_ctx, _cache) {
+    render: function render14(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$f, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"></circle><path d="M7 10h6"></path><path d="M10 7v6"></path><path d="M21 21l-6-6"></path></g>', 1)]));
     }
   });
@@ -2551,7 +2599,7 @@ ${style2}
   };
   vue.defineComponent({
     name: "ChevronDown",
-    render: function render13(_ctx, _cache) {
+    render: function render15(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$c,
@@ -4072,7 +4120,7 @@ ${style2}
       };
     }
   };
-  const style$8 = c([
+  const style$9 = c([
     cB(
       "nb-user-card",
       css`
@@ -4157,8 +4205,8 @@ ${style2}
       ]
     )
   ]);
-  function mountStyle$8() {
-    useTheme("nb-user-card", style$8);
+  function mountStyle$9() {
+    useTheme("nb-user-card", style$9);
   }
   const _hoisted_1$e = ["href"];
   const _hoisted_2$6 = ["href"];
@@ -4233,7 +4281,7 @@ ${style2}
           "--n-font-weight-strong": themeVars.value.fontWeightStrong
         };
       });
-      mountStyle$8();
+      mountStyle$9();
       return (_ctx, _cache) => {
         const _component_n_text = naiveUi.NText;
         const _component_n_tag = naiveUi.NTag;
@@ -4594,7 +4642,7 @@ ${style2}
     mountOne(binderStyle, "vueuc/binder");
     mountedDefault = true;
   }
-  const style$7 = c$3([
+  const style$8 = c$3([
     cB$2(
       "bds-dm-loader-panel",
       css$1`
@@ -4644,8 +4692,8 @@ ${style2}
       ]
     )
   ]);
-  function mountStyle$7(mountTarget) {
-    useTheme$1("bds-dm-loader-panel-style", style$7, mountTarget);
+  function mountStyle$8(mountTarget) {
+    useTheme$1("bds-dm-loader-panel-style", style$8, mountTarget);
   }
   const _hoisted_1$6 = { class: "bds-dm-loader-panel" };
   const _sfc_main$a = {
@@ -4674,7 +4722,7 @@ ${style2}
       const props2 = __props2;
       const emit2 = __emit2;
       const styleMountTarget2 = vue.inject("styleMountTarget", null);
-      mountStyle$7(styleMountTarget2);
+      mountStyle$8(styleMountTarget2);
       function toDateStr(date) {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -5262,7 +5310,7 @@ ${style2}
       };
     }
   };
-  const style$6 = c$3([
+  const style$7 = c$3([
     cB$2(
       "bds-dm-chart-manager",
       css$1`
@@ -5355,8 +5403,8 @@ ${style2}
       ]
     )
   ]);
-  function mountStyle$6(mountTarget) {
-    useTheme$1("bds-dm-chart-manager-style", style$6, mountTarget);
+  function mountStyle$7(mountTarget) {
+    useTheme$1("bds-dm-chart-manager-style", style$7, mountTarget);
   }
   const userChart = {
     key: "user",
@@ -6550,7 +6598,7 @@ ${percentages[params.dataIndex]}%`
       const injectedActiveTheme = vue.inject("activeTheme", null);
       const themeSettings = vue.inject("themeSettings", null);
       const messageApi = naiveUi__namespace.useMessage();
-      mountStyle$6(styleMountTarget);
+      mountStyle$7(styleMountTarget);
       const echartsLib = vue.computed(() => runtimeWindow?.echarts || globalThis.echarts);
       const chartDefs = vue.ref([]);
       const chartDefMap = vue.computed(() => new Map(chartDefs.value.map((def) => [def.key, def])));
@@ -7245,6 +7293,42 @@ ${percentages[params.dataIndex]}%`
       };
     }
   };
+  const style$6 = cB$2(
+    "bds-interactive-graph-panel",
+    css$1`
+    height: 100%;
+    min-height: 0;
+  `,
+    [
+      cE$2(
+        "span-input",
+        css$1`
+        width: 110px;
+      `
+      ),
+      cE$2(
+        "focus-btn",
+        css$1`
+        margin-left: auto;
+      `
+      ),
+      cE$2(
+        "graph",
+        css$1`
+        width: 100%;
+        aspect-ratio: var(--bds-interactive-graph-aspect, 2 / 1);
+
+        &.is-focus-mode,
+        &.is-focus-mode * {
+          cursor: crosshair !important;
+        }
+      `
+      )
+    ]
+  );
+  function mountStyle$6(mountTarget) {
+    useTheme$1("bds-interactive-graph-panel-style", style$6, mountTarget);
+  }
   const compareNodeKey = (a, b) => {
     const an = Number(a);
     const bn = Number(b);
@@ -7275,10 +7359,9 @@ ${percentages[params.dataIndex]}%`
       baseSpan = 4,
       maxArea = 1e8,
       removeBackEdges = false,
-      edgeMetaMap = {},
       getNodeLabel,
       getNodeValue,
-      getEdgeLabel
+      getEdgeValue
     } = options;
     const ratioInput = Number(layoutRatio);
     const baseInput = Number(baseGap2);
@@ -7441,7 +7524,7 @@ ${percentages[params.dataIndex]}%`
         if (edge?.id == null) continue;
         const targetKey = String(edge.id);
         if (!map[targetKey]) continue;
-        const optionLabel = typeof getEdgeLabel === "function" ? String(getEdgeLabel(edge, sourceKey, targetKey) || "") : String(edge?.option || "");
+        const value = typeof getEdgeValue === "function" ? getEdgeValue(edge, sourceKey, targetKey) : edge;
         const pairKey = sourceKey < targetKey ? `${sourceKey}<->${targetKey}` : `${targetKey}<->${sourceKey}`;
         const idx = Number(edgePairCount.get(pairKey) || 0);
         edgePairCount.set(pairKey, idx + 1);
@@ -7469,18 +7552,14 @@ ${percentages[params.dataIndex]}%`
         if (flowDelta === 0) flowSign = axisSign * baseSign;
         const sign = flowSign * axisSign * baseSign;
         const curveness = sign !== 0 ? sign * (baseCurve + idx * jitter) : idx === 0 ? 0 : (idx % 2 === 1 ? 1 : -1) * Math.ceil(idx / 2) * jitter;
-        const edgeMeta = edgeMetaMap?.[sourceKey]?.[targetKey];
         const link = {
           source: sourceKey,
           target: targetKey,
-          label: optionLabel,
+          value,
           lineStyle: {
             curveness
           }
         };
-        if (edgeMeta && typeof edgeMeta === "object") {
-          link.meta = edgeMeta;
-        }
         links.push(link);
       }
     }
@@ -7488,6 +7567,10 @@ ${percentages[params.dataIndex]}%`
     return { data, links, meta: { levelMap, scale: spaceScale, viewport } };
   };
   const baseGap = 60;
+  const FOCUS_OPACITY = 0.95;
+  const DIM_OPACITY = 0.14;
+  const FOCUS_NODE_OPACITY = 1;
+  const DIM_NODE_OPACITY = 0.2;
   const _sfc_main$8 = {
     __name: "InteractiveGraphPanel",
     props: {
@@ -7510,6 +7593,8 @@ ${percentages[params.dataIndex]}%`
     },
     emits: ["graph-click", "graph-capture"],
     setup(__props2, { expose: __expose2, emit: __emit2 }) {
+      const styleMountTarget2 = vue.inject("styleMountTarget", null);
+      mountStyle$6(styleMountTarget2);
       const props2 = __props2;
       const emit2 = __emit2;
       const themeVars = naiveUi.useThemeVars();
@@ -7518,23 +7603,25 @@ ${percentages[params.dataIndex]}%`
         const ratio = Number(props2.aspectRatio);
         return Number.isFinite(ratio) && ratio > 0 ? ratio : 3;
       });
-      const graphElStyle = vue.computed(() => {
-        return {
-          width: "100%",
-          aspectRatio: `${normalizedAspectRatio.value} / 1`
-        };
-      });
+      const cssVars = vue.computed(() => ({
+        "--bds-interactive-graph-aspect": `${normalizedAspectRatio.value} / 1`
+      }));
       const direction = vue.ref("LR");
       const dedupe = vue.ref(false);
       const showOptions = vue.ref(false);
       const removeBackEdges = vue.ref(false);
       const capturing = vue.ref(false);
+      const focusMode = vue.ref(false);
       const currentScale = vue.ref(1);
       const graphElRef = vue.ref(null);
       const graphMapRef = vue.shallowRef({});
-      const edgeMetaMapRef = vue.shallowRef({});
       const varsMapRef = vue.shallowRef({});
+      const currentGraphRef = vue.shallowRef({ data: [], links: [] });
       let graphInstance = null;
+      const VAR_TOKEN_REGEXP = /\$[A-Za-z0-9_]+/g;
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const getSelectedNodeShadowBlur = () => clamp(2.4 * Number(baseSpan.value || 1), 4, 24);
+      const getSelectedEdgeShadowBlur = () => clamp(1.8 * Number(baseSpan.value || 1), 3, 18);
       const prettifyMathAssign = (text) => {
         return String(text || "").replace(/([^=;\s]+)\s*=\s*\1\s*\+\s*([^;]+)/g, "$1+$2").replace(/([^=;\s]+)\s*=\s*\1\s*-\s*([^;]+)/g, "$1-$2");
       };
@@ -7547,17 +7634,123 @@ ${percentages[params.dataIndex]}%`
       };
       const formatEdgeTooltip = (params) => {
         if (params?.dataType !== "edge") return "";
-        const meta = params?.data?.meta;
-        if (!meta || typeof meta !== "object") return "";
-        const action = formatActionExpression(meta?.action, varsMapRef.value);
-        const condition = formatExpression(meta?.condition, varsMapRef.value);
+        const value = params?.data?.value;
+        if (!value || typeof value !== "object") return "";
+        const action = formatActionExpression(value?.action, varsMapRef.value);
+        const condition = formatExpression(value?.condition, varsMapRef.value);
         if (!action && !condition) return "";
         const lines = [];
         if (condition) lines.push(`条件：${condition}`);
         if (action) lines.push(`行为：${action}`);
         return lines.join("<br/>");
       };
+      const escapeRegExp = (text) => String(text || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const extractVars = (text) => {
+        const matches = String(text || "").match(VAR_TOKEN_REGEXP) || [];
+        return new Set(matches.filter(Boolean));
+      };
+      const getLinkKey = (linkLike) => {
+        const source = String(linkLike?.source || "");
+        const target = String(linkLike?.target || "");
+        const value = linkLike?.value || {};
+        const option = String(value?.option || "");
+        const action = String(value?.action || "");
+        const condition = String(value?.condition || "");
+        return `${source}|${target}|${option}|${action}|${condition}`;
+      };
+      const clearEdgeHighlight = async () => {
+        const instance = await ensureGraphInstance();
+        if (!instance) return;
+        const data = Array.isArray(currentGraphRef.value?.data) ? currentGraphRef.value.data : [];
+        const links = Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : [];
+        instance.setOption({
+          series: [
+            {
+              data,
+              links
+            }
+          ]
+        });
+      };
+      const applyEdgeHighlightByVars = async (varSet, selected = {}) => {
+        const instance = await ensureGraphInstance();
+        if (!instance) return;
+        const vars = [...varSet || []].filter(Boolean);
+        const patterns = vars.map((token) => new RegExp(`(^|[^A-Za-z0-9_])${escapeRegExp(token)}([^A-Za-z0-9_]|$)`));
+        const selectedNodeId = selected?.nodeId == null ? "" : String(selected.nodeId);
+        const selectedEdgeKey = String(selected?.edgeKey || "");
+        const highlightedSourceIds = new Set();
+        const selectedNodeShadowBlur = getSelectedNodeShadowBlur();
+        const selectedEdgeShadowBlur = getSelectedEdgeShadowBlur();
+        const links = (Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : []).map((link) => {
+          const action = String(link?.value?.action || "");
+          const matched = patterns.some((pattern) => pattern.test(action));
+          const isSelected = selectedEdgeKey && getLinkKey(link) === selectedEdgeKey;
+          if (matched) highlightedSourceIds.add(String(link?.source || ""));
+          return {
+            ...link,
+            lineStyle: {
+              ...link?.lineStyle || {},
+              opacity: matched || isSelected ? FOCUS_OPACITY : DIM_OPACITY,
+              shadowBlur: isSelected ? selectedEdgeShadowBlur : 0,
+              shadowColor: isSelected ? themeVars.value.primaryColor : "transparent",
+              shadowOffsetX: 0,
+              shadowOffsetY: 0
+            }
+          };
+        });
+        const data = (Array.isArray(currentGraphRef.value?.data) ? currentGraphRef.value.data : []).map((node) => {
+          const nodeId = String(node?.id || "");
+          const matched = highlightedSourceIds.has(nodeId);
+          const isSelected = selectedNodeId && nodeId === selectedNodeId;
+          return {
+            ...node,
+            itemStyle: {
+              ...node?.itemStyle || {},
+              opacity: matched || isSelected ? FOCUS_NODE_OPACITY : DIM_NODE_OPACITY,
+              shadowBlur: isSelected ? selectedNodeShadowBlur : 0,
+              shadowColor: isSelected ? themeVars.value.primaryColor : "transparent",
+              shadowOffsetX: 0,
+              shadowOffsetY: 0
+            }
+          };
+        });
+        instance.setOption({
+          series: [
+            {
+              data,
+              links
+            }
+          ]
+        });
+      };
+      const analyzeNodeInFocusMode = async (nodeValue) => {
+        const inEdges = Array.isArray(nodeValue?.in) ? nodeValue.in : [];
+        const vars = new Set();
+        for (const edge of inEdges) {
+          const edgeVars = extractVars(edge?.condition);
+          for (const token of edgeVars) vars.add(token);
+        }
+        await applyEdgeHighlightByVars(vars, { nodeId: nodeValue?.id });
+      };
+      const analyzeEdgeInFocusMode = async (edgeValue, linkData = {}) => {
+        const vars = extractVars(edgeValue?.condition);
+        await applyEdgeHighlightByVars(vars, { edgeKey: getLinkKey(linkData) });
+      };
       const handleGraphClick = (params) => {
+        if (focusMode.value) {
+          if (params?.dataType === "node") {
+            analyzeNodeInFocusMode(params?.data?.value).catch(() => {
+            });
+            return;
+          }
+          if (params?.dataType === "edge") {
+            analyzeEdgeInFocusMode(params?.data?.value, params?.data || {}).catch(() => {
+            });
+            return;
+          }
+          return;
+        }
         emit2("graph-click", params?.data?.value);
       };
       const ensureGraphInstance = async () => {
@@ -7580,10 +7773,10 @@ ${percentages[params.dataIndex]}%`
           layoutRatio: normalizedAspectRatio.value,
           baseGap,
           baseSpan: baseSpan.value,
-          removeBackEdges: removeBackEdges.value,
-          edgeMetaMap: edgeMetaMapRef.value
+          removeBackEdges: removeBackEdges.value
         });
         currentScale.value = Number(graph?.meta?.scale) || 1;
+        currentGraphRef.value = graph;
         instance.setOption({
           tooltip: {
             show: true,
@@ -7619,7 +7812,7 @@ ${percentages[params.dataIndex]}%`
                 },
                 edgeLabel: {
                   show: true,
-                  formatter: (params) => params?.data?.label || ""
+                  formatter: (params) => params?.data?.value?.option || ""
                 }
               },
               blur: {
@@ -7632,7 +7825,7 @@ ${percentages[params.dataIndex]}%`
               },
               edgeLabel: {
                 show: showOptions.value,
-                formatter: (params) => params?.data?.label || ""
+                formatter: (params) => params?.data?.value?.option || ""
               },
               data: Array.isArray(graph.data) ? graph.data : [],
               links: Array.isArray(graph.links) ? graph.links : []
@@ -7644,10 +7837,8 @@ ${percentages[params.dataIndex]}%`
       const refresh = async () => {
         const payload = await props2.getGraph(dedupe.value) || {};
         const graphMap = payload.graphMap || {};
-        const edgeMetaMap = payload?.edgeMetaMap || {};
         const varsMap = payload?.varsMap || {};
         graphMapRef.value = graphMap;
-        edgeMetaMapRef.value = edgeMetaMap;
         varsMapRef.value = varsMap;
         await renderByGraphMap(graphMap);
       };
@@ -7678,6 +7869,14 @@ ${percentages[params.dataIndex]}%`
           graphInstance.dispose();
         }
         graphInstance = null;
+      };
+      const enableFocusMode = async () => {
+        focusMode.value = true;
+        await clearEdgeHighlight();
+      };
+      const disableFocusMode = async () => {
+        focusMode.value = false;
+        await clearEdgeHighlight();
       };
       const setDirection = async (next) => {
         const value = next === "TB" ? "TB" : "LR";
@@ -7740,8 +7939,7 @@ ${percentages[params.dataIndex]}%`
           baseGap,
           baseSpan: baseSpan.value,
           maxArea: 1e8,
-          removeBackEdges: removeBackEdges.value,
-          edgeMetaMap: edgeMetaMapRef.value
+          removeBackEdges: removeBackEdges.value
         });
         const data = Array.isArray(graph.data) ? graph.data : [];
         const links = Array.isArray(graph.links) ? graph.links : [];
@@ -7789,7 +7987,7 @@ ${percentages[params.dataIndex]}%`
                 },
                 edgeLabel: {
                   show: showOptions.value,
-                  formatter: (params) => params?.data?.label || ""
+                  formatter: (params) => params?.data?.value?.option || ""
                 },
                 data,
                 links
@@ -7837,7 +8035,8 @@ ${percentages[params.dataIndex]}%`
         return vue.openBlock(), vue.createBlock(_component_n_flex, {
           vertical: "",
           size: 8,
-          style: { "height": "100%", "min-height": "0" }
+          class: "bds-interactive-graph-panel",
+          style: vue.normalizeStyle(vue.unref(cssVars))
         }, {
           default: vue.withCtx(() => [
             vue.createVNode(_component_n_flex, {
@@ -7877,13 +8076,13 @@ ${percentages[params.dataIndex]}%`
                     }, {
                       default: vue.withCtx(() => [
                         vue.createVNode(_component_n_radio_button, { value: "LR" }, {
-                          default: vue.withCtx(() => [..._cache[0] || (_cache[0] = [
+                          default: vue.withCtx(() => [..._cache[1] || (_cache[1] = [
                             vue.createTextVNode("水平", -1)
                           ])]),
                           _: 1
                         }),
                         vue.createVNode(_component_n_radio_button, { value: "TB" }, {
-                          default: vue.withCtx(() => [..._cache[1] || (_cache[1] = [
+                          default: vue.withCtx(() => [..._cache[2] || (_cache[2] = [
                             vue.createTextVNode("垂直", -1)
                           ])]),
                           _: 1
@@ -7895,7 +8094,7 @@ ${percentages[params.dataIndex]}%`
                       value: vue.unref(baseSpan),
                       size: "small",
                       min: 1,
-                      style: { "width": "110px" },
+                      class: "bds-interactive-graph-panel__span-input",
                       disabled: __props2.graphLoading,
                       "onUpdate:value": setBaseSpan,
                       title: "密度"
@@ -7924,7 +8123,7 @@ ${percentages[params.dataIndex]}%`
                       disabled: __props2.graphLoading,
                       "onUpdate:checked": setDedupe
                     }, {
-                      default: vue.withCtx(() => [..._cache[2] || (_cache[2] = [
+                      default: vue.withCtx(() => [..._cache[3] || (_cache[3] = [
                         vue.createTextVNode(" 去重 ", -1)
                       ])]),
                       _: 1
@@ -7933,7 +8132,7 @@ ${percentages[params.dataIndex]}%`
                       checked: vue.unref(showOptions),
                       "onUpdate:checked": setShowOptions
                     }, {
-                      default: vue.withCtx(() => [..._cache[3] || (_cache[3] = [
+                      default: vue.withCtx(() => [..._cache[4] || (_cache[4] = [
                         vue.createTextVNode(" 显示选项 ", -1)
                       ])]),
                       _: 1
@@ -7943,7 +8142,7 @@ ${percentages[params.dataIndex]}%`
                       disabled: __props2.graphLoading,
                       "onUpdate:checked": setRemoveBackEdges
                     }, {
-                      default: vue.withCtx(() => [..._cache[4] || (_cache[4] = [
+                      default: vue.withCtx(() => [..._cache[5] || (_cache[5] = [
                         vue.createTextVNode(" 隐藏回边 ", -1)
                       ])]),
                       _: 1
@@ -7954,7 +8153,25 @@ ${percentages[params.dataIndex]}%`
                 vue.createVNode(_component_n_button, {
                   size: "small",
                   circle: "",
-                  style: { "margin-left": "auto" },
+                  class: "bds-interactive-graph-panel__focus-btn",
+                  loading: vue.unref(capturing),
+                  disabled: __props2.graphLoading,
+                  onClick: _cache[0] || (_cache[0] = ($event) => vue.unref(focusMode) ? disableFocusMode() : enableFocusMode()),
+                  title: vue.unref(focusMode) ? "退出分析模式" : "进入分析模式"
+                }, {
+                  icon: vue.withCtx(() => [
+                    vue.createVNode(_component_n_icon, null, {
+                      default: vue.withCtx(() => [
+                        !vue.unref(focusMode) ? (vue.openBlock(), vue.createBlock(vue.unref(Viewfinder), { key: 0 })) : (vue.openBlock(), vue.createBlock(vue.unref(CircleX), { key: 1 }))
+                      ]),
+                      _: 1
+                    })
+                  ]),
+                  _: 1
+                }, 8, ["loading", "disabled", "title"]),
+                vue.createVNode(_component_n_button, {
+                  size: "small",
+                  circle: "",
                   loading: vue.unref(capturing),
                   disabled: __props2.graphLoading || vue.unref(capturing),
                   onClick: captureGraph,
@@ -7976,11 +8193,11 @@ ${percentages[params.dataIndex]}%`
             vue.createElementVNode("div", {
               ref_key: "graphElRef",
               ref: graphElRef,
-              style: vue.normalizeStyle(vue.unref(graphElStyle))
-            }, null, 4)
+              class: vue.normalizeClass(["bds-interactive-graph-panel__graph", { "is-focus-mode": vue.unref(focusMode) }])
+            }, null, 2)
           ]),
           _: 1
-        });
+        }, 8, ["style"]);
       };
     }
   };
@@ -8878,7 +9095,7 @@ ${percentages[params.dataIndex]}%`
       base,
       vueGlobalProd: buildNpmUrl(base, "vue@3/dist/vue.global.prod.js"),
       naiveUiProd: buildNpmUrl(base, "naive-ui@2/dist/index.prod.js"),
-      biliDataManager: buildGhUrl(base, "ZBpine/bili-data-manager@5ee8f7d9697428a8646b591a98141ffa07c42c9e/dist/bili-data-manager.min.js"),
+      biliDataManager: buildGhUrl(base, "ZBpine/bili-data-manager@26c45a54a832157dcdc623487102e16f5e043f56/dist/bili-data-manager.min.js"),
       staticHtmlDefault: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/index.html"),
       staticHtmlCn: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/cn/index.html"),
       favicon: buildGhUrl(base, "ZBpine/bili-data-statistic@main/docs/favicon.ico"),
@@ -9698,10 +9915,8 @@ ${doc.documentElement.outerHTML}`;
       const getInteractiveGraph = async (dedupe) => {
         if (!arcMgr.value?.invoke) return {};
         const graphMap = await arcMgr.value.invoke("buildInteractGraph", Boolean(dedupe)) || {};
-        const metaResult = await arcMgr.value.invoke("buildInteractEdgeMetaMap") || {};
-        const edgeMetaMap = metaResult?.edgeMetaMap || {};
-        const varsMap = metaResult?.varsMap || {};
-        return { graphMap, edgeMetaMap, varsMap };
+        const varsMap = await arcMgr.value.invoke("getInteractVarsMap") || {};
+        return { graphMap, varsMap };
       };
       const getInteractiveEcharts = async () => {
         await ensurePageEcharts();
@@ -11065,7 +11280,7 @@ ${doc.documentElement.outerHTML}`;
       const APP_MODE = vue.inject("APP_MODE", vue.ref("script"));
       const data = vue.inject("data", vue.shallowRef(null));
       const sourceUrl = vue.inject("sourceUrl", vue.shallowRef(""));
-      mountStyle$c(styleMountTarget2);
+      mountStyle$d(styleMountTarget2);
       const showPanel = vue.ref(false);
       const isScriptApp = vue.computed(() => APP_MODE.value === "script");
       const hasProvidedData = vue.computed(() => Boolean(data?.value && typeof data.value === "object"));
