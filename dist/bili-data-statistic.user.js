@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站弹幕统计
 // @namespace    https://github.com/ZBpine/bili-data-statistic
-// @version      3.1.3
+// @version      3.1.4
 // @description  获取B站弹幕数据，并生成统计页面。
 // @icon         https://cdn.jsdelivr.net/gh/ZBpine/bili-data-statistic@main/docs/favicon.ico
 // @match        https://www.bilibili.com/video/*
@@ -1113,7 +1113,7 @@ ${style2}
   function mountStyle$c(mountTarget) {
     useTheme$1("bds-entry-launcher-style", style$c, mountTarget);
   }
-  const _hoisted_1$t = { class: "bds-entry-launcher__text" };
+  const _hoisted_1$v = { class: "bds-entry-launcher__text" };
   const _sfc_main$e = {
     __name: "EntryLauncher",
     props: {
@@ -1157,7 +1157,7 @@ ${style2}
           onClick: _cache[0] || (_cache[0] = ($event) => emit2("toggle"))
         }, {
           default: vue.withCtx(() => [
-            vue.createElementVNode("span", _hoisted_1$t, vue.toDisplayString(props2.label), 1),
+            vue.createElementVNode("span", _hoisted_1$v, vue.toDisplayString(props2.label), 1),
             _cache[1] || (_cache[1] = vue.createElementVNode("span", {
               class: "bds-entry-launcher__icon",
               "aria-hidden": "true"
@@ -1211,7 +1211,7 @@ ${style2}
   function mountStyle$b(mountTarget) {
     useTheme$1("bds-panel-shell-style", style$b, mountTarget);
   }
-  const _hoisted_1$s = { class: "bds-panel-shell" };
+  const _hoisted_1$u = { class: "bds-panel-shell" };
   const _sfc_main$d = {
     __name: "PanelShell",
     props: {
@@ -1263,7 +1263,7 @@ ${style2}
       });
       return (_ctx, _cache) => {
         const _component_n_alert = naiveUi.NAlert;
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$s, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$u, [
           vue.withDirectives(vue.createElementVNode("div", {
             class: "bds-panel-shell__overlay",
             style: vue.normalizeStyle(vue.unref(overlayStyle)),
@@ -1530,6 +1530,55 @@ ${style2}
       };
     }
   };
+  const _hoisted_1$t = {
+    xmlns: "http://www.w3.org/2000/svg",
+    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+    viewBox: "0 0 24 24"
+  };
+  const ArrowsJoin2 = vue.defineComponent({
+    name: "ArrowsJoin2",
+    render: function render2(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock(
+        "svg",
+        _hoisted_1$t,
+        _cache[0] || (_cache[0] = [
+          vue.createElementVNode(
+            "g",
+            {
+              fill: "none",
+              stroke: "currentColor",
+              "stroke-width": "2",
+              "stroke-linecap": "round",
+              "stroke-linejoin": "round"
+            },
+            [
+              vue.createElementVNode("path", {
+                d: "M3 7h1.948c1.913 0 3.705.933 4.802 2.5a5.861 5.861 0 0 0 4.802 2.5H21"
+              }),
+              vue.createElementVNode("path", {
+                d: "M3 17h1.95a5.854 5.854 0 0 0 4.798-2.5a5.854 5.854 0 0 1 4.798-2.5H20"
+              }),
+              vue.createElementVNode("path", {
+                d: "M18 15l3-3l-3-3"
+              })
+            ],
+            -1
+)
+        ])
+      );
+    }
+  });
+  const _hoisted_1$s = {
+    xmlns: "http://www.w3.org/2000/svg",
+    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+    viewBox: "0 0 24 24"
+  };
+  const ArrowsSplit2 = vue.defineComponent({
+    name: "ArrowsSplit2",
+    render: function render3(_ctx, _cache) {
+      return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$s, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 17h-5.397a5 5 0 0 1-4.096-2.133l-.514-.734A5 5 0 0 0 6.897 12H3"></path><path d="M21 7h-5.395a5 5 0 0 0-4.098 2.135l-.51.73A5 5 0 0 1 6.9 12H3"></path><path d="M18 10l3-3l-3-3"></path><path d="M18 20l3-3l-3-3"></path></g>', 1)]));
+    }
+  });
   const _hoisted_1$r = {
     xmlns: "http://www.w3.org/2000/svg",
     "xmlns:xlink": "http://www.w3.org/1999/xlink",
@@ -1537,7 +1586,7 @@ ${style2}
   };
   const Camera = vue.defineComponent({
     name: "Camera",
-    render: function render2(_ctx, _cache) {
+    render: function render4(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$r,
@@ -1574,7 +1623,7 @@ ${style2}
   };
   const CircleX = vue.defineComponent({
     name: "CircleX",
-    render: function render3(_ctx, _cache) {
+    render: function render5(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$q,
@@ -1611,7 +1660,7 @@ ${style2}
   };
   const ExternalLink = vue.defineComponent({
     name: "ExternalLink",
-    render: function render4(_ctx, _cache) {
+    render: function render6(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$p,
@@ -1649,7 +1698,7 @@ ${style2}
   };
   const FileDownload = vue.defineComponent({
     name: "FileDownload",
-    render: function render5(_ctx, _cache) {
+    render: function render7(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$o, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path><path d="M12 11v6"></path><path d="M9 14l3 3l3-3"></path></g>', 1)]));
     }
   });
@@ -1660,7 +1709,7 @@ ${style2}
   };
   const GridDots = vue.defineComponent({
     name: "GridDots",
-    render: function render6(_ctx, _cache) {
+    render: function render8(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$n, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="19" cy="5" r="1"></circle><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="19" r="1"></circle><circle cx="12" cy="19" r="1"></circle><circle cx="19" cy="19" r="1"></circle></g>', 1)]));
     }
   });
@@ -1671,7 +1720,7 @@ ${style2}
   };
   const InfoCircle = vue.defineComponent({
     name: "InfoCircle",
-    render: function render7(_ctx, _cache) {
+    render: function render9(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$m,
@@ -1711,7 +1760,7 @@ ${style2}
   };
   const RefreshDot = vue.defineComponent({
     name: "RefreshDot",
-    render: function render8(_ctx, _cache) {
+    render: function render10(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$l,
@@ -1751,7 +1800,7 @@ ${style2}
   };
   const Settings = vue.defineComponent({
     name: "Settings",
-    render: function render9(_ctx, _cache) {
+    render: function render11(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$k,
@@ -1788,7 +1837,7 @@ ${style2}
   };
   const SquareCheck = vue.defineComponent({
     name: "SquareCheck",
-    render: function render10(_ctx, _cache) {
+    render: function render12(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$j,
@@ -1827,7 +1876,7 @@ ${style2}
   };
   const Trash = vue.defineComponent({
     name: "Trash",
-    render: function render11(_ctx, _cache) {
+    render: function render13(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$i, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path></g>', 1)]));
     }
   });
@@ -1838,7 +1887,7 @@ ${style2}
   };
   const TrashX = vue.defineComponent({
     name: "TrashX",
-    render: function render12(_ctx, _cache) {
+    render: function render14(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$h, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path><path d="M10 12l4 4m0-4l-4 4"></path></g>', 1)]));
     }
   });
@@ -1849,7 +1898,7 @@ ${style2}
   };
   const Viewfinder = vue.defineComponent({
     name: "Viewfinder",
-    render: function render13(_ctx, _cache) {
+    render: function render15(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$g, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v4"></path><path d="M12 21v-3"></path><path d="M3 12h4"></path><path d="M21 12h-3"></path><path d="M12 12v.01"></path></g>', 1)]));
     }
   });
@@ -1860,7 +1909,7 @@ ${style2}
   };
   const ZoomIn = vue.defineComponent({
     name: "ZoomIn",
-    render: function render14(_ctx, _cache) {
+    render: function render16(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1$f, _cache[0] || (_cache[0] = [vue.createStaticVNode('<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"></circle><path d="M7 10h6"></path><path d="M10 7v6"></path><path d="M21 21l-6-6"></path></g>', 1)]));
     }
   });
@@ -2599,7 +2648,7 @@ ${style2}
   };
   vue.defineComponent({
     name: "ChevronDown",
-    render: function render15(_ctx, _cache) {
+    render: function render17(_ctx, _cache) {
       return vue.openBlock(), vue.createElementBlock(
         "svg",
         _hoisted_1$c,
@@ -7307,7 +7356,7 @@ ${percentages[params.dataIndex]}%`
       `
       ),
       cE$2(
-        "focus-btn",
+        "action-right",
         css$1`
         margin-left: auto;
       `
@@ -7354,6 +7403,7 @@ ${percentages[params.dataIndex]}%`
       rootId,
       direction = "LR",
       mode = "compact",
+      spread = false,
       layoutRatio = 2,
       baseGap: baseGap2 = 100,
       baseSpan = 4,
@@ -7436,6 +7486,8 @@ ${percentages[params.dataIndex]}%`
         let barycenter;
         if (indexes.length) {
           barycenter = indexes.reduce((sum, value) => sum + value, 0) / indexes.length;
+        } else if (group.length < sourceGroup.length) {
+          barycenter = groupCenter;
         } else {
           barycenter = index <= groupCenter ? -1 : sourceGroup.length + 1;
         }
@@ -7494,14 +7546,112 @@ ${percentages[params.dataIndex]}%`
       }
     }
     const data = [];
-    const nodePosMap = new Map();
+    const crossMap = new Map();
+    let minCross = Infinity;
+    let maxCross = -Infinity;
     for (const [level, group] of [...levelGroups.entries()].sort((a, b) => a[0] - b[0])) {
       const offset = (group.length - 1) / 2;
       for (let i = 0; i < group.length; i += 1) {
         const key = group[i];
+        const cross = i - offset;
+        crossMap.set(key, cross);
+        if (cross < minCross) minCross = cross;
+        if (cross > maxCross) maxCross = cross;
+      }
+    }
+    if (!Number.isFinite(minCross) || !Number.isFinite(maxCross)) {
+      minCross = 0;
+      maxCross = 0;
+    }
+    if (spread) {
+      const ordered = [...levelGroups.entries()].map(([level]) => Number(level)).sort((a, b) => a - b);
+      const activeLevels = ordered.filter((level) => level > 0);
+      const getSpreadOrder = (group) => {
+        return [...group].map((key, index) => ({
+          key,
+          dist: Math.abs(Number(crossMap.get(key) || 0)),
+          index
+        })).sort((a, b) => {
+          if (a.dist !== b.dist) return b.dist - a.dist;
+          if (a.index !== b.index) return a.index - b.index;
+          return 0;
+        }).map((item) => item.key);
+      };
+      const calcDelta = (key, level, currentCross = Number(crossMap.get(key) || 0)) => {
+        const neighbors = [];
+        const prev = reverseAdjacency.get(key) || [];
+        const next = adjacency.get(key) || [];
+        for (const ref2 of prev) {
+          if (Number(levelMap.get(ref2) || 0) !== level - 1) continue;
+          if (!crossMap.has(ref2)) continue;
+          neighbors.push(ref2);
+        }
+        for (const ref2 of next) {
+          if (Number(levelMap.get(ref2) || 0) !== level + 1) continue;
+          if (!crossMap.has(ref2)) continue;
+          neighbors.push(ref2);
+        }
+        if (!neighbors.length) return 0;
+        return neighbors.map((ref2) => Number(crossMap.get(ref2) || 0) - currentCross).reduce((sum, item) => sum + item, 0);
+      };
+      const tryMoveKeyUntilStop = (level, group, key) => {
+        let moved = false;
+        while (true) {
+          const currentCross = Number(crossMap.get(key) || 0);
+          const deltaSum = calcDelta(key, level, currentCross);
+          const directionSign = deltaSum > 0 ? 1 : deltaSum < 0 ? -1 : 0;
+          if (!directionSign) break;
+          const nextCross = currentCross + directionSign;
+          if (nextCross < minCross || nextCross > maxCross) break;
+          const occupied = group.some((groupKey) => {
+            if (groupKey === key) return false;
+            return Number(crossMap.get(groupKey) || 0) === nextCross;
+          });
+          if (occupied) break;
+          const beforeDelta = calcDelta(key, level, currentCross);
+          const afterDelta = calcDelta(key, level, nextCross);
+          if (Math.abs(afterDelta) >= Math.abs(beforeDelta)) break;
+          crossMap.set(key, nextCross);
+          moved = true;
+        }
+        return moved;
+      };
+      const sweepLevel = (level, keyOrder) => {
+        const group = levelGroups.get(level) || [];
+        let moved = false;
+        for (const key of keyOrder) {
+          if (tryMoveKeyUntilStop(level, group, key)) moved = true;
+        }
+        return moved;
+      };
+      const sweepLevels = (levelOrder) => {
+        let moved = false;
+        for (const level of levelOrder) {
+          const group = levelGroups.get(level) || [];
+          const spreadOrder = getSpreadOrder(group);
+          if (sweepLevel(level, spreadOrder)) moved = true;
+          if (sweepLevel(level, [...spreadOrder].reverse())) moved = true;
+        }
+        return moved;
+      };
+      const maxPass = Math.max(1, ...activeLevels.map((level) => {
+        const group = levelGroups.get(level) || [];
+        return group.length;
+      }));
+      for (let pass = 0; pass < maxPass; pass += 1) {
+        let moved = false;
+        if (sweepLevels(activeLevels)) moved = true;
+        if (!moved) break;
+      }
+    }
+    const nodePosMap = new Map();
+    for (const [level, group] of [...levelGroups.entries()].sort((a, b) => a[0] - b[0])) {
+      for (let i = 0; i < group.length; i += 1) {
+        const key = group[i];
         const node = map[key] || {};
-        const x = direction === "TB" ? -(i - offset) * xGap : level * xGap;
-        const y = direction === "TB" ? level * yGap : (i - offset) * yGap;
+        const cross = Number(crossMap.get(key) || 0);
+        const x = direction === "TB" ? -cross * xGap : level * xGap;
+        const y = direction === "TB" ? level * yGap : cross * yGap;
         const name = typeof getNodeLabel === "function" ? String(getNodeLabel(node, key) || "") : String(node?.title || `#${key}`);
         const value = typeof getNodeValue === "function" ? getNodeValue(node, key) : node;
         data.push({
@@ -7571,6 +7721,8 @@ ${percentages[params.dataIndex]}%`
   const DIM_OPACITY = 0.14;
   const FOCUS_NODE_OPACITY = 1;
   const DIM_NODE_OPACITY = 0.2;
+  const nodeShadowBlur = 16;
+  const edgeShadowBlur = 4;
   const _sfc_main$8 = {
     __name: "InteractiveGraphPanel",
     props: {
@@ -7607,6 +7759,7 @@ ${percentages[params.dataIndex]}%`
         "--bds-interactive-graph-aspect": `${normalizedAspectRatio.value} / 1`
       }));
       const direction = vue.ref("LR");
+      const layoutMode = vue.ref("spread");
       const dedupe = vue.ref(false);
       const showOptions = vue.ref(false);
       const removeBackEdges = vue.ref(false);
@@ -7619,9 +7772,6 @@ ${percentages[params.dataIndex]}%`
       const currentGraphRef = vue.shallowRef({ data: [], links: [] });
       let graphInstance = null;
       const VAR_TOKEN_REGEXP = /\$[A-Za-z0-9_]+/g;
-      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-      const getSelectedNodeShadowBlur = () => clamp(2.4 * Number(baseSpan.value || 1), 4, 24);
-      const getSelectedEdgeShadowBlur = () => clamp(1.8 * Number(baseSpan.value || 1), 3, 18);
       const prettifyMathAssign = (text) => {
         return String(text || "").replace(/([^=;\s]+)\s*=\s*\1\s*\+\s*([^;]+)/g, "$1+$2").replace(/([^=;\s]+)\s*=\s*\1\s*-\s*([^;]+)/g, "$1-$2");
       };
@@ -7672,28 +7822,35 @@ ${percentages[params.dataIndex]}%`
           ]
         });
       };
-      const applyEdgeHighlightByVars = async (varSet, selected = {}) => {
-        const instance = await ensureGraphInstance();
-        if (!instance) return;
-        const vars = [...varSet || []].filter(Boolean);
+      const matchActionByCondition = (condition) => {
+        const links = Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : [];
+        const vars = [...extractVars(condition)].filter(Boolean);
         const patterns = vars.map((token) => new RegExp(`(^|[^A-Za-z0-9_])${escapeRegExp(token)}([^A-Za-z0-9_]|$)`));
-        const selectedNodeId = selected?.nodeId == null ? "" : String(selected.nodeId);
-        const selectedEdgeKey = String(selected?.edgeKey || "");
-        const highlightedSourceIds = new Set();
-        const selectedNodeShadowBlur = getSelectedNodeShadowBlur();
-        const selectedEdgeShadowBlur = getSelectedEdgeShadowBlur();
-        const links = (Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : []).map((link) => {
+        const matchedEdgeKeys = new Set();
+        const matchedSourceNodeIds = new Set();
+        for (const link of links) {
           const action = String(link?.value?.action || "");
           const matched = patterns.some((pattern) => pattern.test(action));
-          const isSelected = selectedEdgeKey && getLinkKey(link) === selectedEdgeKey;
-          if (matched) highlightedSourceIds.add(String(link?.source || ""));
+          if (!matched) continue;
+          matchedEdgeKeys.add(getLinkKey(link));
+          matchedSourceNodeIds.add(String(link?.source || ""));
+        }
+        return { matchedEdgeKeys, matchedSourceNodeIds };
+      };
+      const renderFocusState = async ({ highlightNodeIds, shadowNodeIds, highlightEdgeKeys, shadowEdgeKeys }) => {
+        const instance = await ensureGraphInstance();
+        if (!instance) return;
+        const links = (Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : []).map((link) => {
+          const key = getLinkKey(link);
+          const isHighlight = highlightEdgeKeys.has(key) || shadowEdgeKeys.has(key);
+          const isShadow = shadowEdgeKeys.has(key);
           return {
             ...link,
             lineStyle: {
               ...link?.lineStyle || {},
-              opacity: matched || isSelected ? FOCUS_OPACITY : DIM_OPACITY,
-              shadowBlur: isSelected ? selectedEdgeShadowBlur : 0,
-              shadowColor: isSelected ? themeVars.value.primaryColor : "transparent",
+              opacity: isHighlight ? FOCUS_OPACITY : DIM_OPACITY,
+              shadowBlur: isShadow ? edgeShadowBlur : 0,
+              shadowColor: isShadow ? themeVars.value.primaryColor : "transparent",
               shadowOffsetX: 0,
               shadowOffsetY: 0
             }
@@ -7701,15 +7858,15 @@ ${percentages[params.dataIndex]}%`
         });
         const data = (Array.isArray(currentGraphRef.value?.data) ? currentGraphRef.value.data : []).map((node) => {
           const nodeId = String(node?.id || "");
-          const matched = highlightedSourceIds.has(nodeId);
-          const isSelected = selectedNodeId && nodeId === selectedNodeId;
+          const isHighlight = highlightNodeIds.has(nodeId) || shadowNodeIds.has(nodeId);
+          const isShadow = shadowNodeIds.has(nodeId);
           return {
             ...node,
             itemStyle: {
               ...node?.itemStyle || {},
-              opacity: matched || isSelected ? FOCUS_NODE_OPACITY : DIM_NODE_OPACITY,
-              shadowBlur: isSelected ? selectedNodeShadowBlur : 0,
-              shadowColor: isSelected ? themeVars.value.primaryColor : "transparent",
+              opacity: isHighlight ? FOCUS_NODE_OPACITY : DIM_NODE_OPACITY,
+              shadowBlur: isShadow ? nodeShadowBlur : 0,
+              shadowColor: isShadow ? themeVars.value.primaryColor : "transparent",
               shadowOffsetX: 0,
               shadowOffsetY: 0
             }
@@ -7724,28 +7881,59 @@ ${percentages[params.dataIndex]}%`
           ]
         });
       };
-      const analyzeNodeInFocusMode = async (nodeValue) => {
-        const inEdges = Array.isArray(nodeValue?.in) ? nodeValue.in : [];
-        const vars = new Set();
-        for (const edge of inEdges) {
-          const edgeVars = extractVars(edge?.condition);
-          for (const token of edgeVars) vars.add(token);
-        }
-        await applyEdgeHighlightByVars(vars, { nodeId: nodeValue?.id });
+      const handleEdgeSelection = async (edgeData = {}) => {
+        const edgeValue = edgeData?.value || {};
+        const { matchedEdgeKeys, matchedSourceNodeIds } = matchActionByCondition(edgeValue?.condition);
+        const shadowEdgeKeys = new Set([getLinkKey(edgeData)]);
+        const shadowNodeIds = new Set();
+        const highlightNodeIds = new Set(matchedSourceNodeIds);
+        const selectedTargetId = String(edgeData?.target || "");
+        if (selectedTargetId) highlightNodeIds.add(selectedTargetId);
+        await renderFocusState({
+          highlightNodeIds,
+          shadowNodeIds,
+          highlightEdgeKeys: matchedEdgeKeys,
+          shadowEdgeKeys
+        });
       };
-      const analyzeEdgeInFocusMode = async (edgeValue, linkData = {}) => {
-        const vars = extractVars(edgeValue?.condition);
-        await applyEdgeHighlightByVars(vars, { edgeKey: getLinkKey(linkData) });
+      const handleNodeSelection = async (nodeData = {}) => {
+        const nodeValue = nodeData?.value || {};
+        const inEdges = Array.isArray(nodeValue?.in) ? nodeValue.in : [];
+        const highlightEdgeKeys = new Set();
+        const shadowEdgeKeys = new Set();
+        const highlightNodeIds = new Set();
+        const shadowNodeIds = new Set();
+        const selectedNodeId = String(nodeValue?.id || "");
+        if (selectedNodeId) shadowNodeIds.add(selectedNodeId);
+        for (const inEdge of inEdges) {
+          const { matchedEdgeKeys, matchedSourceNodeIds } = matchActionByCondition(inEdge?.condition);
+          if (!matchedEdgeKeys.size) continue;
+          const incomingEdgeLike = {
+            source: inEdge?.id,
+            target: selectedNodeId,
+            value: inEdge
+          };
+          const incomingEdgeKey = getLinkKey(incomingEdgeLike);
+          shadowEdgeKeys.add(incomingEdgeKey);
+          for (const key of matchedEdgeKeys) highlightEdgeKeys.add(key);
+          for (const id of matchedSourceNodeIds) highlightNodeIds.add(id);
+        }
+        await renderFocusState({
+          highlightNodeIds,
+          shadowNodeIds,
+          highlightEdgeKeys,
+          shadowEdgeKeys
+        });
       };
       const handleGraphClick = (params) => {
         if (focusMode.value) {
           if (params?.dataType === "node") {
-            analyzeNodeInFocusMode(params?.data?.value).catch(() => {
+            handleNodeSelection(params?.data || {}).catch(() => {
             });
             return;
           }
           if (params?.dataType === "edge") {
-            analyzeEdgeInFocusMode(params?.data?.value, params?.data || {}).catch(() => {
+            handleEdgeSelection(params?.data || {}).catch(() => {
             });
             return;
           }
@@ -7770,6 +7958,7 @@ ${percentages[params.dataIndex]}%`
           rootId: 1,
           direction: direction.value,
           mode: "compact",
+          spread: layoutMode.value === "spread",
           layoutRatio: normalizedAspectRatio.value,
           baseGap,
           baseSpan: baseSpan.value,
@@ -7890,6 +8079,12 @@ ${percentages[params.dataIndex]}%`
         dedupe.value = value;
         await refresh();
       };
+      const setLayoutMode = async (next) => {
+        const value = next === "spread" ? "spread" : "converge";
+        if (layoutMode.value === value) return;
+        layoutMode.value = value;
+        await refresh();
+      };
       const setShowOptions = async (checked) => {
         const value = Boolean(checked);
         if (showOptions.value === value) return;
@@ -7935,6 +8130,7 @@ ${percentages[params.dataIndex]}%`
           rootId: 1,
           direction: direction.value,
           mode: "layout",
+          spread: layoutMode.value === "spread",
           layoutRatio: normalizedAspectRatio.value,
           baseGap,
           baseSpan: baseSpan.value,
@@ -8047,6 +8243,7 @@ ${percentages[params.dataIndex]}%`
               default: vue.withCtx(() => [
                 vue.createVNode(_component_n_flex, {
                   size: 8,
+                  inline: true,
                   align: "center",
                   wrap: ""
                 }, {
@@ -8068,6 +8265,44 @@ ${percentages[params.dataIndex]}%`
                       ]),
                       _: 1
                     }, 8, ["disabled"]),
+                    vue.createVNode(_component_n_radio_group, {
+                      value: vue.unref(layoutMode),
+                      size: "small",
+                      disabled: __props2.graphLoading,
+                      "onUpdate:value": setLayoutMode
+                    }, {
+                      default: vue.withCtx(() => [
+                        vue.createVNode(_component_n_radio_button, {
+                          value: "spread",
+                          title: "分散"
+                        }, {
+                          default: vue.withCtx(() => [
+                            vue.createVNode(_component_n_icon, null, {
+                              default: vue.withCtx(() => [
+                                vue.createVNode(vue.unref(ArrowsSplit2))
+                              ]),
+                              _: 1
+                            })
+                          ]),
+                          _: 1
+                        }),
+                        vue.createVNode(_component_n_radio_button, {
+                          value: "converge",
+                          title: "收束"
+                        }, {
+                          default: vue.withCtx(() => [
+                            vue.createVNode(_component_n_icon, null, {
+                              default: vue.withCtx(() => [
+                                vue.createVNode(vue.unref(ArrowsJoin2))
+                              ]),
+                              _: 1
+                            })
+                          ]),
+                          _: 1
+                        })
+                      ]),
+                      _: 1
+                    }, 8, ["value", "disabled"]),
                     vue.createVNode(_component_n_radio_group, {
                       value: vue.unref(direction),
                       size: "small",
@@ -8114,6 +8349,7 @@ ${percentages[params.dataIndex]}%`
                 }),
                 vue.createVNode(_component_n_flex, {
                   size: 8,
+                  inline: true,
                   align: "center",
                   wrap: ""
                 }, {
@@ -8150,43 +8386,53 @@ ${percentages[params.dataIndex]}%`
                   ]),
                   _: 1
                 }),
-                vue.createVNode(_component_n_button, {
-                  size: "small",
-                  circle: "",
-                  class: "bds-interactive-graph-panel__focus-btn",
-                  loading: vue.unref(capturing),
-                  disabled: __props2.graphLoading,
-                  onClick: _cache[0] || (_cache[0] = ($event) => vue.unref(focusMode) ? disableFocusMode() : enableFocusMode()),
-                  title: vue.unref(focusMode) ? "退出分析模式" : "进入分析模式"
+                vue.createVNode(_component_n_flex, {
+                  size: 8,
+                  inline: true,
+                  align: "center",
+                  wrap: "",
+                  class: "bds-interactive-graph-panel__action-right"
                 }, {
-                  icon: vue.withCtx(() => [
-                    vue.createVNode(_component_n_icon, null, {
-                      default: vue.withCtx(() => [
-                        !vue.unref(focusMode) ? (vue.openBlock(), vue.createBlock(vue.unref(Viewfinder), { key: 0 })) : (vue.openBlock(), vue.createBlock(vue.unref(CircleX), { key: 1 }))
+                  default: vue.withCtx(() => [
+                    vue.createVNode(_component_n_button, {
+                      size: "small",
+                      circle: "",
+                      loading: vue.unref(capturing),
+                      disabled: __props2.graphLoading,
+                      onClick: _cache[0] || (_cache[0] = ($event) => vue.unref(focusMode) ? disableFocusMode() : enableFocusMode()),
+                      title: vue.unref(focusMode) ? "退出分析模式" : "进入分析模式"
+                    }, {
+                      icon: vue.withCtx(() => [
+                        vue.createVNode(_component_n_icon, null, {
+                          default: vue.withCtx(() => [
+                            !vue.unref(focusMode) ? (vue.openBlock(), vue.createBlock(vue.unref(Viewfinder), { key: 0 })) : (vue.openBlock(), vue.createBlock(vue.unref(CircleX), { key: 1 }))
+                          ]),
+                          _: 1
+                        })
                       ]),
                       _: 1
-                    })
-                  ]),
-                  _: 1
-                }, 8, ["loading", "disabled", "title"]),
-                vue.createVNode(_component_n_button, {
-                  size: "small",
-                  circle: "",
-                  loading: vue.unref(capturing),
-                  disabled: __props2.graphLoading || vue.unref(capturing),
-                  onClick: captureGraph,
-                  title: "密度越小截图越大"
-                }, {
-                  icon: vue.withCtx(() => [
-                    vue.createVNode(_component_n_icon, null, {
-                      default: vue.withCtx(() => [
-                        vue.createVNode(vue.unref(Camera))
+                    }, 8, ["loading", "disabled", "title"]),
+                    vue.createVNode(_component_n_button, {
+                      size: "small",
+                      circle: "",
+                      loading: vue.unref(capturing),
+                      disabled: __props2.graphLoading || vue.unref(capturing),
+                      onClick: captureGraph,
+                      title: "密度越小截图越大"
+                    }, {
+                      icon: vue.withCtx(() => [
+                        vue.createVNode(_component_n_icon, null, {
+                          default: vue.withCtx(() => [
+                            vue.createVNode(vue.unref(Camera))
+                          ]),
+                          _: 1
+                        })
                       ]),
                       _: 1
-                    })
+                    }, 8, ["loading", "disabled"])
                   ]),
                   _: 1
-                }, 8, ["loading", "disabled"])
+                })
               ]),
               _: 1
             }),

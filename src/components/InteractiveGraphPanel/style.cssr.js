@@ -14,7 +14,7 @@ const style = cB(
       `,
     ),
     cE(
-      'focus-btn',
+      'action-right',
       css`
         margin-left: auto;
       `,

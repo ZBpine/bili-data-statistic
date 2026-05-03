@@ -1,7 +1,7 @@
 <script setup>
 import mountStyle from './style.cssr.js';
 import { nextTick } from 'vue';
-import { Camera, RefreshDot, GridDots, Viewfinder, CircleX } from '@vicons/tabler';
+import { Camera, RefreshDot, GridDots, Viewfinder, CircleX, ArrowsSplit2, ArrowsJoin2 } from '@vicons/tabler';
 import { useThemeVars } from 'naive-ui';
 import { layoutFlowGraph } from '../../utils/graphLayout';
 
@@ -42,6 +42,7 @@ const cssVars = computed(() => ({
 }));
 
 const direction = ref('LR');
+const layoutMode = ref('spread');
 const dedupe = ref(false);
 const showOptions = ref(false);
 const removeBackEdges = ref(false);
@@ -61,8 +62,8 @@ const DIM_NODE_OPACITY = 0.2;
 const VAR_TOKEN_REGEXP = /\$[A-Za-z0-9_]+/g;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-const getSelectedNodeShadowBlur = () => clamp(2.4 * Number(baseSpan.value || 1), 4, 24);
-const getSelectedEdgeShadowBlur = () => clamp(1.8 * Number(baseSpan.value || 1), 3, 18);
+const nodeShadowBlur = 16;
+const edgeShadowBlur = 4;
 
 const prettifyMathAssign = (text) => {
   return String(text || '')
@@ -135,28 +136,36 @@ const clearEdgeHighlight = async () => {
   });
 };
 
-const applyEdgeHighlightByVars = async (varSet, selected = {}) => {
-  const instance = await ensureGraphInstance();
-  if (!instance) return;
-  const vars = [...(varSet || [])].filter(Boolean);
+const matchActionByCondition = (condition) => {
+  const links = Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : [];
+  const vars = [...extractVars(condition)].filter(Boolean);
   const patterns = vars.map((token) => new RegExp(`(^|[^A-Za-z0-9_])${escapeRegExp(token)}([^A-Za-z0-9_]|$)`));
-  const selectedNodeId = selected?.nodeId == null ? '' : String(selected.nodeId);
-  const selectedEdgeKey = String(selected?.edgeKey || '');
-  const highlightedSourceIds = new Set();
-  const selectedNodeShadowBlur = getSelectedNodeShadowBlur();
-  const selectedEdgeShadowBlur = getSelectedEdgeShadowBlur();
-  const links = (Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : []).map((link) => {
+  const matchedEdgeKeys = new Set();
+  const matchedSourceNodeIds = new Set();
+  for (const link of links) {
     const action = String(link?.value?.action || '');
     const matched = patterns.some((pattern) => pattern.test(action));
-    const isSelected = selectedEdgeKey && getLinkKey(link) === selectedEdgeKey;
-    if (matched) highlightedSourceIds.add(String(link?.source || ''));
+    if (!matched) continue;
+    matchedEdgeKeys.add(getLinkKey(link));
+    matchedSourceNodeIds.add(String(link?.source || ''));
+  }
+  return { matchedEdgeKeys, matchedSourceNodeIds };
+};
+
+const renderFocusState = async ({ highlightNodeIds, shadowNodeIds, highlightEdgeKeys, shadowEdgeKeys }) => {
+  const instance = await ensureGraphInstance();
+  if (!instance) return;
+  const links = (Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : []).map((link) => {
+    const key = getLinkKey(link);
+    const isHighlight = highlightEdgeKeys.has(key) || shadowEdgeKeys.has(key);
+    const isShadow = shadowEdgeKeys.has(key);
     return {
       ...link,
       lineStyle: {
         ...(link?.lineStyle || {}),
-        opacity: (matched || isSelected) ? FOCUS_OPACITY : DIM_OPACITY,
-        shadowBlur: isSelected ? selectedEdgeShadowBlur : 0,
-        shadowColor: isSelected ? themeVars.value.primaryColor : 'transparent',
+        opacity: isHighlight ? FOCUS_OPACITY : DIM_OPACITY,
+        shadowBlur: isShadow ? edgeShadowBlur : 0,
+        shadowColor: isShadow ? themeVars.value.primaryColor : 'transparent',
         shadowOffsetX: 0,
         shadowOffsetY: 0,
       },
@@ -164,15 +173,15 @@ const applyEdgeHighlightByVars = async (varSet, selected = {}) => {
   });
   const data = (Array.isArray(currentGraphRef.value?.data) ? currentGraphRef.value.data : []).map((node) => {
     const nodeId = String(node?.id || '');
-    const matched = highlightedSourceIds.has(nodeId);
-    const isSelected = selectedNodeId && nodeId === selectedNodeId;
+    const isHighlight = highlightNodeIds.has(nodeId) || shadowNodeIds.has(nodeId);
+    const isShadow = shadowNodeIds.has(nodeId);
     return {
       ...node,
       itemStyle: {
         ...(node?.itemStyle || {}),
-        opacity: (matched || isSelected) ? FOCUS_NODE_OPACITY : DIM_NODE_OPACITY,
-        shadowBlur: isSelected ? selectedNodeShadowBlur : 0,
-        shadowColor: isSelected ? themeVars.value.primaryColor : 'transparent',
+        opacity: isHighlight ? FOCUS_NODE_OPACITY : DIM_NODE_OPACITY,
+        shadowBlur: isShadow ? nodeShadowBlur : 0,
+        shadowColor: isShadow ? themeVars.value.primaryColor : 'transparent',
         shadowOffsetX: 0,
         shadowOffsetY: 0,
       },
@@ -188,29 +197,62 @@ const applyEdgeHighlightByVars = async (varSet, selected = {}) => {
   });
 };
 
-const analyzeNodeInFocusMode = async (nodeValue) => {
-  const inEdges = Array.isArray(nodeValue?.in) ? nodeValue.in : [];
-  const vars = new Set();
-  for (const edge of inEdges) {
-    const edgeVars = extractVars(edge?.condition);
-    for (const token of edgeVars) vars.add(token);
-  }
-  await applyEdgeHighlightByVars(vars, { nodeId: nodeValue?.id });
+const handleEdgeSelection = async (edgeData = {}) => {
+  const edgeValue = edgeData?.value || {};
+  const { matchedEdgeKeys, matchedSourceNodeIds } = matchActionByCondition(edgeValue?.condition);
+  const shadowEdgeKeys = new Set([getLinkKey(edgeData)]);
+  const shadowNodeIds = new Set();
+  const highlightNodeIds = new Set(matchedSourceNodeIds);
+  const selectedTargetId = String(edgeData?.target || '');
+  if (selectedTargetId) highlightNodeIds.add(selectedTargetId);
+  await renderFocusState({
+    highlightNodeIds,
+    shadowNodeIds,
+    highlightEdgeKeys: matchedEdgeKeys,
+    shadowEdgeKeys,
+  });
 };
 
-const analyzeEdgeInFocusMode = async (edgeValue, linkData = {}) => {
-  const vars = extractVars(edgeValue?.condition);
-  await applyEdgeHighlightByVars(vars, { edgeKey: getLinkKey(linkData) });
+const handleNodeSelection = async (nodeData = {}) => {
+  const nodeValue = nodeData?.value || {};
+  const inEdges = Array.isArray(nodeValue?.in) ? nodeValue.in : [];
+  const highlightEdgeKeys = new Set();
+  const shadowEdgeKeys = new Set();
+  const highlightNodeIds = new Set();
+  const shadowNodeIds = new Set();
+  const selectedNodeId = String(nodeValue?.id || '');
+  if (selectedNodeId) shadowNodeIds.add(selectedNodeId);
+
+  for (const inEdge of inEdges) {
+    const { matchedEdgeKeys, matchedSourceNodeIds } = matchActionByCondition(inEdge?.condition);
+    if (!matchedEdgeKeys.size) continue;
+    const incomingEdgeLike = {
+      source: inEdge?.id,
+      target: selectedNodeId,
+      value: inEdge,
+    };
+    const incomingEdgeKey = getLinkKey(incomingEdgeLike);
+    shadowEdgeKeys.add(incomingEdgeKey);
+    for (const key of matchedEdgeKeys) highlightEdgeKeys.add(key);
+    for (const id of matchedSourceNodeIds) highlightNodeIds.add(id);
+  }
+
+  await renderFocusState({
+    highlightNodeIds,
+    shadowNodeIds,
+    highlightEdgeKeys,
+    shadowEdgeKeys,
+  });
 };
 
 const handleGraphClick = (params) => {
   if (focusMode.value) {
     if (params?.dataType === 'node') {
-      analyzeNodeInFocusMode(params?.data?.value).catch(() => { });
+      handleNodeSelection(params?.data || {}).catch(() => { });
       return;
     }
     if (params?.dataType === 'edge') {
-      analyzeEdgeInFocusMode(params?.data?.value, params?.data || {}).catch(() => { });
+      handleEdgeSelection(params?.data || {}).catch(() => { });
       return;
     }
     return;
@@ -236,6 +278,7 @@ const renderByGraphMap = async (graphMap) => {
     rootId: 1,
     direction: direction.value,
     mode: 'compact',
+    spread: layoutMode.value === 'spread',
     layoutRatio: normalizedAspectRatio.value,
     baseGap,
     baseSpan: baseSpan.value,
@@ -365,6 +408,13 @@ const setDedupe = async (checked) => {
   await refresh();
 };
 
+const setLayoutMode = async (next) => {
+  const value = next === 'spread' ? 'spread' : 'converge';
+  if (layoutMode.value === value) return;
+  layoutMode.value = value;
+  await refresh();
+};
+
 const setShowOptions = async (checked) => {
   const value = Boolean(checked);
   if (showOptions.value === value) return;
@@ -413,6 +463,7 @@ const captureGraph = async () => {
     rootId: 1,
     direction: direction.value,
     mode: 'layout',
+    spread: layoutMode.value === 'spread',
     layoutRatio: normalizedAspectRatio.value,
     baseGap,
     baseSpan: baseSpan.value,
@@ -512,7 +563,7 @@ onMounted(() => {
 <template>
   <n-flex vertical :size="8" class="bds-interactive-graph-panel" :style="cssVars">
     <n-flex :size="8" align="center" wrap>
-      <n-flex :size="8" align="center" wrap>
+      <n-flex :size="8" :inline="true" align="center" wrap>
         <n-button size="small" circle title="回到开头" :disabled="graphLoading" @click="resetView">
           <template #icon>
             <n-icon>
@@ -520,13 +571,24 @@ onMounted(() => {
             </n-icon>
           </template>
         </n-button>
+        <n-radio-group :value="layoutMode" size="small" :disabled="graphLoading" @update:value="setLayoutMode">
+          <n-radio-button value="spread" title="分散">
+            <n-icon>
+              <arrows-split2 />
+            </n-icon>
+          </n-radio-button>
+          <n-radio-button value="converge" title="收束">
+            <n-icon>
+              <arrows-join2 />
+            </n-icon>
+          </n-radio-button>
+        </n-radio-group>
         <n-radio-group :value="direction" size="small" :disabled="graphLoading" @update:value="setDirection">
           <n-radio-button value="LR">水平</n-radio-button>
           <n-radio-button value="TB">垂直</n-radio-button>
         </n-radio-group>
         <n-input-number :value="baseSpan" size="small" :min="1" class="bds-interactive-graph-panel__span-input"
-          :disabled="graphLoading"
-          @update:value="setBaseSpan" title="密度">
+          :disabled="graphLoading" @update:value="setBaseSpan" title="密度">
           <template #prefix>
             <n-icon>
               <grid-dots />
@@ -534,7 +596,7 @@ onMounted(() => {
           </template>
         </n-input-number>
       </n-flex>
-      <n-flex :size="8" align="center" wrap>
+      <n-flex :size="8" :inline="true" align="center" wrap>
         <n-checkbox :checked="dedupe" :disabled="graphLoading" @update:checked="setDedupe">
           去重
         </n-checkbox>
@@ -545,26 +607,26 @@ onMounted(() => {
           隐藏回边
         </n-checkbox>
       </n-flex>
-      <n-button size="small" circle class="bds-interactive-graph-panel__focus-btn" :loading="capturing"
-        :disabled="graphLoading" @click="focusMode ? disableFocusMode() : enableFocusMode()"
-        :title="focusMode ? '退出分析模式' : '进入分析模式'">
-        <template #icon>
-          <n-icon>
-            <viewfinder v-if="!focusMode" />
-            <circle-x v-else />
-          </n-icon>
-        </template>
-      </n-button>
-      <n-button size="small" circle :loading="capturing" :disabled="graphLoading || capturing" @click="captureGraph"
-        title="密度越小截图越大">
-        <template #icon>
-          <n-icon>
-            <camera />
-          </n-icon>
-        </template>
-      </n-button>
+      <n-flex :size="8" :inline="true" align="center" wrap class="bds-interactive-graph-panel__action-right">
+        <n-button size="small" circle :loading="capturing" :disabled="graphLoading"
+          @click="focusMode ? disableFocusMode() : enableFocusMode()" :title="focusMode ? '退出分析模式' : '进入分析模式'">
+          <template #icon>
+            <n-icon>
+              <viewfinder v-if="!focusMode" />
+              <circle-x v-else />
+            </n-icon>
+          </template>
+        </n-button>
+        <n-button size="small" circle :loading="capturing" :disabled="graphLoading || capturing" @click="captureGraph"
+          title="密度越小截图越大">
+          <template #icon>
+            <n-icon>
+              <camera />
+            </n-icon>
+          </template>
+        </n-button>
+      </n-flex>
     </n-flex>
-    <div ref="graphElRef" class="bds-interactive-graph-panel__graph"
-      :class="{ 'is-focus-mode': focusMode }"></div>
+    <div ref="graphElRef" class="bds-interactive-graph-panel__graph" :class="{ 'is-focus-mode': focusMode }"></div>
   </n-flex>
 </template>
