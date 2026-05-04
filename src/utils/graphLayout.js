@@ -112,56 +112,26 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
     levelGroups.set(level, group);
   }
 
-  const orderedLevels = [...levelGroups.keys()].sort((a, b) => a - b);
-  const reorderByBarycenter = (sourceLevel, targetLevel, getRefs) => {
-    const sourceGroup = levelGroups.get(sourceLevel) || [];
-    const sourceIndexMap = new Map(sourceGroup.map((key, index) => [key, index]));
-    const group = levelGroups.get(targetLevel) || [];
-    const groupCenter = (group.length - 1) / 2;
-    const nextGroup = [...group]
-      .map((key, index) => {
-        const indexes = getRefs(key)
-          .filter((refKey) => Number(levelMap.get(refKey) || 0) === sourceLevel)
-          .map((refKey) => sourceIndexMap.get(refKey))
-          .filter((value) => Number.isFinite(value));
-        let barycenter;
-        if (indexes.length) {
-          barycenter = indexes.reduce((sum, value) => sum + value, 0) / indexes.length;
-        } else if (group.length < sourceGroup.length) {
-          barycenter = groupCenter;
-        } else {
-          barycenter = index <= groupCenter ? -1 : sourceGroup.length + 1;
-        }
-        return { key, index, barycenter };
-      })
-      .sort((a, b) => {
-        if (a.barycenter !== b.barycenter) return a.barycenter - b.barycenter;
-        return a.index - b.index;
-      })
-      .map((item) => item.key);
-    levelGroups.set(targetLevel, nextGroup);
-  };
-
-  for (let i = 1; i < orderedLevels.length; i += 1) {
-    const level = orderedLevels[i];
-    const prevLevel = orderedLevels[i - 1];
-    reorderByBarycenter(prevLevel, level, (key) => reverseAdjacency.get(key) || []);
-  }
-  for (let i = orderedLevels.length - 2; i >= 0; i -= 1) {
-    const level = orderedLevels[i];
-    const nextLevel = orderedLevels[i + 1];
-    reorderByBarycenter(nextLevel, level, (key) => adjacency.get(key) || []);
-  }
-  for (let i = 1; i < orderedLevels.length; i += 1) {
-    const level = orderedLevels[i];
-    const prevLevel = orderedLevels[i - 1];
-    reorderByBarycenter(prevLevel, level, (key) => reverseAdjacency.get(key) || []);
-  }
-
+  const getSortedLevelEntries = () => [...levelGroups.entries()].sort((a, b) => a[0] - b[0]);
   const levelCount = levelGroups.size;
   let maxLevelWidth = 0;
-  for (const group of levelGroups.values()) {
+  const crossMap = new Map();
+  let minCross = Infinity;
+  let maxCross = -Infinity;
+  for (const [level, group] of getSortedLevelEntries()) {
     if (group.length > maxLevelWidth) maxLevelWidth = group.length;
+    const offset = (group.length - 1) / 2;
+    for (let i = 0; i < group.length; i += 1) {
+      const key = group[i];
+      const cross = i - offset;
+      crossMap.set(key, cross);
+      if (cross < minCross) minCross = cross;
+      if (cross > maxCross) maxCross = cross;
+    }
+  }
+  if (!Number.isFinite(minCross) || !Number.isFinite(maxCross)) {
+    minCross = 0;
+    maxCross = 0;
   }
   const spaceScale = Math.max(1, levelCount, maxLevelWidth) / Number(baseSpan);
   let xGap = base * ratio;
@@ -193,124 +163,127 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
     }
   }
 
-  const data = [];
-  const crossMap = new Map();
-  let minCross = Infinity;
-  let maxCross = -Infinity;
-  for (const [level, group] of [...levelGroups.entries()].sort((a, b) => a[0] - b[0])) {
-    const offset = (group.length - 1) / 2;
-    for (let i = 0; i < group.length; i += 1) {
-      const key = group[i];
-      const cross = i - offset;
-      crossMap.set(key, cross);
-      if (cross < minCross) minCross = cross;
-      if (cross > maxCross) maxCross = cross;
-    }
-  }
-  if (!Number.isFinite(minCross) || !Number.isFinite(maxCross)) {
-    minCross = 0;
-    maxCross = 0;
-  }
-
-  if (spread) {
-    const ordered = [...levelGroups.entries()]
-      .map(([level]) => Number(level))
-      .sort((a, b) => a - b);
-    const activeLevels = ordered.filter((level) => level > 0);
-    const getSpreadOrder = (group) => {
-      return [...group]
-        .map((key, index) => ({
-          key,
-          dist: Math.abs(Number(crossMap.get(key) || 0)),
-          index,
-        }))
-        .sort((a, b) => {
-          if (a.dist !== b.dist) return b.dist - a.dist;
-          if (a.index !== b.index) return a.index - b.index;
-          return 0;
-        })
-        .map((item) => item.key);
-    };
-    const calcDelta = (key, level, currentCross = Number(crossMap.get(key) || 0)) => {
-      const neighbors = [];
+  const calcDelta = (key, level, cross = Number(crossMap.get(key) || 0), reference = 'prev') => {
+    const neighbors = [];
+    if (reference === 'prev' || reference === 'both') {
       const prev = reverseAdjacency.get(key) || [];
-      const next = adjacency.get(key) || [];
       for (const ref of prev) {
         if (Number(levelMap.get(ref) || 0) !== level - 1) continue;
         if (!crossMap.has(ref)) continue;
-        neighbors.push(ref);
+        neighbors.push(Number(crossMap.get(ref) || 0));
       }
+    }
+    if (reference === 'next' || reference === 'both') {
+      const next = adjacency.get(key) || [];
       for (const ref of next) {
         if (Number(levelMap.get(ref) || 0) !== level + 1) continue;
         if (!crossMap.has(ref)) continue;
-        neighbors.push(ref);
+        neighbors.push(Number(crossMap.get(ref) || 0));
       }
-      if (!neighbors.length) return 0;
-      return neighbors
-        .map((ref) => Number(crossMap.get(ref) || 0) - currentCross)
-        .reduce((sum, item) => sum + item, 0);
-    };
+    }
+    if (!neighbors.length) {
+      let barycenter = cross;
+      const compareGroupLength = (source, target) => {
+        const sourceLength = levelGroups.get(source)?.length || 0;
+        const targetLength = levelGroups.get(target)?.length || 0;
+        return targetLength - sourceLength;
+      };
+      let lengthDelta = 0;
+      if (reference === 'prev') lengthDelta = compareGroupLength(level - 1, level);
+      else if (reference === 'next') lengthDelta = compareGroupLength(level + 1, level);
+      if (lengthDelta < 0) barycenter = 0;
+      else if (lengthDelta > 0) barycenter = cross <= 0 ? minCross - 1 : maxCross + 1;
+      return { barycenter, dist: 0, delta: 0, sign: 0 };
+    }
+    const barycenter = neighbors.reduce((sum, v) => sum + v, 0) / neighbors.length;
+    const raw = barycenter - cross;
+    const dist = Math.abs(raw);
+    const delta = dist * neighbors.length;
+    const sign = raw > 0 ? 1 : (raw < 0 ? -1 : 0);
+    return { barycenter, delta, dist, sign };
+  };
 
-    const tryMoveKeyUntilStop = (level, group, key) => {
-      let moved = false;
+  const sweepLevel = (level, reference) => {
+    const group = levelGroups.get(level) || [];
+    const nextGroup = [...group]
+      .map((key, index) => ({
+        key,
+        barycenter: calcDelta(key, level, Number(crossMap.get(key) || 0), reference).barycenter,
+        index,
+      }))
+      .sort((a, b) => (a.barycenter - b.barycenter) || (a.index - b.index))
+      .map((item) => item.key);
+
+    const offset = (nextGroup.length - 1) / 2;
+    for (let i = 0; i < nextGroup.length; i += 1) {
+      crossMap.set(nextGroup[i], i- offset);
+    }
+    levelGroups.set(level, nextGroup);
+  };
+  const relocateOnce = (level, group, reference) => {
+    let moved = false;
+    const order = [...group]
+      .map((key, index) => ({
+        key,
+        dist: Math.abs(Number(crossMap.get(key) || 0)),
+        index,
+      }))
+      .sort((a, b) => (b.dist - a.dist) || (a.index - b.index))
+      .map((item) => item.key);
+    for (const key of [...order, ...[...order].reverse()]) {
       while (true) {
         const currentCross = Number(crossMap.get(key) || 0);
-        const deltaSum = calcDelta(key, level, currentCross);
-        const directionSign = deltaSum > 0 ? 1 : (deltaSum < 0 ? -1 : 0);
-        if (!directionSign) break;
-
-        const nextCross = currentCross + directionSign;
+        const before = calcDelta(key, level, currentCross, reference);
+        if (!before.sign) break;
+        const nextCross = currentCross + before.sign * 0.5;
         if (nextCross < minCross || nextCross > maxCross) break;
 
         const occupied = group.some((groupKey) => {
           if (groupKey === key) return false;
-          return Number(crossMap.get(groupKey) || 0) === nextCross;
+          const groupCross = Number(crossMap.get(groupKey) || 0);
+          
+          return (currentCross - groupCross) * (currentCross + before.sign - groupCross) <= 0;
         });
         if (occupied) break;
 
-        const beforeDelta = calcDelta(key, level, currentCross);
-        const afterDelta = calcDelta(key, level, nextCross);
-        if (Math.abs(afterDelta) >= Math.abs(beforeDelta)) break;
+        const after = calcDelta(key, level, nextCross, reference);
+        if (after.delta >= before.delta) break;
 
         crossMap.set(key, nextCross);
         moved = true;
       }
-      return moved;
-    };
+    }
+    return moved;
+  };
+  const relocate = (level, group, reference) => {
+    let moved = false;
+    for (let i = 0; i < Math.max(1, group.length); i += 1) {
+      if (!relocateOnce(level, group, reference)) break;
+      moved = true;
+    }
+    return moved;
+  };
 
-    const sweepLevel = (level, keyOrder) => {
-      const group = levelGroups.get(level) || [];
-      let moved = false;
-      for (const key of keyOrder) {
-        if (tryMoveKeyUntilStop(level, group, key)) moved = true;
-      }
-      return moved;
-    };
-
-    const sweepLevels = (levelOrder) => {
-      let moved = false;
-      for (const level of levelOrder) {
-        const group = levelGroups.get(level) || [];
-        const spreadOrder = getSpreadOrder(group);
-        if (sweepLevel(level, spreadOrder)) moved = true;
-        if (sweepLevel(level, [...spreadOrder].reverse())) moved = true;
-      }
-      return moved;
-    };
-
-    const maxPass = Math.max(1, ...activeLevels.map((level) => {
-      const group = levelGroups.get(level) || [];
-      return group.length;
-    }));
-    for (let pass = 0; pass < maxPass; pass += 1) {
-      let moved = false;
-      if (sweepLevels(activeLevels)) moved = true;
-      if (!moved) break;
+  const orderedLevels = [...levelGroups.keys()].sort((a, b) => a - b);
+  for (let i = 1; i < orderedLevels.length; i += 1) {
+    sweepLevel(orderedLevels[i], 'prev');
+  }
+  for (let i = orderedLevels.length - 2; i > 0; i -= 1) {
+    sweepLevel(orderedLevels[i], 'next');
+  }
+  for (let i = 1; i < orderedLevels.length; i += 1) {
+    sweepLevel(orderedLevels[i], 'prev');
+  }
+  if (spread) {
+    for (const [level, group] of getSortedLevelEntries()) {
+      if (level <= 0) continue;
+      relocate(level, group, 'both');
     }
   }
 
+  const data = [];
   const nodePosMap = new Map();
-  for (const [level, group] of [...levelGroups.entries()].sort((a, b) => a[0] - b[0])) {
+  for (const [level, group] of getSortedLevelEntries()) {
     for (let i = 0; i < group.length; i += 1) {
       const key = group[i];
       const node = map[key] || {};
