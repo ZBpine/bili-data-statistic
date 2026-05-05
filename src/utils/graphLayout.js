@@ -305,49 +305,35 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
     return moved;
   };
 
-  const layoutPasses = Array.isArray(passes)
-    ? passes
-      .map((pass) => {
-        const reference = String(pass?.reference || '').toLowerCase();
-        const nextReference = ['prev', 'next', 'both'].includes(reference) ? reference : 'both';
-        return {
-          reference: nextReference,
-          spread: Boolean(pass?.spread),
-        };
-      })
-      .filter((pass) => pass.reference)
-    : [];
-  const defaultPasses = [
-    { reference: 'prev', spread: false },
-    { reference: 'next', spread: false },
-    { reference: 'prev', spread: false },
-  ];
-  if (spread) {
-    defaultPasses.push(
-      { reference: 'both', spread: true },
-      { reference: 'both', spread: true },
-    );
-  }
-  const resolvedPasses = layoutPasses.length
-    ? layoutPasses
-    : defaultPasses;
   const runPass = ({ reference, spread: useSpread }) => {
     let moved = false;
-    for (const [level, group] of getSortedLevelEntries()) {
-      if (level <= 0) continue;
+    const orderedEntries = getSortedLevelEntries();
+    const levelEntries = reference === 'next' ? [...orderedEntries].reverse() : orderedEntries;
+    for (let i = 1; i < levelEntries.length; i += 1) {
+      const [level, group] = levelEntries[i];
       const maxLength = useSpread ? maxLevelLength : group.length;
       if (optimizeLevel(level, group, reference, maxLength)) {
         moved = true;
-        console.log('moved', `${level} / ${levelCount}`, reference, moved);
       }
     }
-    console.log('moved', `${levelCount} * ${maxLevelLength}`, reference, moved, useSpread ? 'spread' : 'non-spread');
     return moved;
   };
-  for (const pass of resolvedPasses) {
-    const moved = runPass(pass);
-    // if (!moved) break;
+  runPass({ reference: 'prev', spread: false });
+  runPass({ reference: 'next', spread: false });
+  runPass({ reference: 'prev', spread: false });
+  if (spread) {
+    const spreadPassLoop = Math.max(1, Math.ceil(Math.sqrt(maxLevelLength)));
+    for (let i = 0; i < spreadPassLoop / 3; i += 1) {
+      runPass({ reference: 'both', spread: true });
+    }
+    runPass({ reference: 'prev', spread: true });
+    for (let i = 0; i < spreadPassLoop; i += 1) {
+      if (!runPass({ reference: 'both', spread: true })) break;
+    }
   }
+  // for (const pass of passes) {
+  //   runPass(pass);
+  // }
 
   const data = [];
   const nodePosMap = new Map();

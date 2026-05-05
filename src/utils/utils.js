@@ -35,3 +35,37 @@ export const parseRangeValue = (value) => {
   if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
   return { start, end };
 };
+
+export const getStringSimilarity = (a, b) => {
+  const sa = String(a || '');
+  const sb = String(b || '');
+  if (!sa && !sb) return 1;
+  if (!sa || !sb) return 0;
+  if (sa === sb) return 1;
+
+  const n = sa.length;
+  const m = sb.length;
+  const prev = new Array(m + 1).fill(0);
+  const curr = new Array(m + 1).fill(0);
+
+  for (let j = 0; j <= m; j += 1) prev[j] = j;
+
+  for (let i = 1; i <= n; i += 1) {
+    curr[0] = i;
+    const ca = sa.charAt(i - 1);
+    for (let j = 1; j <= m; j += 1) {
+      const cb = sb.charAt(j - 1);
+      const cost = ca === cb ? 0 : 1;
+      curr[j] = Math.min(
+        prev[j] + 1,
+        curr[j - 1] + 1,
+        prev[j - 1] + cost,
+      );
+    }
+    for (let j = 0; j <= m; j += 1) prev[j] = curr[j];
+  }
+
+  const distance = prev[m];
+  const maxLen = Math.max(n, m);
+  return maxLen > 0 ? (1 - distance / maxLen) : 1;
+};

@@ -1,9 +1,10 @@
 <script setup>
 import mountStyle from './style.cssr.js';
 import { nextTick } from 'vue';
-import { Camera, RefreshDot, GridDots, Viewfinder, CircleX, ArrowsSplit2, ArrowsJoin2 } from '@vicons/tabler';
+import { Camera, RefreshDot, GridDots, Viewfinder, CircleX, ArrowsSplit2, ArrowsJoin2, Variable } from '@vicons/tabler';
 import { useThemeVars } from 'naive-ui';
 import { layoutFlowGraph } from '../../utils/graphLayout';
+import { getStringSimilarity } from '../../utils/utils';
 
 const styleMountTarget = inject('styleMountTarget', null);
 mountStyle(styleMountTarget);
@@ -31,14 +32,16 @@ const emit = defineEmits(['graph-click', 'graph-capture']);
 const themeVars = useThemeVars();
 const baseGap = 60;
 const baseSpan = ref(4);
+const localAspectRatio = ref(null);
 
 const normalizedAspectRatio = computed(() => {
-  const ratio = Number(props.aspectRatio);
+  const ratio = Number(localAspectRatio.value ?? props.aspectRatio);
   return Number.isFinite(ratio) && ratio > 0 ? ratio : 3;
 });
 
 const cssVars = computed(() => ({
   '--bds-interactive-graph-aspect': `${normalizedAspectRatio.value} / 1`,
+  '--bds-interactive-graph-hover-color': themeVars.value.hoverColor,
 }));
 
 const direction = ref('LR');
@@ -78,11 +81,65 @@ const focusMode = ref(false);
 const currentScale = ref(1);
 const panelElRef = ref(null);
 const graphElRef = ref(null);
-const showPassesDrawer = ref(false);
+const showDrawer = ref(false);
 const graphMapRef = shallowRef({});
 const varsMapRef = shallowRef({});
+const hiddenVarMap = ref({});
 const currentGraphRef = shallowRef({ data: [], links: [] });
 let graphInstance = null;
+const hasVariables = computed(() => Object.keys(varsMapRef.value || {}).length > 0);
+const hiddenVarItems = computed(() => {
+  const varsMap = varsMapRef.value || {};
+  const sorted = Object.keys(varsMap)
+    .map((key) => ({
+      key,
+      label: String(varsMap?.[key]?.name || key),
+      checked: Boolean(hiddenVarMap.value?.[key]),
+    }))
+    .sort((a, b) => (a.label.localeCompare(b.label, 'zh-Hans-CN')) || a.key.localeCompare(b.key));
+
+  const numericNamePattern = /^数值(\d+)$/;
+  const normalItems = [];
+  const numericItems = [];
+  for (const item of sorted) {
+    const matched = numericNamePattern.exec(item.label);
+    if (!matched) {
+      normalItems.push(item);
+      continue;
+    }
+    numericItems.push({
+      ...item,
+      numericIndex: Number(matched[1]),
+    });
+  }
+
+  const orderBySimilarity = (items) => {
+    if (items.length <= 2) return [...items];
+
+    const ordered = [items[0]];
+    const rest = items.slice(1);
+    while (rest.length) {
+      const last = ordered[ordered.length - 1];
+      let bestIndex = 0;
+      let bestScore = getStringSimilarity(last.label, rest[0].label);
+      for (let i = 1; i < rest.length; i += 1) {
+        const score = getStringSimilarity(last.label, rest[i].label);
+        if (score > bestScore) {
+          bestScore = score;
+          bestIndex = i;
+        }
+      }
+      ordered.push(rest.splice(bestIndex, 1)[0]);
+    }
+
+    return ordered;
+  };
+
+  const orderedNormalItems = orderBySimilarity(normalItems);
+  numericItems.sort((a, b) => (a.numericIndex - b.numericIndex) || a.key.localeCompare(b.key));
+
+  return [...orderedNormalItems, ...numericItems.map(({ numericIndex, ...item }) => item)];
+});
 
 const FOCUS_OPACITY = 0.95;
 const DIM_OPACITY = 0.14;
@@ -92,6 +149,10 @@ const VAR_TOKEN_REGEXP = /\$[A-Za-z0-9_]+/g;
 
 const nodeShadowBlur = 16;
 const edgeShadowBlur = 4;
+let dragPointerId = null;
+let dragStartY = 0;
+let dragStartHeight = 0;
+let draggingResize = false;
 
 const prettifyMathAssign = (text) => {
   return String(text || '')
@@ -164,9 +225,9 @@ const clearEdgeHighlight = async () => {
   });
 };
 
-const matchActionByCondition = (condition) => {
+const matchAction = (inputText) => {
   const links = Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : [];
-  const vars = [...extractVars(condition)].filter(Boolean);
+  const vars = [...extractVars(inputText)].filter(Boolean);
   const patterns = vars.map((token) => new RegExp(`(^|[^A-Za-z0-9_])${escapeRegExp(token)}([^A-Za-z0-9_]|$)`));
   const matchedEdgeKeys = new Set();
   const matchedSourceNodeIds = new Set();
@@ -180,7 +241,66 @@ const matchActionByCondition = (condition) => {
   return { matchedEdgeKeys, matchedSourceNodeIds };
 };
 
-const renderFocusState = async ({ highlightNodeIds, shadowNodeIds, highlightEdgeKeys, shadowEdgeKeys }) => {
+const matchCondition = (inputText) => {
+  const links = Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : [];
+  const vars = [...extractVars(inputText)].filter(Boolean);
+  const patterns = vars.map((token) => new RegExp(`(^|[^A-Za-z0-9_])${escapeRegExp(token)}([^A-Za-z0-9_]|$)`));
+  const matchedEdgeKeys = new Set();
+  const matchedTargetNodeIds = new Set();
+  for (const link of links) {
+    const condition = String(link?.value?.condition || '');
+    const matched = patterns.some((pattern) => pattern.test(condition));
+    if (!matched) continue;
+    matchedEdgeKeys.add(getLinkKey(link));
+    matchedTargetNodeIds.add(String(link?.target || ''));
+  }
+  return { matchedEdgeKeys, matchedTargetNodeIds };
+};
+
+const setHiddenVarChecked = (key, checked) => {
+  hiddenVarMap.value = {
+    ...(hiddenVarMap.value || {}),
+    [key]: Boolean(checked),
+  };
+};
+
+const applyHiddenVarFocus = async () => {
+  const selectedKeys = Object.keys(hiddenVarMap.value || {}).filter((key) => Boolean(hiddenVarMap.value?.[key]));
+  if (!selectedKeys.length) {
+    await clearEdgeHighlight();
+    showDrawer.value = false;
+    return;
+  }
+  const highlightEdgeKeys = new Set();
+  const highlightNodeIds = new Set();
+  for (const key of selectedKeys) {
+    const actionMatched = matchAction(key);
+    const conditionMatched = matchCondition(key);
+    for (const edgeKey of actionMatched.matchedEdgeKeys) highlightEdgeKeys.add(edgeKey);
+    for (const edgeKey of conditionMatched.matchedEdgeKeys) highlightEdgeKeys.add(edgeKey);
+    for (const sourceId of actionMatched.matchedSourceNodeIds) highlightNodeIds.add(sourceId);
+    for (const targetId of conditionMatched.matchedTargetNodeIds) highlightNodeIds.add(targetId);
+  }
+  await renderFocusState({
+    highlightNodeIds,
+    shadowNodeIds: new Set(),
+    highlightEdgeKeys,
+    shadowEdgeKeys: new Set(),
+  });
+  showDrawer.value = false;
+};
+
+const clearHiddenVarFocus = async () => {
+  await clearEdgeHighlight();
+  showDrawer.value = false;
+};
+
+const renderFocusState = async ({
+  highlightNodeIds = new Set(),
+  shadowNodeIds = new Set(),
+  highlightEdgeKeys = new Set(),
+  shadowEdgeKeys = new Set(),
+} = {}) => {
   const instance = await ensureGraphInstance();
   if (!instance) return;
   const links = (Array.isArray(currentGraphRef.value?.links) ? currentGraphRef.value.links : []).map((link) => {
@@ -227,7 +347,7 @@ const renderFocusState = async ({ highlightNodeIds, shadowNodeIds, highlightEdge
 
 const handleEdgeSelection = async (edgeData = {}) => {
   const edgeValue = edgeData?.value || {};
-  const { matchedEdgeKeys, matchedSourceNodeIds } = matchActionByCondition(edgeValue?.condition);
+  const { matchedEdgeKeys, matchedSourceNodeIds } = matchAction(edgeValue?.condition);
   const shadowEdgeKeys = new Set([getLinkKey(edgeData)]);
   const shadowNodeIds = new Set();
   const highlightNodeIds = new Set(matchedSourceNodeIds);
@@ -252,7 +372,7 @@ const handleNodeSelection = async (nodeData = {}) => {
   if (selectedNodeId) shadowNodeIds.add(selectedNodeId);
 
   for (const inEdge of inEdges) {
-    const { matchedEdgeKeys, matchedSourceNodeIds } = matchActionByCondition(inEdge?.condition);
+    const { matchedEdgeKeys, matchedSourceNodeIds } = matchAction(inEdge?.condition);
     if (!matchedEdgeKeys.size) continue;
     const incomingEdgeLike = {
       source: inEdge?.id,
@@ -377,8 +497,13 @@ const refresh = async () => {
   const payload = await props.getGraph(dedupe.value) || {};
   const graphMap = payload.graphMap || {};
   const varsMap = payload?.varsMap || {};
+  const nextHiddenVarMap = {};
+  for (const key of Object.keys(varsMap)) {
+    nextHiddenVarMap[key] = Boolean(hiddenVarMap.value?.[key]);
+  }
   graphMapRef.value = graphMap;
   varsMapRef.value = varsMap;
+  hiddenVarMap.value = nextHiddenVarMap;
   await renderByGraphMap(graphMap);
 };
 
@@ -401,6 +526,41 @@ const setBaseSpan = async (value) => {
 const handleWindowResize = () => {
   if (!updateBaseSpan()) return;
   refresh().catch(() => { });
+};
+
+const handleAspectResizeMove = (event) => {
+  event.preventDefault();
+  if (!draggingResize || dragPointerId == null) return;
+  if (event.pointerId !== dragPointerId) return;
+  const width = Number(graphElRef.value?.clientWidth || 0);
+  if (width <= 0) return;
+  const deltaY = Number(event.clientY || 0) - dragStartY;
+  const nextHeight = dragStartHeight + deltaY;
+  if (nextHeight < width / 50) return;
+  localAspectRatio.value = width / nextHeight;
+};
+
+const handleAspectResizeEnd = () => {
+  if (!draggingResize) return;
+  draggingResize = false;
+  dragPointerId = null;
+  window.removeEventListener('pointermove', handleAspectResizeMove);
+  window.removeEventListener('pointerup', handleAspectResizeEnd);
+  window.removeEventListener('pointercancel', handleAspectResizeEnd);
+  refresh().catch(() => { });
+};
+
+const beginAspectResize = (event) => {
+  event.preventDefault();
+  const height = Number(graphElRef.value?.clientHeight || 0);
+  if (height <= 0) return;
+  dragPointerId = event.pointerId;
+  dragStartY = Number(event.clientY || 0);
+  dragStartHeight = height;
+  draggingResize = true;
+  window.addEventListener('pointermove', handleAspectResizeMove);
+  window.addEventListener('pointerup', handleAspectResizeEnd);
+  window.addEventListener('pointercancel', handleAspectResizeEnd);
 };
 
 const dispose = () => {
@@ -590,6 +750,7 @@ defineExpose({
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleWindowResize);
+  handleAspectResizeEnd();
   dispose();
 });
 
@@ -651,8 +812,13 @@ onMounted(() => {
           </n-checkbox>
         </n-flex>
         <n-flex :size="8" :inline="true" align="center" wrap class="bds-interactive-graph-panel__action-right">
-          <n-button size="small" :disabled="graphLoading" @click="showPassesDrawer = true" title="布局轮次配置">
-            Passes
+          <n-button v-if="hasVariables" size="small" circle :disabled="graphLoading" @click="showDrawer = true"
+            title="查看隐藏变量">
+            <template #icon>
+              <n-icon>
+                <variable />
+              </n-icon>
+            </template>
           </n-button>
           <n-button size="small" circle :loading="capturing" :disabled="graphLoading"
             @click="focusMode ? disableFocusMode() : enableFocusMode()" :title="focusMode ? '退出分析模式' : '进入分析模式'">
@@ -674,12 +840,27 @@ onMounted(() => {
         </n-flex>
       </n-flex>
       <div ref="graphElRef" class="bds-interactive-graph-panel__graph" :class="{ 'is-focus-mode': focusMode }"></div>
+      <div class="bds-interactive-graph-panel__resize-handle" @pointerdown="beginAspectResize"></div>
     </n-flex>
-    <n-drawer v-model:show="showPassesDrawer" placement="right" :width="360" :to="panelElRef"
+    <n-drawer v-model:show="showDrawer" placement="right" :width="360" :to="panelElRef"
       :trap-focus="false" :block-scroll="false">
-      <n-drawer-content title="Layout Passes" closable>
+      <n-drawer-content title="隐藏变量" closable>
         <n-flex vertical :size="12">
-          <n-dynamic-input :value="layoutPasses" :disabled="graphLoading" class="bds-interactive-graph-panel__passes"
+          <n-flex vertical :size="8">
+            <n-flex v-for="item in hiddenVarItems" :key="item.key" :inline="true" align="center" justify="space-between">
+              <n-switch :value="item.checked" @update:value="(next) => setHiddenVarChecked(item.key, next)" />
+              <span>{{ item.label }}</span>
+            </n-flex>
+          </n-flex>
+          <n-flex :size="8" :inline="true" style="width: 100%">
+            <div style="flex: 1">
+              <n-button style="width: 100%" @click="applyHiddenVarFocus">查看</n-button>
+            </div>
+            <div style="flex: 1">
+              <n-button style="width: 100%" @click="clearHiddenVarFocus">清除</n-button>
+            </div>
+          </n-flex>
+          <!-- <n-dynamic-input :value="layoutPasses" :disabled="graphLoading" class="bds-interactive-graph-panel__passes"
             :on-create="() => ({ reference: 'both', spread: layoutMode === 'spread' })" @update:value="setLayoutPasses">
             <template #default="{ value, index }">
               <n-flex :size="6" :inline="true" align="center" wrap>
@@ -693,7 +874,7 @@ onMounted(() => {
               </n-flex>
             </template>
           </n-dynamic-input>
-          <n-button secondary @click="resetLayoutPasses">重置默认</n-button>
+          <n-button secondary @click="resetLayoutPasses">重置默认</n-button> -->
         </n-flex>
       </n-drawer-content>
     </n-drawer>

@@ -32,6 +32,29 @@ const style = cB(
         }
       `,
     ),
+    cE(
+      'resize-handle',
+      css`
+        width: 100%;
+        height: 8px;
+        cursor: ns-resize;
+        background: linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 2px,
+          var(--bds-interactive-graph-hover-color) 2px,
+          var(--bds-interactive-graph-hover-color) 6px,
+          transparent 6px,
+          transparent 100%
+        );
+        opacity: 0.3;
+        transition: opacity 0.2s ease;
+
+        &:hover {
+          opacity: 0.9;
+        }
+      `,
+    ),
   ],
 );
 
