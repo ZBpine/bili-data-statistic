@@ -43,13 +43,42 @@ const cssVars = computed(() => ({
 
 const direction = ref('LR');
 const layoutMode = ref('spread');
+const createDefaultPasses = (useSpread) => {
+  const next = [
+    { reference: 'prev', spread: false },
+    { reference: 'next', spread: false },
+    { reference: 'prev', spread: false },
+  ];
+  if (useSpread) {
+    next.push(
+      { reference: 'both', spread: true },
+      { reference: 'both', spread: true },
+    );
+  }
+  return next;
+};
+const normalizePass = (pass = {}) => {
+  const reference = String(pass?.reference || '').toLowerCase();
+  return {
+    reference: ['prev', 'next', 'both'].includes(reference) ? reference : 'both',
+    spread: Boolean(pass?.spread),
+  };
+};
+const passReferenceOptions = [
+  { label: 'prev', value: 'prev' },
+  { label: 'next', value: 'next' },
+  { label: 'both', value: 'both' },
+];
+const layoutPasses = ref(createDefaultPasses(true));
 const dedupe = ref(false);
 const showOptions = ref(false);
 const removeBackEdges = ref(false);
 const capturing = ref(false);
 const focusMode = ref(false);
 const currentScale = ref(1);
+const panelElRef = ref(null);
 const graphElRef = ref(null);
+const showPassesDrawer = ref(false);
 const graphMapRef = shallowRef({});
 const varsMapRef = shallowRef({});
 const currentGraphRef = shallowRef({ data: [], links: [] });
@@ -61,7 +90,6 @@ const FOCUS_NODE_OPACITY = 1;
 const DIM_NODE_OPACITY = 0.2;
 const VAR_TOKEN_REGEXP = /\$[A-Za-z0-9_]+/g;
 
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const nodeShadowBlur = 16;
 const edgeShadowBlur = 4;
 
@@ -279,6 +307,7 @@ const renderByGraphMap = async (graphMap) => {
     direction: direction.value,
     mode: 'compact',
     spread: layoutMode.value === 'spread',
+    passes: layoutPasses.value,
     layoutRatio: normalizedAspectRatio.value,
     baseGap,
     baseSpan: baseSpan.value,
@@ -412,6 +441,13 @@ const setLayoutMode = async (next) => {
   const value = next === 'spread' ? 'spread' : 'converge';
   if (layoutMode.value === value) return;
   layoutMode.value = value;
+  layoutPasses.value = createDefaultPasses(value === 'spread');
+  await refresh();
+};
+
+const setLayoutPasses = async (value) => {
+  const list = Array.isArray(value) ? value.map((item) => normalizePass(item)) : [];
+  layoutPasses.value = list.length ? list : createDefaultPasses(layoutMode.value === 'spread');
   await refresh();
 };
 
@@ -440,6 +476,11 @@ const setRemoveBackEdges = async (checked) => {
   await refresh();
 };
 
+const resetLayoutPasses = async () => {
+  layoutPasses.value = createDefaultPasses(layoutMode.value === 'spread');
+  await refresh();
+};
+
 const resetView = async () => {
   const instance = await ensureGraphInstance();
   if (!instance) return;
@@ -464,6 +505,7 @@ const captureGraph = async () => {
     direction: direction.value,
     mode: 'layout',
     spread: layoutMode.value === 'spread',
+    passes: layoutPasses.value,
     layoutRatio: normalizedAspectRatio.value,
     baseGap,
     baseSpan: baseSpan.value,
@@ -561,72 +603,99 @@ onMounted(() => {
 </script>
 
 <template>
-  <n-flex vertical :size="8" class="bds-interactive-graph-panel" :style="cssVars">
-    <n-flex :size="8" align="center" wrap>
-      <n-flex :size="8" :inline="true" align="center" wrap>
-        <n-button size="small" circle title="回到开头" :disabled="graphLoading" @click="resetView">
-          <template #icon>
-            <n-icon>
-              <refresh-dot />
-            </n-icon>
-          </template>
-        </n-button>
-        <n-radio-group :value="layoutMode" size="small" :disabled="graphLoading" @update:value="setLayoutMode">
-          <n-radio-button value="spread" title="分散">
-            <n-icon>
-              <arrows-split2 />
-            </n-icon>
-          </n-radio-button>
-          <n-radio-button value="converge" title="收束">
-            <n-icon>
-              <arrows-join2 />
-            </n-icon>
-          </n-radio-button>
-        </n-radio-group>
-        <n-radio-group :value="direction" size="small" :disabled="graphLoading" @update:value="setDirection">
-          <n-radio-button value="LR">水平</n-radio-button>
-          <n-radio-button value="TB">垂直</n-radio-button>
-        </n-radio-group>
-        <n-input-number :value="baseSpan" size="small" :min="1" class="bds-interactive-graph-panel__span-input"
-          :disabled="graphLoading" @update:value="setBaseSpan" title="密度">
-          <template #prefix>
-            <n-icon>
-              <grid-dots />
-            </n-icon>
-          </template>
-        </n-input-number>
+  <div ref="panelElRef" class="bds-interactive-graph-panel" :style="cssVars">
+    <n-flex vertical :size="8">
+      <n-flex :size="8" align="center" wrap>
+        <n-flex :size="8" :inline="true" align="center" wrap>
+          <n-button size="small" circle title="回到开头" :disabled="graphLoading" @click="resetView">
+            <template #icon>
+              <n-icon>
+                <refresh-dot />
+              </n-icon>
+            </template>
+          </n-button>
+          <n-radio-group :value="layoutMode" size="small" :disabled="graphLoading" @update:value="setLayoutMode">
+            <n-radio-button value="spread" title="分散">
+              <n-icon>
+                <arrows-split2 />
+              </n-icon>
+            </n-radio-button>
+            <n-radio-button value="converge" title="收束">
+              <n-icon>
+                <arrows-join2 />
+              </n-icon>
+            </n-radio-button>
+          </n-radio-group>
+          <n-radio-group :value="direction" size="small" :disabled="graphLoading" @update:value="setDirection">
+            <n-radio-button value="LR">水平</n-radio-button>
+            <n-radio-button value="TB">垂直</n-radio-button>
+          </n-radio-group>
+          <n-input-number :value="baseSpan" size="small" :min="1" class="bds-interactive-graph-panel__span-input"
+            :disabled="graphLoading" @update:value="setBaseSpan" title="密度">
+            <template #prefix>
+              <n-icon>
+                <grid-dots />
+              </n-icon>
+            </template>
+          </n-input-number>
+        </n-flex>
+        <n-flex :size="8" :inline="true" align="center" wrap>
+          <n-checkbox :checked="dedupe" :disabled="graphLoading" @update:checked="setDedupe">
+            去重
+          </n-checkbox>
+          <n-checkbox :checked="showOptions" @update:checked="setShowOptions">
+            显示选项
+          </n-checkbox>
+          <n-checkbox :checked="removeBackEdges" :disabled="graphLoading" @update:checked="setRemoveBackEdges">
+            隐藏回边
+          </n-checkbox>
+        </n-flex>
+        <n-flex :size="8" :inline="true" align="center" wrap class="bds-interactive-graph-panel__action-right">
+          <n-button size="small" :disabled="graphLoading" @click="showPassesDrawer = true" title="布局轮次配置">
+            Passes
+          </n-button>
+          <n-button size="small" circle :loading="capturing" :disabled="graphLoading"
+            @click="focusMode ? disableFocusMode() : enableFocusMode()" :title="focusMode ? '退出分析模式' : '进入分析模式'">
+            <template #icon>
+              <n-icon>
+                <viewfinder v-if="!focusMode" />
+                <circle-x v-else />
+              </n-icon>
+            </template>
+          </n-button>
+          <n-button size="small" circle :loading="capturing" :disabled="graphLoading || capturing" @click="captureGraph"
+            title="密度越小截图越大">
+            <template #icon>
+              <n-icon>
+                <camera />
+              </n-icon>
+            </template>
+          </n-button>
+        </n-flex>
       </n-flex>
-      <n-flex :size="8" :inline="true" align="center" wrap>
-        <n-checkbox :checked="dedupe" :disabled="graphLoading" @update:checked="setDedupe">
-          去重
-        </n-checkbox>
-        <n-checkbox :checked="showOptions" @update:checked="setShowOptions">
-          显示选项
-        </n-checkbox>
-        <n-checkbox :checked="removeBackEdges" :disabled="graphLoading" @update:checked="setRemoveBackEdges">
-          隐藏回边
-        </n-checkbox>
-      </n-flex>
-      <n-flex :size="8" :inline="true" align="center" wrap class="bds-interactive-graph-panel__action-right">
-        <n-button size="small" circle :loading="capturing" :disabled="graphLoading"
-          @click="focusMode ? disableFocusMode() : enableFocusMode()" :title="focusMode ? '退出分析模式' : '进入分析模式'">
-          <template #icon>
-            <n-icon>
-              <viewfinder v-if="!focusMode" />
-              <circle-x v-else />
-            </n-icon>
-          </template>
-        </n-button>
-        <n-button size="small" circle :loading="capturing" :disabled="graphLoading || capturing" @click="captureGraph"
-          title="密度越小截图越大">
-          <template #icon>
-            <n-icon>
-              <camera />
-            </n-icon>
-          </template>
-        </n-button>
-      </n-flex>
+      <div ref="graphElRef" class="bds-interactive-graph-panel__graph" :class="{ 'is-focus-mode': focusMode }"></div>
     </n-flex>
-    <div ref="graphElRef" class="bds-interactive-graph-panel__graph" :class="{ 'is-focus-mode': focusMode }"></div>
-  </n-flex>
+    <n-drawer v-model:show="showPassesDrawer" placement="right" :width="360" :to="panelElRef"
+      :trap-focus="false" :block-scroll="false">
+      <n-drawer-content title="Layout Passes" closable>
+        <n-flex vertical :size="12">
+          <n-dynamic-input :value="layoutPasses" :disabled="graphLoading" class="bds-interactive-graph-panel__passes"
+            :on-create="() => ({ reference: 'both', spread: layoutMode === 'spread' })" @update:value="setLayoutPasses">
+            <template #default="{ value, index }">
+              <n-flex :size="6" :inline="true" align="center" wrap>
+                <n-select size="small" :value="value.reference" :options="passReferenceOptions" style="width: 110px"
+                  @update:value="(next) => setLayoutPasses(layoutPasses.map((item, itemIndex) => itemIndex === index ? { ...item, reference: next } : item))" />
+                <n-switch size="small" :value="value.spread"
+                  @update:value="(next) => setLayoutPasses(layoutPasses.map((item, itemIndex) => itemIndex === index ? { ...item, spread: next } : item))">
+                  <template #checked>True</template>
+                  <template #unchecked>False</template>
+                </n-switch>
+              </n-flex>
+            </template>
+          </n-dynamic-input>
+          <n-button secondary @click="resetLayoutPasses">重置默认</n-button>
+        </n-flex>
+      </n-drawer-content>
+    </n-drawer>
+  </div>
 </template>

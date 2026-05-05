@@ -36,6 +36,7 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
     baseSpan = 4,
     maxArea = 100_000_000,
     removeBackEdges = false,
+    passes,
     getNodeLabel,
     getNodeValue,
     getEdgeValue,
@@ -114,26 +115,18 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
 
   const getSortedLevelEntries = () => [...levelGroups.entries()].sort((a, b) => a[0] - b[0]);
   const levelCount = levelGroups.size;
-  let maxLevelWidth = 0;
+  let maxLevelLength = 0;
   const crossMap = new Map();
-  let minCross = Infinity;
-  let maxCross = -Infinity;
   for (const [level, group] of getSortedLevelEntries()) {
-    if (group.length > maxLevelWidth) maxLevelWidth = group.length;
+    if (group.length > maxLevelLength) maxLevelLength = group.length;
     const offset = (group.length - 1) / 2;
     for (let i = 0; i < group.length; i += 1) {
       const key = group[i];
       const cross = i - offset;
       crossMap.set(key, cross);
-      if (cross < minCross) minCross = cross;
-      if (cross > maxCross) maxCross = cross;
     }
   }
-  if (!Number.isFinite(minCross) || !Number.isFinite(maxCross)) {
-    minCross = 0;
-    maxCross = 0;
-  }
-  const spaceScale = Math.max(1, levelCount, maxLevelWidth) / Number(baseSpan);
+  const spaceScale = Math.max(1, levelCount, maxLevelLength) / Number(baseSpan);
   let xGap = base * ratio;
   let yGap = base;
   let symbolSize = base * 0.5;
@@ -145,8 +138,8 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
   }
 
   const estimateViewport = () => {
-    const cols = direction === 'TB' ? Math.max(1, maxLevelWidth) : Math.max(1, levelCount);
-    const rows = direction === 'TB' ? Math.max(1, levelCount) : Math.max(1, maxLevelWidth);
+    const cols = direction === 'TB' ? Math.max(1, maxLevelLength) : Math.max(1, levelCount);
+    const rows = direction === 'TB' ? Math.max(1, levelCount) : Math.max(1, maxLevelLength);
     const width = Math.ceil(cols > 1 ? ((cols - 1) * xGap + symbolSize) : symbolSize);
     const height = Math.ceil(rows > 1 ? ((rows - 1) * yGap + symbolSize) : symbolSize);
     return { width, height, area: width * height };
@@ -163,7 +156,7 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
     }
   }
 
-  const calcDelta = (key, level, cross = Number(crossMap.get(key) || 0), reference = 'prev') => {
+  const getBarycenter = (key, level, cross = Number(crossMap.get(key) || 0), reference = 'both') => {
     const neighbors = [];
     if (reference === 'prev' || reference === 'both') {
       const prev = reverseAdjacency.get(key) || [];
@@ -181,104 +174,179 @@ export const layoutFlowGraph = (graphMap, options = {}) => {
         neighbors.push(Number(crossMap.get(ref) || 0));
       }
     }
-    if (!neighbors.length) {
-      let barycenter = cross;
-      const compareGroupLength = (source, target) => {
-        const sourceLength = levelGroups.get(source)?.length || 0;
-        const targetLength = levelGroups.get(target)?.length || 0;
-        return targetLength - sourceLength;
-      };
-      let lengthDelta = 0;
-      if (reference === 'prev') lengthDelta = compareGroupLength(level - 1, level);
-      else if (reference === 'next') lengthDelta = compareGroupLength(level + 1, level);
-      if (lengthDelta < 0) barycenter = 0;
-      else if (lengthDelta > 0) barycenter = cross <= 0 ? minCross - 1 : maxCross + 1;
-      return { barycenter, dist: 0, delta: 0, sign: 0 };
-    }
+    if (!neighbors.length) return { barycenter: cross, weight: 0 };
     const barycenter = neighbors.reduce((sum, v) => sum + v, 0) / neighbors.length;
-    const raw = barycenter - cross;
-    const dist = Math.abs(raw);
-    const delta = dist * neighbors.length;
-    const sign = raw > 0 ? 1 : (raw < 0 ? -1 : 0);
-    return { barycenter, delta, dist, sign };
+    return { barycenter, weight: neighbors.length };
   };
 
-  const sweepLevel = (level, reference) => {
-    const group = levelGroups.get(level) || [];
-    const nextGroup = [...group]
-      .map((key, index) => ({
-        key,
-        barycenter: calcDelta(key, level, Number(crossMap.get(key) || 0), reference).barycenter,
-        index,
-      }))
-      .sort((a, b) => (a.barycenter - b.barycenter) || (a.index - b.index))
-      .map((item) => item.key);
+  const solveAssignment = (cost) => {
+    const n = cost.length;
+    if (!n) return [];
+    const m = cost[0]?.length || 0;
+    if (!m) return new Array(n).fill(-1);
+    const u = new Array(n + 1).fill(0);
+    const v = new Array(m + 1).fill(0);
+    const p = new Array(m + 1).fill(0);
+    const way = new Array(m + 1).fill(0);
 
-    const offset = (nextGroup.length - 1) / 2;
-    for (let i = 0; i < nextGroup.length; i += 1) {
-      crossMap.set(nextGroup[i], i- offset);
+    for (let i = 1; i <= n; i += 1) {
+      p[0] = i;
+      let j0 = 0;
+      const minv = new Array(m + 1).fill(Infinity);
+      const used = new Array(m + 1).fill(false);
+
+      do {
+        used[j0] = true;
+        const i0 = p[j0];
+        let delta = Infinity;
+        let j1 = 0;
+        for (let j = 1; j <= m; j += 1) {
+          if (used[j]) continue;
+          const cur = cost[i0 - 1][j - 1] - u[i0] - v[j];
+          if (cur < minv[j]) {
+            minv[j] = cur;
+            way[j] = j0;
+          }
+          if (minv[j] < delta) {
+            delta = minv[j];
+            j1 = j;
+          }
+        }
+        for (let j = 0; j <= m; j += 1) {
+          if (used[j]) {
+            u[p[j]] += delta;
+            v[j] -= delta;
+          } else {
+            minv[j] -= delta;
+          }
+        }
+        j0 = j1;
+      } while (p[j0] !== 0);
+
+      do {
+        const j1 = way[j0];
+        p[j0] = p[j1];
+        j0 = j1;
+      } while (j0 !== 0);
     }
-    levelGroups.set(level, nextGroup);
+
+    const assignment = new Array(n).fill(-1);
+    for (let j = 1; j <= m; j += 1) {
+      if (p[j] > 0) assignment[p[j] - 1] = j - 1;
+    }
+    return assignment;
   };
-  const relocateOnce = (level, group, reference) => {
+
+  const optimizeLevel = (level, group, reference, maxLength) => {
+    if (!Array.isArray(group) || group.length === 0) return false;
+    const minGap = 1;
     let moved = false;
-    const order = [...group]
-      .map((key, index) => ({
-        key,
-        dist: Math.abs(Number(crossMap.get(key) || 0)),
-        index,
-      }))
-      .sort((a, b) => (b.dist - a.dist) || (a.index - b.index))
-      .map((item) => item.key);
-    for (const key of [...order, ...[...order].reverse()]) {
-      while (true) {
-        const currentCross = Number(crossMap.get(key) || 0);
-        const before = calcDelta(key, level, currentCross, reference);
-        if (!before.sign) break;
-        const nextCross = currentCross + before.sign * 0.5;
-        if (nextCross < minCross || nextCross > maxCross) break;
 
-        const occupied = group.some((groupKey) => {
-          if (groupKey === key) return false;
-          const groupCross = Number(crossMap.get(groupKey) || 0);
-          
-          return (currentCross - groupCross) * (currentCross + before.sign - groupCross) <= 0;
-        });
-        if (occupied) break;
+    const scored = [];
+    for (let i = 0; i < group.length; i += 1) {
+      const key = group[i];
+      const cross = Number(crossMap.get(key) || 0);
+      const { barycenter, weight } = getBarycenter(key, level, cross, reference);
+      const target = Number.isFinite(barycenter) ? barycenter : cross;
+      const w = Number.isFinite(weight) && weight > 0 ? weight : 0;
+      scored.push({ key, target, weight: w, index: i });
+    }
 
-        const after = calcDelta(key, level, nextCross, reference);
-        if (after.delta >= before.delta) break;
+    const n = scored.length;
+    const spanLength = Number.isFinite(maxLength) ? Math.max(1, Number(maxLength)) : maxLevelLength;
+    const half = Math.max(0, (spanLength - 1) / 2);
+    const lowerBound = -half;
+    const upperBound = half;
 
-        crossMap.set(key, nextCross);
-        moved = true;
+    const phase = group.length % 2 === 0 ? 0.5 : 0;
+    const slotStart = Math.ceil((lowerBound - phase) / minGap - EPSILON);
+    const slotEnd = Math.floor((upperBound - phase) / minGap + EPSILON);
+    const slots = [];
+    for (let k = slotStart; k <= slotEnd; k += 1) {
+      slots.push(phase + k * minGap);
+    }
+
+    if (slots.length < n) {
+      const fallback = [...group];
+      const offset = (fallback.length - 1) / 2;
+      for (let i = 0; i < fallback.length; i += 1) {
+        const nextCross = i - offset;
+        if (Math.abs(nextCross - Number(crossMap.get(fallback[i]) || 0)) > EPSILON) moved = true;
+        crossMap.set(fallback[i], nextCross);
       }
+      levelGroups.set(level, fallback);
+      return moved;
     }
-    return moved;
-  };
-  const relocate = (level, group, reference) => {
-    let moved = false;
-    for (let i = 0; i < Math.max(1, group.length); i += 1) {
-      if (!relocateOnce(level, group, reference)) break;
-      moved = true;
+
+    const slotCenter = (slots.length - 1) / 2;
+    const nodeCenter = (n - 1) / 2;
+    const cost = scored.map((node, nodeIndex) => slots.map((slot, slotIndex) => {
+      const diff = slot - node.target;
+      const baseCost = node.weight * diff * diff;
+      const expectedSlot = nodeCenter > 0
+        ? (nodeIndex / nodeCenter) * slotCenter
+        : slotCenter;
+      const tieBreak = (slotIndex - expectedSlot) * (slotIndex - expectedSlot) * EPSILON;
+      return baseCost + tieBreak;
+    }));
+    const assignment = solveAssignment(cost);
+    // console.log(level, scored.map((item) => ({...item, title: map[item.key].title})), cost, assignment);
+
+    const placed = [];
+    for (let i = 0; i < n; i += 1) {
+      const slotIndex = assignment[i];
+      const slot = slots[slotIndex];
+      if (Math.abs(slot - Number(crossMap.get(scored[i].key) || 0)) > EPSILON) moved = true;
+      crossMap.set(scored[i].key, slot);
+      placed.push({ key: scored[i].key, cross: slot });
     }
+    placed.sort((a, b) => (a.cross - b.cross) || compareNodeKey(a.key, b.key));
+    levelGroups.set(level, placed.map((item) => item.key));
     return moved;
   };
 
-  const orderedLevels = [...levelGroups.keys()].sort((a, b) => a - b);
-  for (let i = 1; i < orderedLevels.length; i += 1) {
-    sweepLevel(orderedLevels[i], 'prev');
-  }
-  for (let i = orderedLevels.length - 2; i > 0; i -= 1) {
-    sweepLevel(orderedLevels[i], 'next');
-  }
-  for (let i = 1; i < orderedLevels.length; i += 1) {
-    sweepLevel(orderedLevels[i], 'prev');
-  }
+  const layoutPasses = Array.isArray(passes)
+    ? passes
+      .map((pass) => {
+        const reference = String(pass?.reference || '').toLowerCase();
+        const nextReference = ['prev', 'next', 'both'].includes(reference) ? reference : 'both';
+        return {
+          reference: nextReference,
+          spread: Boolean(pass?.spread),
+        };
+      })
+      .filter((pass) => pass.reference)
+    : [];
+  const defaultPasses = [
+    { reference: 'prev', spread: false },
+    { reference: 'next', spread: false },
+    { reference: 'prev', spread: false },
+  ];
   if (spread) {
+    defaultPasses.push(
+      { reference: 'both', spread: true },
+      { reference: 'both', spread: true },
+    );
+  }
+  const resolvedPasses = layoutPasses.length
+    ? layoutPasses
+    : defaultPasses;
+  const runPass = ({ reference, spread: useSpread }) => {
+    let moved = false;
     for (const [level, group] of getSortedLevelEntries()) {
       if (level <= 0) continue;
-      relocate(level, group, 'both');
+      const maxLength = useSpread ? maxLevelLength : group.length;
+      if (optimizeLevel(level, group, reference, maxLength)) {
+        moved = true;
+        console.log('moved', `${level} / ${levelCount}`, reference, moved);
+      }
     }
+    console.log('moved', `${levelCount} * ${maxLevelLength}`, reference, moved, useSpread ? 'spread' : 'non-spread');
+    return moved;
+  };
+  for (const pass of resolvedPasses) {
+    const moved = runPass(pass);
+    // if (!moved) break;
   }
 
   const data = [];

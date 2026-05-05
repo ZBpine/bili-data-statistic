@@ -5,6 +5,7 @@ const style = cB(
   css`
     height: 100%;
     min-height: 0;
+    position: relative;
   `,
   [
     cE(

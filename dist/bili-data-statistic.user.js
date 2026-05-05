@@ -7347,6 +7347,7 @@ ${percentages[params.dataIndex]}%`
     css$1`
     height: 100%;
     min-height: 0;
+    position: relative;
   `,
     [
       cE$2(
@@ -7409,6 +7410,7 @@ ${percentages[params.dataIndex]}%`
       baseSpan = 4,
       maxArea = 1e8,
       removeBackEdges = false,
+      passes,
       getNodeLabel,
       getNodeValue,
       getEdgeValue
@@ -7475,50 +7477,20 @@ ${percentages[params.dataIndex]}%`
       group.sort(compareNodeKey);
       levelGroups.set(level, group);
     }
-    const orderedLevels = [...levelGroups.keys()].sort((a, b) => a - b);
-    const reorderByBarycenter = (sourceLevel, targetLevel, getRefs) => {
-      const sourceGroup = levelGroups.get(sourceLevel) || [];
-      const sourceIndexMap = new Map(sourceGroup.map((key, index) => [key, index]));
-      const group = levelGroups.get(targetLevel) || [];
-      const groupCenter = (group.length - 1) / 2;
-      const nextGroup = [...group].map((key, index) => {
-        const indexes = getRefs(key).filter((refKey) => Number(levelMap.get(refKey) || 0) === sourceLevel).map((refKey) => sourceIndexMap.get(refKey)).filter((value) => Number.isFinite(value));
-        let barycenter;
-        if (indexes.length) {
-          barycenter = indexes.reduce((sum, value) => sum + value, 0) / indexes.length;
-        } else if (group.length < sourceGroup.length) {
-          barycenter = groupCenter;
-        } else {
-          barycenter = index <= groupCenter ? -1 : sourceGroup.length + 1;
-        }
-        return { key, index, barycenter };
-      }).sort((a, b) => {
-        if (a.barycenter !== b.barycenter) return a.barycenter - b.barycenter;
-        return a.index - b.index;
-      }).map((item) => item.key);
-      levelGroups.set(targetLevel, nextGroup);
-    };
-    for (let i = 1; i < orderedLevels.length; i += 1) {
-      const level = orderedLevels[i];
-      const prevLevel = orderedLevels[i - 1];
-      reorderByBarycenter(prevLevel, level, (key) => reverseAdjacency.get(key) || []);
-    }
-    for (let i = orderedLevels.length - 2; i >= 0; i -= 1) {
-      const level = orderedLevels[i];
-      const nextLevel = orderedLevels[i + 1];
-      reorderByBarycenter(nextLevel, level, (key) => adjacency.get(key) || []);
-    }
-    for (let i = 1; i < orderedLevels.length; i += 1) {
-      const level = orderedLevels[i];
-      const prevLevel = orderedLevels[i - 1];
-      reorderByBarycenter(prevLevel, level, (key) => reverseAdjacency.get(key) || []);
-    }
+    const getSortedLevelEntries = () => [...levelGroups.entries()].sort((a, b) => a[0] - b[0]);
     const levelCount = levelGroups.size;
-    let maxLevelWidth = 0;
-    for (const group of levelGroups.values()) {
-      if (group.length > maxLevelWidth) maxLevelWidth = group.length;
+    let maxLevelLength = 0;
+    const crossMap = new Map();
+    for (const [level, group] of getSortedLevelEntries()) {
+      if (group.length > maxLevelLength) maxLevelLength = group.length;
+      const offset = (group.length - 1) / 2;
+      for (let i = 0; i < group.length; i += 1) {
+        const key = group[i];
+        const cross = i - offset;
+        crossMap.set(key, cross);
+      }
     }
-    const spaceScale = Math.max(1, levelCount, maxLevelWidth) / Number(baseSpan);
+    const spaceScale = Math.max(1, levelCount, maxLevelLength) / Number(baseSpan);
     let xGap = base * ratio;
     let yGap = base;
     let symbolSize = base * 0.5;
@@ -7529,8 +7501,8 @@ ${percentages[params.dataIndex]}%`
       yGap *= spaceScale;
     }
     const estimateViewport = () => {
-      const cols = direction === "TB" ? Math.max(1, maxLevelWidth) : Math.max(1, levelCount);
-      const rows = direction === "TB" ? Math.max(1, levelCount) : Math.max(1, maxLevelWidth);
+      const cols = direction === "TB" ? Math.max(1, maxLevelLength) : Math.max(1, levelCount);
+      const rows = direction === "TB" ? Math.max(1, levelCount) : Math.max(1, maxLevelLength);
       const width = Math.ceil(cols > 1 ? (cols - 1) * xGap + symbolSize : symbolSize);
       const height = Math.ceil(rows > 1 ? (rows - 1) * yGap + symbolSize : symbolSize);
       return { width, height, area: width * height };
@@ -7545,107 +7517,178 @@ ${percentages[params.dataIndex]}%`
         symbolSize /= shrinkScale;
       }
     }
-    const data = [];
-    const crossMap = new Map();
-    let minCross = Infinity;
-    let maxCross = -Infinity;
-    for (const [level, group] of [...levelGroups.entries()].sort((a, b) => a[0] - b[0])) {
-      const offset = (group.length - 1) / 2;
-      for (let i = 0; i < group.length; i += 1) {
-        const key = group[i];
-        const cross = i - offset;
-        crossMap.set(key, cross);
-        if (cross < minCross) minCross = cross;
-        if (cross > maxCross) maxCross = cross;
-      }
-    }
-    if (!Number.isFinite(minCross) || !Number.isFinite(maxCross)) {
-      minCross = 0;
-      maxCross = 0;
-    }
-    if (spread) {
-      const ordered = [...levelGroups.entries()].map(([level]) => Number(level)).sort((a, b) => a - b);
-      const activeLevels = ordered.filter((level) => level > 0);
-      const getSpreadOrder = (group) => {
-        return [...group].map((key, index) => ({
-          key,
-          dist: Math.abs(Number(crossMap.get(key) || 0)),
-          index
-        })).sort((a, b) => {
-          if (a.dist !== b.dist) return b.dist - a.dist;
-          if (a.index !== b.index) return a.index - b.index;
-          return 0;
-        }).map((item) => item.key);
-      };
-      const calcDelta = (key, level, currentCross = Number(crossMap.get(key) || 0)) => {
-        const neighbors = [];
+    const getBarycenter = (key, level, cross = Number(crossMap.get(key) || 0), reference = "both") => {
+      const neighbors = [];
+      if (reference === "prev" || reference === "both") {
         const prev = reverseAdjacency.get(key) || [];
-        const next = adjacency.get(key) || [];
         for (const ref2 of prev) {
           if (Number(levelMap.get(ref2) || 0) !== level - 1) continue;
           if (!crossMap.has(ref2)) continue;
-          neighbors.push(ref2);
+          neighbors.push(Number(crossMap.get(ref2) || 0));
         }
+      }
+      if (reference === "next" || reference === "both") {
+        const next = adjacency.get(key) || [];
         for (const ref2 of next) {
           if (Number(levelMap.get(ref2) || 0) !== level + 1) continue;
           if (!crossMap.has(ref2)) continue;
-          neighbors.push(ref2);
+          neighbors.push(Number(crossMap.get(ref2) || 0));
         }
-        if (!neighbors.length) return 0;
-        return neighbors.map((ref2) => Number(crossMap.get(ref2) || 0) - currentCross).reduce((sum, item) => sum + item, 0);
-      };
-      const tryMoveKeyUntilStop = (level, group, key) => {
-        let moved = false;
-        while (true) {
-          const currentCross = Number(crossMap.get(key) || 0);
-          const deltaSum = calcDelta(key, level, currentCross);
-          const directionSign = deltaSum > 0 ? 1 : deltaSum < 0 ? -1 : 0;
-          if (!directionSign) break;
-          const nextCross = currentCross + directionSign;
-          if (nextCross < minCross || nextCross > maxCross) break;
-          const occupied = group.some((groupKey) => {
-            if (groupKey === key) return false;
-            return Number(crossMap.get(groupKey) || 0) === nextCross;
-          });
-          if (occupied) break;
-          const beforeDelta = calcDelta(key, level, currentCross);
-          const afterDelta = calcDelta(key, level, nextCross);
-          if (Math.abs(afterDelta) >= Math.abs(beforeDelta)) break;
-          crossMap.set(key, nextCross);
-          moved = true;
-        }
-        return moved;
-      };
-      const sweepLevel = (level, keyOrder) => {
-        const group = levelGroups.get(level) || [];
-        let moved = false;
-        for (const key of keyOrder) {
-          if (tryMoveKeyUntilStop(level, group, key)) moved = true;
-        }
-        return moved;
-      };
-      const sweepLevels = (levelOrder) => {
-        let moved = false;
-        for (const level of levelOrder) {
-          const group = levelGroups.get(level) || [];
-          const spreadOrder = getSpreadOrder(group);
-          if (sweepLevel(level, spreadOrder)) moved = true;
-          if (sweepLevel(level, [...spreadOrder].reverse())) moved = true;
-        }
-        return moved;
-      };
-      const maxPass = Math.max(1, ...activeLevels.map((level) => {
-        const group = levelGroups.get(level) || [];
-        return group.length;
-      }));
-      for (let pass = 0; pass < maxPass; pass += 1) {
-        let moved = false;
-        if (sweepLevels(activeLevels)) moved = true;
-        if (!moved) break;
       }
+      if (!neighbors.length) return { barycenter: cross, weight: 0 };
+      const barycenter = neighbors.reduce((sum, v) => sum + v, 0) / neighbors.length;
+      return { barycenter, weight: neighbors.length };
+    };
+    const solveAssignment = (cost) => {
+      const n = cost.length;
+      if (!n) return [];
+      const m = cost[0]?.length || 0;
+      if (!m) return new Array(n).fill(-1);
+      const u = new Array(n + 1).fill(0);
+      const v = new Array(m + 1).fill(0);
+      const p = new Array(m + 1).fill(0);
+      const way = new Array(m + 1).fill(0);
+      for (let i = 1; i <= n; i += 1) {
+        p[0] = i;
+        let j0 = 0;
+        const minv = new Array(m + 1).fill(Infinity);
+        const used = new Array(m + 1).fill(false);
+        do {
+          used[j0] = true;
+          const i0 = p[j0];
+          let delta = Infinity;
+          let j1 = 0;
+          for (let j = 1; j <= m; j += 1) {
+            if (used[j]) continue;
+            const cur = cost[i0 - 1][j - 1] - u[i0] - v[j];
+            if (cur < minv[j]) {
+              minv[j] = cur;
+              way[j] = j0;
+            }
+            if (minv[j] < delta) {
+              delta = minv[j];
+              j1 = j;
+            }
+          }
+          for (let j = 0; j <= m; j += 1) {
+            if (used[j]) {
+              u[p[j]] += delta;
+              v[j] -= delta;
+            } else {
+              minv[j] -= delta;
+            }
+          }
+          j0 = j1;
+        } while (p[j0] !== 0);
+        do {
+          const j1 = way[j0];
+          p[j0] = p[j1];
+          j0 = j1;
+        } while (j0 !== 0);
+      }
+      const assignment = new Array(n).fill(-1);
+      for (let j = 1; j <= m; j += 1) {
+        if (p[j] > 0) assignment[p[j] - 1] = j - 1;
+      }
+      return assignment;
+    };
+    const optimizeLevel = (level, group, reference, maxLength) => {
+      if (!Array.isArray(group) || group.length === 0) return false;
+      const minGap = 1;
+      let moved = false;
+      const scored = [];
+      for (let i = 0; i < group.length; i += 1) {
+        const key = group[i];
+        const cross = Number(crossMap.get(key) || 0);
+        const { barycenter, weight } = getBarycenter(key, level, cross, reference);
+        const target = Number.isFinite(barycenter) ? barycenter : cross;
+        const w = Number.isFinite(weight) && weight > 0 ? weight : 0;
+        scored.push({ key, target, weight: w, index: i });
+      }
+      const n = scored.length;
+      const spanLength = Number.isFinite(maxLength) ? Math.max(1, Number(maxLength)) : maxLevelLength;
+      const half = Math.max(0, (spanLength - 1) / 2);
+      const lowerBound = -half;
+      const upperBound = half;
+      const phase = group.length % 2 === 0 ? 0.5 : 0;
+      const slotStart = Math.ceil((lowerBound - phase) / minGap - EPSILON);
+      const slotEnd = Math.floor((upperBound - phase) / minGap + EPSILON);
+      const slots = [];
+      for (let k = slotStart; k <= slotEnd; k += 1) {
+        slots.push(phase + k * minGap);
+      }
+      if (slots.length < n) {
+        const fallback = [...group];
+        const offset = (fallback.length - 1) / 2;
+        for (let i = 0; i < fallback.length; i += 1) {
+          const nextCross = i - offset;
+          if (Math.abs(nextCross - Number(crossMap.get(fallback[i]) || 0)) > EPSILON) moved = true;
+          crossMap.set(fallback[i], nextCross);
+        }
+        levelGroups.set(level, fallback);
+        return moved;
+      }
+      const slotCenter = (slots.length - 1) / 2;
+      const nodeCenter = (n - 1) / 2;
+      const cost = scored.map((node, nodeIndex) => slots.map((slot, slotIndex) => {
+        const diff = slot - node.target;
+        const baseCost = node.weight * diff * diff;
+        const expectedSlot = nodeCenter > 0 ? nodeIndex / nodeCenter * slotCenter : slotCenter;
+        const tieBreak = (slotIndex - expectedSlot) * (slotIndex - expectedSlot) * EPSILON;
+        return baseCost + tieBreak;
+      }));
+      const assignment = solveAssignment(cost);
+      const placed = [];
+      for (let i = 0; i < n; i += 1) {
+        const slotIndex = assignment[i];
+        const slot = slots[slotIndex];
+        if (Math.abs(slot - Number(crossMap.get(scored[i].key) || 0)) > EPSILON) moved = true;
+        crossMap.set(scored[i].key, slot);
+        placed.push({ key: scored[i].key, cross: slot });
+      }
+      placed.sort((a, b) => a.cross - b.cross || compareNodeKey(a.key, b.key));
+      levelGroups.set(level, placed.map((item) => item.key));
+      return moved;
+    };
+    const layoutPasses = Array.isArray(passes) ? passes.map((pass) => {
+      const reference = String(pass?.reference || "").toLowerCase();
+      const nextReference = ["prev", "next", "both"].includes(reference) ? reference : "both";
+      return {
+        reference: nextReference,
+        spread: Boolean(pass?.spread)
+      };
+    }).filter((pass) => pass.reference) : [];
+    const defaultPasses = [
+      { reference: "prev", spread: false },
+      { reference: "next", spread: false },
+      { reference: "prev", spread: false }
+    ];
+    if (spread) {
+      defaultPasses.push(
+        { reference: "both", spread: true },
+        { reference: "both", spread: true }
+      );
     }
+    const resolvedPasses = layoutPasses.length ? layoutPasses : defaultPasses;
+    const runPass = ({ reference, spread: useSpread }) => {
+      let moved = false;
+      for (const [level, group] of getSortedLevelEntries()) {
+        if (level <= 0) continue;
+        const maxLength = useSpread ? maxLevelLength : group.length;
+        if (optimizeLevel(level, group, reference, maxLength)) {
+          moved = true;
+          console.log("moved", `${level} / ${levelCount}`, reference, moved);
+        }
+      }
+      console.log("moved", `${levelCount} * ${maxLevelLength}`, reference, moved, useSpread ? "spread" : "non-spread");
+      return moved;
+    };
+    for (const pass of resolvedPasses) {
+      runPass(pass);
+    }
+    const data = [];
     const nodePosMap = new Map();
-    for (const [level, group] of [...levelGroups.entries()].sort((a, b) => a[0] - b[0])) {
+    for (const [level, group] of getSortedLevelEntries()) {
       for (let i = 0; i < group.length; i += 1) {
         const key = group[i];
         const node = map[key] || {};
@@ -7760,13 +7803,42 @@ ${percentages[params.dataIndex]}%`
       }));
       const direction = vue.ref("LR");
       const layoutMode = vue.ref("spread");
+      const createDefaultPasses = (useSpread) => {
+        const next = [
+          { reference: "prev", spread: false },
+          { reference: "next", spread: false },
+          { reference: "prev", spread: false }
+        ];
+        if (useSpread) {
+          next.push(
+            { reference: "both", spread: true },
+            { reference: "both", spread: true }
+          );
+        }
+        return next;
+      };
+      const normalizePass = (pass = {}) => {
+        const reference = String(pass?.reference || "").toLowerCase();
+        return {
+          reference: ["prev", "next", "both"].includes(reference) ? reference : "both",
+          spread: Boolean(pass?.spread)
+        };
+      };
+      const passReferenceOptions = [
+        { label: "prev", value: "prev" },
+        { label: "next", value: "next" },
+        { label: "both", value: "both" }
+      ];
+      const layoutPasses = vue.ref(createDefaultPasses(true));
       const dedupe = vue.ref(false);
       const showOptions = vue.ref(false);
       const removeBackEdges = vue.ref(false);
       const capturing = vue.ref(false);
       const focusMode = vue.ref(false);
       const currentScale = vue.ref(1);
+      const panelElRef = vue.ref(null);
       const graphElRef = vue.ref(null);
+      const showPassesDrawer = vue.ref(false);
       const graphMapRef = vue.shallowRef({});
       const varsMapRef = vue.shallowRef({});
       const currentGraphRef = vue.shallowRef({ data: [], links: [] });
@@ -7959,6 +8031,7 @@ ${percentages[params.dataIndex]}%`
           direction: direction.value,
           mode: "compact",
           spread: layoutMode.value === "spread",
+          passes: layoutPasses.value,
           layoutRatio: normalizedAspectRatio.value,
           baseGap,
           baseSpan: baseSpan.value,
@@ -8083,6 +8156,12 @@ ${percentages[params.dataIndex]}%`
         const value = next === "spread" ? "spread" : "converge";
         if (layoutMode.value === value) return;
         layoutMode.value = value;
+        layoutPasses.value = createDefaultPasses(value === "spread");
+        await refresh();
+      };
+      const setLayoutPasses = async (value) => {
+        const list = Array.isArray(value) ? value.map((item) => normalizePass(item)) : [];
+        layoutPasses.value = list.length ? list : createDefaultPasses(layoutMode.value === "spread");
         await refresh();
       };
       const setShowOptions = async (checked) => {
@@ -8108,6 +8187,10 @@ ${percentages[params.dataIndex]}%`
         removeBackEdges.value = value;
         await refresh();
       };
+      const resetLayoutPasses = async () => {
+        layoutPasses.value = createDefaultPasses(layoutMode.value === "spread");
+        await refresh();
+      };
       const resetView = async () => {
         const instance = await ensureGraphInstance();
         if (!instance) return;
@@ -8131,6 +8214,7 @@ ${percentages[params.dataIndex]}%`
           direction: direction.value,
           mode: "layout",
           spread: layoutMode.value === "spread",
+          passes: layoutPasses.value,
           layoutRatio: normalizedAspectRatio.value,
           baseGap,
           baseSpan: baseSpan.value,
@@ -8228,222 +8312,322 @@ ${percentages[params.dataIndex]}%`
         const _component_n_input_number = naiveUi.NInputNumber;
         const _component_n_flex = naiveUi.NFlex;
         const _component_n_checkbox = naiveUi.NCheckbox;
-        return vue.openBlock(), vue.createBlock(_component_n_flex, {
-          vertical: "",
-          size: 8,
+        const _component_n_select = naiveUi.NSelect;
+        const _component_n_switch = naiveUi.NSwitch;
+        const _component_n_dynamic_input = naiveUi.NDynamicInput;
+        const _component_n_drawer_content = naiveUi.NDrawerContent;
+        const _component_n_drawer = naiveUi.NDrawer;
+        return vue.openBlock(), vue.createElementBlock("div", {
+          ref_key: "panelElRef",
+          ref: panelElRef,
           class: "bds-interactive-graph-panel",
           style: vue.normalizeStyle(vue.unref(cssVars))
-        }, {
-          default: vue.withCtx(() => [
-            vue.createVNode(_component_n_flex, {
-              size: 8,
-              align: "center",
-              wrap: ""
-            }, {
-              default: vue.withCtx(() => [
-                vue.createVNode(_component_n_flex, {
-                  size: 8,
-                  inline: true,
-                  align: "center",
-                  wrap: ""
-                }, {
-                  default: vue.withCtx(() => [
-                    vue.createVNode(_component_n_button, {
-                      size: "small",
-                      circle: "",
-                      title: "回到开头",
-                      disabled: __props2.graphLoading,
-                      onClick: resetView
-                    }, {
-                      icon: vue.withCtx(() => [
-                        vue.createVNode(_component_n_icon, null, {
-                          default: vue.withCtx(() => [
-                            vue.createVNode(vue.unref(RefreshDot))
-                          ]),
-                          _: 1
-                        })
-                      ]),
-                      _: 1
-                    }, 8, ["disabled"]),
-                    vue.createVNode(_component_n_radio_group, {
-                      value: vue.unref(layoutMode),
-                      size: "small",
-                      disabled: __props2.graphLoading,
-                      "onUpdate:value": setLayoutMode
-                    }, {
-                      default: vue.withCtx(() => [
-                        vue.createVNode(_component_n_radio_button, {
-                          value: "spread",
-                          title: "分散"
-                        }, {
-                          default: vue.withCtx(() => [
-                            vue.createVNode(_component_n_icon, null, {
-                              default: vue.withCtx(() => [
-                                vue.createVNode(vue.unref(ArrowsSplit2))
-                              ]),
-                              _: 1
-                            })
-                          ]),
-                          _: 1
-                        }),
-                        vue.createVNode(_component_n_radio_button, {
-                          value: "converge",
-                          title: "收束"
-                        }, {
-                          default: vue.withCtx(() => [
-                            vue.createVNode(_component_n_icon, null, {
-                              default: vue.withCtx(() => [
-                                vue.createVNode(vue.unref(ArrowsJoin2))
-                              ]),
-                              _: 1
-                            })
-                          ]),
-                          _: 1
-                        })
-                      ]),
-                      _: 1
-                    }, 8, ["value", "disabled"]),
-                    vue.createVNode(_component_n_radio_group, {
-                      value: vue.unref(direction),
-                      size: "small",
-                      disabled: __props2.graphLoading,
-                      "onUpdate:value": setDirection
-                    }, {
-                      default: vue.withCtx(() => [
-                        vue.createVNode(_component_n_radio_button, { value: "LR" }, {
-                          default: vue.withCtx(() => [..._cache[1] || (_cache[1] = [
-                            vue.createTextVNode("水平", -1)
-                          ])]),
-                          _: 1
-                        }),
-                        vue.createVNode(_component_n_radio_button, { value: "TB" }, {
-                          default: vue.withCtx(() => [..._cache[2] || (_cache[2] = [
-                            vue.createTextVNode("垂直", -1)
-                          ])]),
-                          _: 1
-                        })
-                      ]),
-                      _: 1
-                    }, 8, ["value", "disabled"]),
-                    vue.createVNode(_component_n_input_number, {
-                      value: vue.unref(baseSpan),
-                      size: "small",
-                      min: 1,
-                      class: "bds-interactive-graph-panel__span-input",
-                      disabled: __props2.graphLoading,
-                      "onUpdate:value": setBaseSpan,
-                      title: "密度"
-                    }, {
-                      prefix: vue.withCtx(() => [
-                        vue.createVNode(_component_n_icon, null, {
-                          default: vue.withCtx(() => [
-                            vue.createVNode(vue.unref(GridDots))
-                          ]),
-                          _: 1
-                        })
-                      ]),
-                      _: 1
-                    }, 8, ["value", "disabled"])
-                  ]),
-                  _: 1
-                }),
-                vue.createVNode(_component_n_flex, {
-                  size: 8,
-                  inline: true,
-                  align: "center",
-                  wrap: ""
-                }, {
-                  default: vue.withCtx(() => [
-                    vue.createVNode(_component_n_checkbox, {
-                      checked: vue.unref(dedupe),
-                      disabled: __props2.graphLoading,
-                      "onUpdate:checked": setDedupe
-                    }, {
-                      default: vue.withCtx(() => [..._cache[3] || (_cache[3] = [
-                        vue.createTextVNode(" 去重 ", -1)
-                      ])]),
-                      _: 1
-                    }, 8, ["checked", "disabled"]),
-                    vue.createVNode(_component_n_checkbox, {
-                      checked: vue.unref(showOptions),
-                      "onUpdate:checked": setShowOptions
-                    }, {
-                      default: vue.withCtx(() => [..._cache[4] || (_cache[4] = [
-                        vue.createTextVNode(" 显示选项 ", -1)
-                      ])]),
-                      _: 1
-                    }, 8, ["checked"]),
-                    vue.createVNode(_component_n_checkbox, {
-                      checked: vue.unref(removeBackEdges),
-                      disabled: __props2.graphLoading,
-                      "onUpdate:checked": setRemoveBackEdges
-                    }, {
-                      default: vue.withCtx(() => [..._cache[5] || (_cache[5] = [
-                        vue.createTextVNode(" 隐藏回边 ", -1)
-                      ])]),
-                      _: 1
-                    }, 8, ["checked", "disabled"])
-                  ]),
-                  _: 1
-                }),
-                vue.createVNode(_component_n_flex, {
-                  size: 8,
-                  inline: true,
-                  align: "center",
-                  wrap: "",
-                  class: "bds-interactive-graph-panel__action-right"
-                }, {
-                  default: vue.withCtx(() => [
-                    vue.createVNode(_component_n_button, {
-                      size: "small",
-                      circle: "",
-                      loading: vue.unref(capturing),
-                      disabled: __props2.graphLoading,
-                      onClick: _cache[0] || (_cache[0] = ($event) => vue.unref(focusMode) ? disableFocusMode() : enableFocusMode()),
-                      title: vue.unref(focusMode) ? "退出分析模式" : "进入分析模式"
-                    }, {
-                      icon: vue.withCtx(() => [
-                        vue.createVNode(_component_n_icon, null, {
-                          default: vue.withCtx(() => [
-                            !vue.unref(focusMode) ? (vue.openBlock(), vue.createBlock(vue.unref(Viewfinder), { key: 0 })) : (vue.openBlock(), vue.createBlock(vue.unref(CircleX), { key: 1 }))
-                          ]),
-                          _: 1
-                        })
-                      ]),
-                      _: 1
-                    }, 8, ["loading", "disabled", "title"]),
-                    vue.createVNode(_component_n_button, {
-                      size: "small",
-                      circle: "",
-                      loading: vue.unref(capturing),
-                      disabled: __props2.graphLoading || vue.unref(capturing),
-                      onClick: captureGraph,
-                      title: "密度越小截图越大"
-                    }, {
-                      icon: vue.withCtx(() => [
-                        vue.createVNode(_component_n_icon, null, {
-                          default: vue.withCtx(() => [
-                            vue.createVNode(vue.unref(Camera))
-                          ]),
-                          _: 1
-                        })
-                      ]),
-                      _: 1
-                    }, 8, ["loading", "disabled"])
-                  ]),
-                  _: 1
-                })
-              ]),
-              _: 1
-            }),
-            vue.createElementVNode("div", {
-              ref_key: "graphElRef",
-              ref: graphElRef,
-              class: vue.normalizeClass(["bds-interactive-graph-panel__graph", { "is-focus-mode": vue.unref(focusMode) }])
-            }, null, 2)
-          ]),
-          _: 1
-        }, 8, ["style"]);
+        }, [
+          vue.createVNode(_component_n_flex, {
+            vertical: "",
+            size: 8
+          }, {
+            default: vue.withCtx(() => [
+              vue.createVNode(_component_n_flex, {
+                size: 8,
+                align: "center",
+                wrap: ""
+              }, {
+                default: vue.withCtx(() => [
+                  vue.createVNode(_component_n_flex, {
+                    size: 8,
+                    inline: true,
+                    align: "center",
+                    wrap: ""
+                  }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(_component_n_button, {
+                        size: "small",
+                        circle: "",
+                        title: "回到开头",
+                        disabled: __props2.graphLoading,
+                        onClick: resetView
+                      }, {
+                        icon: vue.withCtx(() => [
+                          vue.createVNode(_component_n_icon, null, {
+                            default: vue.withCtx(() => [
+                              vue.createVNode(vue.unref(RefreshDot))
+                            ]),
+                            _: 1
+                          })
+                        ]),
+                        _: 1
+                      }, 8, ["disabled"]),
+                      vue.createVNode(_component_n_radio_group, {
+                        value: vue.unref(layoutMode),
+                        size: "small",
+                        disabled: __props2.graphLoading,
+                        "onUpdate:value": setLayoutMode
+                      }, {
+                        default: vue.withCtx(() => [
+                          vue.createVNode(_component_n_radio_button, {
+                            value: "spread",
+                            title: "分散"
+                          }, {
+                            default: vue.withCtx(() => [
+                              vue.createVNode(_component_n_icon, null, {
+                                default: vue.withCtx(() => [
+                                  vue.createVNode(vue.unref(ArrowsSplit2))
+                                ]),
+                                _: 1
+                              })
+                            ]),
+                            _: 1
+                          }),
+                          vue.createVNode(_component_n_radio_button, {
+                            value: "converge",
+                            title: "收束"
+                          }, {
+                            default: vue.withCtx(() => [
+                              vue.createVNode(_component_n_icon, null, {
+                                default: vue.withCtx(() => [
+                                  vue.createVNode(vue.unref(ArrowsJoin2))
+                                ]),
+                                _: 1
+                              })
+                            ]),
+                            _: 1
+                          })
+                        ]),
+                        _: 1
+                      }, 8, ["value", "disabled"]),
+                      vue.createVNode(_component_n_radio_group, {
+                        value: vue.unref(direction),
+                        size: "small",
+                        disabled: __props2.graphLoading,
+                        "onUpdate:value": setDirection
+                      }, {
+                        default: vue.withCtx(() => [
+                          vue.createVNode(_component_n_radio_button, { value: "LR" }, {
+                            default: vue.withCtx(() => [..._cache[3] || (_cache[3] = [
+                              vue.createTextVNode("水平", -1)
+                            ])]),
+                            _: 1
+                          }),
+                          vue.createVNode(_component_n_radio_button, { value: "TB" }, {
+                            default: vue.withCtx(() => [..._cache[4] || (_cache[4] = [
+                              vue.createTextVNode("垂直", -1)
+                            ])]),
+                            _: 1
+                          })
+                        ]),
+                        _: 1
+                      }, 8, ["value", "disabled"]),
+                      vue.createVNode(_component_n_input_number, {
+                        value: vue.unref(baseSpan),
+                        size: "small",
+                        min: 1,
+                        class: "bds-interactive-graph-panel__span-input",
+                        disabled: __props2.graphLoading,
+                        "onUpdate:value": setBaseSpan,
+                        title: "密度"
+                      }, {
+                        prefix: vue.withCtx(() => [
+                          vue.createVNode(_component_n_icon, null, {
+                            default: vue.withCtx(() => [
+                              vue.createVNode(vue.unref(GridDots))
+                            ]),
+                            _: 1
+                          })
+                        ]),
+                        _: 1
+                      }, 8, ["value", "disabled"])
+                    ]),
+                    _: 1
+                  }),
+                  vue.createVNode(_component_n_flex, {
+                    size: 8,
+                    inline: true,
+                    align: "center",
+                    wrap: ""
+                  }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(_component_n_checkbox, {
+                        checked: vue.unref(dedupe),
+                        disabled: __props2.graphLoading,
+                        "onUpdate:checked": setDedupe
+                      }, {
+                        default: vue.withCtx(() => [..._cache[5] || (_cache[5] = [
+                          vue.createTextVNode(" 去重 ", -1)
+                        ])]),
+                        _: 1
+                      }, 8, ["checked", "disabled"]),
+                      vue.createVNode(_component_n_checkbox, {
+                        checked: vue.unref(showOptions),
+                        "onUpdate:checked": setShowOptions
+                      }, {
+                        default: vue.withCtx(() => [..._cache[6] || (_cache[6] = [
+                          vue.createTextVNode(" 显示选项 ", -1)
+                        ])]),
+                        _: 1
+                      }, 8, ["checked"]),
+                      vue.createVNode(_component_n_checkbox, {
+                        checked: vue.unref(removeBackEdges),
+                        disabled: __props2.graphLoading,
+                        "onUpdate:checked": setRemoveBackEdges
+                      }, {
+                        default: vue.withCtx(() => [..._cache[7] || (_cache[7] = [
+                          vue.createTextVNode(" 隐藏回边 ", -1)
+                        ])]),
+                        _: 1
+                      }, 8, ["checked", "disabled"])
+                    ]),
+                    _: 1
+                  }),
+                  vue.createVNode(_component_n_flex, {
+                    size: 8,
+                    inline: true,
+                    align: "center",
+                    wrap: "",
+                    class: "bds-interactive-graph-panel__action-right"
+                  }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(_component_n_button, {
+                        size: "small",
+                        disabled: __props2.graphLoading,
+                        onClick: _cache[0] || (_cache[0] = ($event) => showPassesDrawer.value = true),
+                        title: "布局轮次配置"
+                      }, {
+                        default: vue.withCtx(() => [..._cache[8] || (_cache[8] = [
+                          vue.createTextVNode(" Passes ", -1)
+                        ])]),
+                        _: 1
+                      }, 8, ["disabled"]),
+                      vue.createVNode(_component_n_button, {
+                        size: "small",
+                        circle: "",
+                        loading: vue.unref(capturing),
+                        disabled: __props2.graphLoading,
+                        onClick: _cache[1] || (_cache[1] = ($event) => vue.unref(focusMode) ? disableFocusMode() : enableFocusMode()),
+                        title: vue.unref(focusMode) ? "退出分析模式" : "进入分析模式"
+                      }, {
+                        icon: vue.withCtx(() => [
+                          vue.createVNode(_component_n_icon, null, {
+                            default: vue.withCtx(() => [
+                              !vue.unref(focusMode) ? (vue.openBlock(), vue.createBlock(vue.unref(Viewfinder), { key: 0 })) : (vue.openBlock(), vue.createBlock(vue.unref(CircleX), { key: 1 }))
+                            ]),
+                            _: 1
+                          })
+                        ]),
+                        _: 1
+                      }, 8, ["loading", "disabled", "title"]),
+                      vue.createVNode(_component_n_button, {
+                        size: "small",
+                        circle: "",
+                        loading: vue.unref(capturing),
+                        disabled: __props2.graphLoading || vue.unref(capturing),
+                        onClick: captureGraph,
+                        title: "密度越小截图越大"
+                      }, {
+                        icon: vue.withCtx(() => [
+                          vue.createVNode(_component_n_icon, null, {
+                            default: vue.withCtx(() => [
+                              vue.createVNode(vue.unref(Camera))
+                            ]),
+                            _: 1
+                          })
+                        ]),
+                        _: 1
+                      }, 8, ["loading", "disabled"])
+                    ]),
+                    _: 1
+                  })
+                ]),
+                _: 1
+              }),
+              vue.createElementVNode("div", {
+                ref_key: "graphElRef",
+                ref: graphElRef,
+                class: vue.normalizeClass(["bds-interactive-graph-panel__graph", { "is-focus-mode": vue.unref(focusMode) }])
+              }, null, 2)
+            ]),
+            _: 1
+          }),
+          vue.createVNode(_component_n_drawer, {
+            show: vue.unref(showPassesDrawer),
+            "onUpdate:show": _cache[2] || (_cache[2] = ($event) => vue.isRef(showPassesDrawer) ? showPassesDrawer.value = $event : null),
+            placement: "right",
+            width: 360,
+            to: vue.unref(panelElRef),
+            "trap-focus": false,
+            "block-scroll": false
+          }, {
+            default: vue.withCtx(() => [
+              vue.createVNode(_component_n_drawer_content, {
+                title: "Layout Passes",
+                closable: ""
+              }, {
+                default: vue.withCtx(() => [
+                  vue.createVNode(_component_n_flex, {
+                    vertical: "",
+                    size: 12
+                  }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(_component_n_dynamic_input, {
+                        value: vue.unref(layoutPasses),
+                        disabled: __props2.graphLoading,
+                        class: "bds-interactive-graph-panel__passes",
+                        "on-create": () => ({ reference: "both", spread: vue.unref(layoutMode) === "spread" }),
+                        "onUpdate:value": setLayoutPasses
+                      }, {
+                        default: vue.withCtx(({ value, index }) => [
+                          vue.createVNode(_component_n_flex, {
+                            size: 6,
+                            inline: true,
+                            align: "center",
+                            wrap: ""
+                          }, {
+                            default: vue.withCtx(() => [
+                              vue.createVNode(_component_n_select, {
+                                size: "small",
+                                value: value.reference,
+                                options: passReferenceOptions,
+                                style: { "width": "110px" },
+                                "onUpdate:value": (next) => setLayoutPasses(vue.unref(layoutPasses).map((item, itemIndex) => itemIndex === index ? { ...item, reference: next } : item))
+                              }, null, 8, ["value", "onUpdate:value"]),
+                              vue.createVNode(_component_n_switch, {
+                                size: "small",
+                                value: value.spread,
+                                "onUpdate:value": (next) => setLayoutPasses(vue.unref(layoutPasses).map((item, itemIndex) => itemIndex === index ? { ...item, spread: next } : item))
+                              }, {
+                                checked: vue.withCtx(() => [..._cache[9] || (_cache[9] = [
+                                  vue.createTextVNode("True", -1)
+                                ])]),
+                                unchecked: vue.withCtx(() => [..._cache[10] || (_cache[10] = [
+                                  vue.createTextVNode("False", -1)
+                                ])]),
+                                _: 1
+                              }, 8, ["value", "onUpdate:value"])
+                            ]),
+                            _: 2
+                          }, 1024)
+                        ]),
+                        _: 1
+                      }, 8, ["value", "disabled", "on-create"]),
+                      vue.createVNode(_component_n_button, {
+                        secondary: "",
+                        onClick: resetLayoutPasses
+                      }, {
+                        default: vue.withCtx(() => [..._cache[11] || (_cache[11] = [
+                          vue.createTextVNode("重置默认", -1)
+                        ])]),
+                        _: 1
+                      })
+                    ]),
+                    _: 1
+                  })
+                ]),
+                _: 1
+              })
+            ]),
+            _: 1
+          }, 8, ["show", "to"])
+        ], 4);
       };
     }
   };
